@@ -14,12 +14,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Vision description is required' });
     }
 
-    const imagePrompt = `Create a visual reference image for an art template: ${title || 'My Template'}.
+    let lineDetail = "simple";
+    let lineCount = "minimal";
+    let complexity = "basic";
+
+    if (workDifficulty === 'beginner') {
+      lineDetail = "simple and clean";
+      lineCount = "minimal, essential lines only";
+      complexity = "basic shapes and forms";
+    } else if (workDifficulty === 'intermediate') {
+      lineDetail = "moderately detailed";
+      lineCount = "moderate number of lines";
+      complexity = "intermediate complexity with some details";
+    } else if (workDifficulty === 'advanced') {
+      lineDetail = "highly detailed";
+      lineCount = "many intricate lines";
+      complexity = "complex and sophisticated";
+    }
+
+    if (workDuration && workDuration.toLowerCase().includes('hour')) {
+      lineDetail += " with quick, gestural strokes";
+    } else if (workDuration && (workDuration.toLowerCase().includes('day') || workDuration.toLowerCase().includes('week'))) {
+      lineDetail += " with careful, precise linework";
+      complexity += " and refined details";
+    }
+
+    const imagePrompt = `Create a black and white line sketch reference for an art template: ${title || 'My Template'}.
     Medium: ${workMedium},
-    Difficulty: ${workDifficulty || 'intermediate'},
+    Difficulty: ${workDifficulty || 'intermediate'} (${lineDetail}, ${lineCount}),
     Duration: ${workDuration || '2-3 hours'}.
     Vision: ${description}.
-    Generate a clear, inspiring reference image that shows the artistic concept, composition, and style that artists can use as guidance for this template.`;
+
+    Generate a black and white line drawing sketch using only black lines on white background. The sketch should be ${complexity}. Use ${lineCount} with ${lineDetail} to create a clear, inspiring reference that shows the artistic concept, composition, and style. No shading, no color, no fills - only clean black lines defining the form and structure that artists can use as guidance for this template.`;
 
     const response = await openai.responses.create({
       model: "gpt-5",

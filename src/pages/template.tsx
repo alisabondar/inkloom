@@ -1,12 +1,78 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import styles from "../styles/Home.module.css";
 
 export default function Template() {
+  const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [visionDescription, setVisionDescription] = useState("");
+  const [templateTitle, setTemplateTitle] = useState("");
+  const [workMedium, setWorkMedium] = useState("");
+  const [workDifficulty, setWorkDifficulty] = useState("");
+  const [workDuration, setWorkDuration] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (selectedOption !== 'vision' || !visionDescription.trim()) {
+      alert('Please select "I\'ll describe my vision" and provide a description to create a template with AI.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/generate-template', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          description: visionDescription,
+          title: templateTitle,
+          workMedium,
+          workDifficulty,
+          workDuration,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate template');
+      }
+
+      if (data.success && data.image) {
+        // Save template data to localStorage and redirect to result page
+        // REPLACE WITH DB SAVE
+        const templateData = {
+          title: templateTitle,
+          workMedium,
+          workDifficulty,
+          workDuration,
+          description: visionDescription,
+          image: data.image,
+          prompt: data.prompt
+        };
+
+        localStorage.setItem('generatedTemplate', JSON.stringify(templateData));
+        router.push('/template-result');
+      } else {
+        throw new Error('No image generated');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      alert(`Error: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
   return (
     <div className={styles.container}>
@@ -24,10 +90,10 @@ export default function Template() {
             Create New Template
           </h2>
           <p className={`${styles.subheader} ${styles.subheaderDark}`}>
-            Share your artistic knowledge by creating a template for other artists to learn from.
+            What would you like to create today?
           </p>
           <div className={`${styles.formContainer} ${styles.formContainerDark}`}>
-            <form className={styles.form}>
+            <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.formField}>
                 <label className={`${styles.label} ${styles.labelDark}`}>
                   Template Title
@@ -36,6 +102,8 @@ export default function Template() {
                   type="text"
                   className={`${styles.textInput} ${styles.textInputDark}`}
                   placeholder="Enter template title"
+                  value={templateTitle}
+                  onChange={(e) => setTemplateTitle(e.target.value)}
                 />
               </div>
 
@@ -43,23 +111,31 @@ export default function Template() {
                 <label className={`${styles.label} ${styles.labelDark}`}>
                   Artistic Medium
                 </label>
-                <select className={`${styles.dropdown} ${styles.dropdownDark}`}>
+                <select
+                  className={`${styles.dropdown} ${styles.dropdownDark}`}
+                  value={workMedium}
+                  onChange={(e) => setWorkMedium(e.target.value)}
+                >
                   <option value="">Select medium</option>
+                  {/* dall-e */}
                   <option value="painting">Painting</option>
-                  <option value="drawing">Drawing</option>
-                  <option value="sculpture">Sculpture</option>
-                  <option value="digital">Digital Art</option>
-                  <option value="photography">Photography</option>
-                  <option value="mixed-media">Mixed Media</option>
+                  {/* pixelate */}
+                  <option value="cross-stitch">Sculpture</option>
+                  {/* 3D options? */}
+                  {/* <option value="embroidery">Photography</option> */}
+                  {/* <option value="mixed-media">Mixed Media</option> */}
                 </select>
               </div>
-
 
               <div className={styles.formField}>
                 <label className={`${styles.label} ${styles.labelDark}`}>
                   Difficulty Level
                 </label>
-                <select className={`${styles.dropdown} ${styles.dropdownDark}`}>
+                <select
+                  className={`${styles.dropdown} ${styles.dropdownDark}`}
+                  value={workDifficulty}
+                  onChange={(e) => setWorkDifficulty(e.target.value)}
+                >
                   <option value="">Select difficulty</option>
                   <option value="beginner">Beginner</option>
                   <option value="intermediate">Intermediate</option>
@@ -75,6 +151,8 @@ export default function Template() {
                   type="text"
                   className={`${styles.textInput} ${styles.textInputDark}`}
                   placeholder="e.g., 2 hours, 1 day, 3 weeks"
+                  value={workDuration}
+                  onChange={(e) => setWorkDuration(e.target.value)}
                 />
               </div>
 
@@ -130,9 +208,10 @@ export default function Template() {
               <div className={styles.buttonContainer}>
                 <button
                   type="submit"
-                  className={`${styles.primaryButton} ${styles.primaryButtonDark}`}
+                  className={`${styles.primaryButton} ${styles.primaryButtonDark} ${isLoading ? styles.buttonLoading : ''}`}
+                  disabled={isLoading}
                 >
-                  Create Template
+                  {isLoading ? 'Generating...' : 'Create Template'}
                 </button>
                 <button
                   type="button"
@@ -141,6 +220,12 @@ export default function Template() {
                   Save as Draft
                 </button>
               </div>
+
+              {error && (
+                <div className={`${styles.errorMessage} ${styles.errorMessageDark}`}>
+                  {error}
+                </div>
+              )}
             </form>
           </div>
         </div>
