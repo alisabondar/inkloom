@@ -8,25 +8,45 @@ export default function TemplateResult() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Get the template data from localStorage (passed from the form)
-    const savedTemplate = localStorage.getItem('generatedTemplate');
-    if (savedTemplate) {
-      setTemplateData(JSON.parse(savedTemplate));
+    const fetchTemplate = async () => {
+      const { id } = router.query;
+
+      if (!id) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/get-template?id=${id}`);
+        const data = await response.json();
+
+        if (data.success && data.template) {
+          setTemplateData(data.template);
+        } else {
+          console.error('Failed to load template:', data.error);
+        }
+      } catch (error) {
+        console.error('Error loading template:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (router.isReady) {
+      fetchTemplate();
     }
-    setIsLoading(false);
-  }, []);
+  }, [router.isReady, router.query]);
 
   const handleCreateNew = () => {
-    // Clear the saved template data
-    localStorage.removeItem('generatedTemplate');
     router.push('/template');
   };
 
   const handleDownloadImage = () => {
-    if (templateData?.image) {
+    if (templateData?.image_url) {
       const link = document.createElement('a');
-      link.href = `data:image/png;base64,${templateData.image}`;
-      link.download = `${templateData.title || 'template'}-reference.png`;
+      link.href = templateData.image_url;
+      link.download = `${templateData.title || templateData.medium || 'template'}-reference.png`;
+      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -94,13 +114,13 @@ export default function TemplateResult() {
               </h2>
               <div className={styles.templateMeta}>
                 <span className={`${styles.metaTag} ${styles.metaTagDark}`}>
-                  {templateData.workMedium}
+                  {templateData.medium}
                 </span>
                 <span className={`${styles.metaTag} ${styles.metaTagDark}`}>
-                  {templateData.workDifficulty}
+                  {templateData.difficulty}
                 </span>
                 <span className={`${styles.metaTag} ${styles.metaTagDark}`}>
-                  {templateData.workDuration}
+                  {templateData.duration}
                 </span>
               </div>
             </div>
@@ -109,10 +129,10 @@ export default function TemplateResult() {
               <h3 className={`${styles.sectionTitle} ${styles.sectionTitleDark}`}>
                 Generated Reference Image
               </h3>
-              {templateData.image && (
+              {templateData.image_url && (
                 <div className={styles.imageContainer}>
                   <img
-                    src={`data:image/png;base64,${templateData.image}`}
+                    src={templateData.image_url}
                     alt="Generated template reference"
                     className={styles.resultImage}
                   />
@@ -131,7 +151,7 @@ export default function TemplateResult() {
                 Your Vision
               </h3>
               <p className={`${styles.descriptionText} ${styles.descriptionTextDark}`}>
-                {templateData.description}
+                {templateData.source}
               </p>
             </div>
 

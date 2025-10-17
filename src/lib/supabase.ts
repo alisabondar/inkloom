@@ -1,0 +1,35 @@
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.SUPABASE_URL!
+const supabaseKey = process.env.SUPABASE_ANON_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+export const supabase = createClient(supabaseUrl, supabaseKey)
+
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+})
+
+export interface User {
+  id: string
+  email: string
+  first_name: string
+  favorite_medium: string
+  created_at: string
+}
+
+export interface Template {
+  id: string
+  user_id: string
+  title: string
+  medium: string
+  difficulty: string
+  duration: string
+  generated_image_id: string
+  created_at: string
+  updated_at: string
+  source: string
+}

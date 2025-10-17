@@ -50,20 +50,35 @@ export default function Template() {
       }
 
       if (data.success && data.image) {
-        // Save template data to localStorage and redirect to result page
-        // REPLACE WITH DB SAVE
-        const templateData = {
-          title: templateTitle,
-          workMedium,
-          workDifficulty,
-          workDuration,
-          description: visionDescription,
-          image: data.image,
-          prompt: data.prompt
-        };
+        // Save template data to Supabase database
+        const saveResponse = await fetch('/api/save-template', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: templateTitle,
+            medium: workMedium,
+            difficulty: workDifficulty,
+            duration: workDuration,
+            generated_image_id: data.generated_image_id,
+            image_url: data.image_url,
+            source: visionDescription
+          }),
+        });
 
-        localStorage.setItem('generatedTemplate', JSON.stringify(templateData));
-        router.push('/template-result');
+        const saveData = await saveResponse.json();
+
+        if (!saveResponse.ok) {
+          throw new Error(saveData.error || 'Failed to save template');
+        }
+
+        if (saveData.success && saveData.template) {
+          // Redirect to result page with template ID
+          router.push(`/template-result?id=${saveData.template.id}`);
+        } else {
+          throw new Error('Failed to save template to database');
+        }
       } else {
         throw new Error('No image generated');
       }
@@ -120,9 +135,9 @@ export default function Template() {
                   {/* dall-e */}
                   <option value="painting">Painting</option>
                   {/* pixelate */}
-                  <option value="cross-stitch">Sculpture</option>
+                  <option value="cross-stitch">Cross-Stitch</option>
                   {/* 3D options? */}
-                  {/* <option value="embroidery">Photography</option> */}
+                  {/* <option value="embroidery">Embroidery</option> */}
                   {/* <option value="mixed-media">Mixed Media</option> */}
                 </select>
               </div>

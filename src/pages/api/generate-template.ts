@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
+import { supabaseAdmin } from '../../lib/supabase';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -64,10 +65,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const imageBase64 = imageData[0];
 
+    // Convert base64 to buffer for Supabase Storage upload
+    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    // Generate unique filename
+    const filename = `template-${Date.now()}-${response.id}.png`;
+
+    // Upload to Supabase Storage using admin client (bypasses RLS)
+    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+      .from('templates')
+      .upload(filename, buffer, {
+        contentType: 'image/png',
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('Supabase Storage upload error:', uploadError);
+      throw new Error('Failed to upload image to storage');
+    }
+
+    // Get public URL
+    const { data: urlData } = supabaseAdmin.storage
+      .from('templates')
+      .getPublicUrl(filename);
+
+    const imageUrl = urlData.publicUrl;
+
     res.status(200).json({
       success: true,
       image: imageBase64,
-      prompt: imagePrompt
+      image_url: imageUrl,
+      prompt: imagePrompt,
+      title: title,
+      medium: workMedium,
+      difficulty: workDifficulty,
+      duration: workDuration,
+      generated_image_id: response.id,
+      source: "DESCRIPTION"
     });
 
   } catch (error) {

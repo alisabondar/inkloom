@@ -14,11 +14,18 @@ export default function Home() {
 
       <main className={`${styles.main} ${styles.mainDark}`}>
         <div className={styles.mainContent}>
-          <Link href="/template">
-            <button className={styles.templateButton}>
-              Template Form
-            </button>
-          </Link>
+          <div className={styles.homeButtons}>
+            <Link href="/template">
+              <button className={styles.templateButton}>
+                Create New Template
+              </button>
+            </Link>
+            <Link href="/templates">
+              <button className={`${styles.templateButton} ${styles.templateButtonSecondary}`}>
+                View My Templates
+              </button>
+            </Link>
+          </div>
         </div>
       </main>
 
