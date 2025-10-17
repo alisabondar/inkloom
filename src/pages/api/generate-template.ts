@@ -10,11 +10,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { description, title, workMedium, workDifficulty, workDuration } = req.body;
 
-    // to add a toast
-    if (!description) {
-      return res.status(400).json({ error: 'Vision description is required' });
-    }
-
     let lineDetail = "simple";
     let lineCount = "minimal";
     let complexity = "basic";
@@ -54,7 +49,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       tools: [{ type: "image_generation" }],
     });
 
-    // Extract the generated image data
     const imageData = response.output
       .filter((output) => output.type === "image_generation_call")
       .map((output) => output.result);
@@ -65,17 +59,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const imageBase64 = imageData[0];
 
-    // Convert base64 to buffer for Supabase Storage upload
-    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
-    const buffer = Buffer.from(base64Data, 'base64');
+    const base64Data = imageBase64?.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = base64Data && Buffer.from(base64Data, 'base64');
 
-    // Generate unique filename
     const filename = `template-${Date.now()}-${response.id}.png`;
 
-    // Upload to Supabase Storage using admin client (bypasses RLS)
     const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
       .from('templates')
-      .upload(filename, buffer, {
+      .upload(filename, buffer || '', {
         contentType: 'image/png',
         cacheControl: '3600',
         upsert: false
@@ -86,7 +77,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       throw new Error('Failed to upload image to storage');
     }
 
-    // Get public URL
     const { data: urlData } = supabaseAdmin.storage
       .from('templates')
       .getPublicUrl(filename);

@@ -1,0 +1,55 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-geist-sans), var(--font-geist-mono), sans-serif;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+}
+
+.mainDark {
+  background-color: #1f2937;
+}
+
+.mainContent {
+  text-align: center;
+}
+
+.homeButtons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.templateButton {
+  background-color: #2563eb;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.templateButton:hover {
+  background-color: #1d4ed8;
+}
+
+.templateButtonSecondary {
+  background-color: #6b7280;
+}
+
+.templateButtonSecondary:hover {
+  background-color: #4b5563;
+}

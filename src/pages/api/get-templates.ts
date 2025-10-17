@@ -1,25 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../lib/supabase';
+import { supabase, Template, SupabaseQueryResponse } from '../../lib/supabase';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   try {
     const { limit = '10', offset = '0' } = req.query;
 
-    // Use hardcoded user_id for now (user_id: 1)
+   // use hardcoded user_id for now
     const user_id = "1";
 
-    // Get templates from Supabase with pagination, filtered by user_id
-    const { data, error, count } = await supabase
+    const { data: templates, error, count } = (await supabase
       .from('template')
       .select('*', { count: 'exact' })
       .eq('user_id', user_id)
       .order('created_at', { ascending: false })
       .limit(parseInt(limit as string))
-      .range(parseInt(offset as string), parseInt(offset as string) + parseInt(limit as string) - 1);
+      .range(parseInt(offset as string), parseInt(offset as string) + parseInt(limit as string) - 1)) as SupabaseQueryResponse<Template[]>;
 
     if (error) {
       console.error('Supabase error:', error);
@@ -28,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.status(200).json({
       success: true,
-      templates: data,
+      templates,
       count: count || 0,
       limit: parseInt(limit as string),
       offset: parseInt(offset as string)

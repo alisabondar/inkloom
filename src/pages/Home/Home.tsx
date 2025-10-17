@@ -1,16 +1,12 @@
-import styles from "../styles/Home.module.css";
 import Link from "next/link";
+import { Header } from "../../components/Header";
+import { Footer } from "../../components/Footer";
+import styles from "./Home.module.css";
 
-export default function Home() {
+export const HomePage = () => {
   return (
     <div className={styles.container}>
-      <header className={`${styles.header} ${styles.headerDark}`}>
-        <div className={styles.headerContent}>
-          <h1 className={`${styles.headerTitle} ${styles.headerTitleDark}`}>
-            Homepage
-          </h1>
-        </div>
-      </header>
+      <Header title="Homepage" />
 
       <main className={`${styles.main} ${styles.mainDark}`}>
         <div className={styles.mainContent}>
@@ -29,13 +25,7 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className={`${styles.footer} ${styles.footerDark}`}>
-        <div className={styles.footerContent}>
-          <p className={`${styles.footerText} ${styles.footerTextDark}`}>
-            © 2024 Your Company. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

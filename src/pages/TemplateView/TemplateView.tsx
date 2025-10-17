@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import styles from "../styles/Home.module.css";
+import Image from "next/image";
+import { Header } from "../../components/Header";
+import { Footer } from "../../components/Footer";
+import S from "./TemplateView.module.css";
+import { Template } from "@/lib/supabase";
 
-export default function TemplateResult() {
+export const TemplateView = () => {
   const router = useRouter();
-  const [templateData, setTemplateData] = useState<any>(null);
+  const [templateData, setTemplateData] = useState<Template | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -55,12 +59,12 @@ export default function TemplateResult() {
 
   if (isLoading) {
     return (
-      <div className={styles.container}>
-        <div className={`${styles.templateForm} ${styles.templateFormDark}`}>
-          <div className={styles.templateFormContent}>
-            <div className={`${styles.loadingContainer} ${styles.loadingContainerDark}`}>
-              <div className={styles.loadingSpinner}></div>
-              <p className={`${styles.loadingText} ${styles.loadingTextDark}`}>
+      <div className={S.container}>
+        <div className={`${S.templateForm} ${S.templateFormDark}`}>
+          <div className={S.templateFormContent}>
+            <div className={`${S.loadingContainer} ${S.loadingContainerDark}`}>
+              <div className={S.loadingSpinner}></div>
+              <p className={`${S.loadingText} ${S.loadingTextDark}`}>
                 Loading your template...
               </p>
             </div>
@@ -72,19 +76,19 @@ export default function TemplateResult() {
 
   if (!templateData) {
     return (
-      <div className={styles.container}>
-        <div className={`${styles.templateForm} ${styles.templateFormDark}`}>
-          <div className={styles.templateFormContent}>
-            <div className={`${styles.errorContainer} ${styles.errorContainerDark}`}>
-              <h2 className={`${styles.errorTitle} ${styles.errorTitleDark}`}>
+      <div className={S.container}>
+        <div className={`${S.templateForm} ${S.templateFormDark}`}>
+          <div className={S.templateFormContent}>
+            <div className={`${S.errorContainer} ${S.errorContainerDark}`}>
+              <h2 className={`${S.errorTitle} ${S.errorTitleDark}`}>
                 No Template Found
               </h2>
-              <p className={`${styles.errorText} ${styles.errorTextDark}`}>
+              <p className={`${S.errorText} ${S.errorTextDark}`}>
                 It looks like no template data was found. Please go back and create a new template.
               </p>
               <button
                 onClick={handleCreateNew}
-                className={`${styles.primaryButton} ${styles.primaryButtonDark}`}
+                className={`${S.primaryButton} ${S.primaryButtonDark}`}
               >
                 Create New Template
               </button>
@@ -96,49 +100,46 @@ export default function TemplateResult() {
   }
 
   return (
-    <div className={styles.container}>
-      <header className={`${styles.header} ${styles.headerDark}`}>
-        <div className={styles.headerContent}>
-          <h1 className={`${styles.headerTitle} ${styles.headerTitleDark}`}>
-            Your Template
-          </h1>
-        </div>
-      </header>
+    <div className={S.container}>
+      <Header title="Your Template" />
 
-      <main className={`${styles.templateForm} ${styles.templateFormDark}`}>
-        <div className={styles.templateFormContent}>
-          <div className={`${styles.resultContainer} ${styles.resultContainerDark}`}>
-            <div className={styles.resultHeader}>
-              <h2 className={`${styles.resultTitle} ${styles.resultTitleDark}`}>
+      <main className={`${S.templateForm} ${S.templateFormDark}`}>
+        <div className={S.templateFormContent}>
+          <div className={`${S.resultContainer} ${S.resultContainerDark}`}>
+            <div className={S.resultHeader}>
+              <h2 className={`${S.resultTitle} ${S.resultTitleDark}`}>
                 {templateData.title || 'My Template'}
               </h2>
-              <div className={styles.templateMeta}>
-                <span className={`${styles.metaTag} ${styles.metaTagDark}`}>
+              <div className={S.templateMeta}>
+                <span className={`${S.metaTag} ${S.metaTagDark}`}>
                   {templateData.medium}
                 </span>
-                <span className={`${styles.metaTag} ${styles.metaTagDark}`}>
+                <span className={`${S.metaTag} ${S.metaTagDark}`}>
                   {templateData.difficulty}
                 </span>
-                <span className={`${styles.metaTag} ${styles.metaTagDark}`}>
+                <span className={`${S.metaTag} ${S.metaTagDark}`}>
                   {templateData.duration}
                 </span>
               </div>
             </div>
 
-            <div className={styles.imageSection}>
-              <h3 className={`${styles.sectionTitle} ${styles.sectionTitleDark}`}>
+            <div className={S.imageSection}>
+              <h3 className={`${S.sectionTitle} ${S.sectionTitleDark}`}>
                 Generated Reference Image
               </h3>
               {templateData.image_url && (
-                <div className={styles.imageContainer}>
-                  <img
+                <div className={S.imageContainer}>
+                  <Image
                     src={templateData.image_url}
                     alt="Generated template reference"
-                    className={styles.resultImage}
+                    width={800}
+                    height={800}
+                    className={S.resultImage}
+                    priority
                   />
                   <button
                     onClick={handleDownloadImage}
-                    className={`${styles.downloadButton} ${styles.downloadButtonDark}`}
+                    className={`${S.downloadButton} ${S.downloadButtonDark}`}
                   >
                     📥 Download Image
                   </button>
@@ -146,25 +147,25 @@ export default function TemplateResult() {
               )}
             </div>
 
-            <div className={styles.descriptionSection}>
-              <h3 className={`${styles.sectionTitle} ${styles.sectionTitleDark}`}>
+            <div className={S.descriptionSection}>
+              <h3 className={`${S.sectionTitle} ${S.sectionTitleDark}`}>
                 Your Vision
               </h3>
-              <p className={`${styles.descriptionText} ${styles.descriptionTextDark}`}>
+              <p className={`${S.descriptionText} ${S.descriptionTextDark}`}>
                 {templateData.source}
               </p>
             </div>
 
-            <div className={styles.actionButtons}>
+            <div className={S.actionButtons}>
               <button
                 onClick={handleCreateNew}
-                className={`${styles.primaryButton} ${styles.primaryButtonDark}`}
+                className={`${S.primaryButton} ${S.primaryButtonDark}`}
               >
                 Create Another Template
               </button>
               <button
                 onClick={() => router.push('/')}
-                className={`${styles.secondaryButton} ${styles.secondaryButtonDark}`}
+                className={`${S.secondaryButton} ${S.secondaryButtonDark}`}
               >
                 Back to Home
               </button>
@@ -173,13 +174,7 @@ export default function TemplateResult() {
         </div>
       </main>
 
-      <footer className={`${styles.footer} ${styles.footerDark}`}>
-        <div className={styles.footerContent}>
-          <p className={`${styles.footerText} ${styles.footerTextDark}`}>
-            © 2024 Your Company. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

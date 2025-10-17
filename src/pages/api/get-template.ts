@@ -1,11 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../lib/supabase';
+import { supabase, Template } from '../../lib/supabase';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   try {
     const { id } = req.query;
 
@@ -13,12 +9,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Template ID is required' });
     }
 
-    // Get template from Supabase
     const { data, error } = await supabase
       .from('template')
       .select('*')
       .eq('id', id)
-      .single();
+      .single<Template>();
 
     if (error) {
       console.error('Supabase error:', error);

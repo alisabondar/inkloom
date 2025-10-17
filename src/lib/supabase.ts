@@ -25,11 +25,20 @@ export interface Template {
   id: string
   user_id: string
   title: string
-  medium: string
-  difficulty: string
-  duration: string
+  medium: string  // Required: no longer nullable
+  difficulty: string  // Required: no longer nullable
+  duration: string  // Required: no longer nullable
   generated_image_id: string
+  image_url: string
+  source: string
   created_at: string
   updated_at: string
-  source: string
+}
+
+export type TemplateInsert = Omit<Template, 'id' | 'created_at' | 'updated_at'>
+
+export type SupabaseQueryResponse<T> = {
+  data: T | null
+  error: Error | null
+  count: number | null
 }

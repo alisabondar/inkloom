@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { supabase } from '../../lib/supabase';
+import { supabase, Template, TemplateInsert } from '../../lib/supabase';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -9,29 +9,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { title, medium, difficulty, duration, generated_image_id, image_url, source } = req.body;
 
-    if (!generated_image_id || !source || !image_url) {
-      return res.status(400).json({ error: 'Missing required fields: generated_image_id, image_url, and source are required' });
-    }
-
     // use hardcoded user_id for now
     const user_id = "1";
 
+    const newTemplate: TemplateInsert = {
+      title: title || 'Untitled Template',
+      medium,
+      difficulty,
+      duration,
+      generated_image_id,
+      image_url,
+      source,
+      user_id
+    };
+
     const { data, error } = await supabase
       .from('template')
-      .insert([
-        {
-          title: title || 'Untitled Template',
-          medium: medium || '',
-          difficulty: difficulty || '',
-          duration: duration || '',
-          generated_image_id,
-          image_url,
-          source,
-          user_id
-        }
-      ])
+      .insert([newTemplate])
       .select()
-      .single();
+      .single<Template>();
 
     if (error) {
       console.error('Supabase error:', error);

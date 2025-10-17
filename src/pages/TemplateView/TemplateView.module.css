@@ -1,0 +1,274 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-geist-sans), var(--font-geist-mono), sans-serif;
+}
+
+.templateForm {
+  background-color: #ffffff;
+  padding: 4rem 1rem;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.templateFormDark {
+  background-color: #1f2937;
+}
+
+.templateFormContent {
+  max-width: 48rem;
+  width: 100%;
+  text-align: center;
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.loadingContainerDark {
+  color: #ffffff;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.loadingText {
+  font-size: 1.125rem;
+  color: #6b7280;
+}
+
+.loadingTextDark {
+  color: #d1d5db;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.errorContainerDark {
+  color: #ffffff;
+}
+
+.errorTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.errorTitleDark {
+  color: #ffffff;
+}
+
+.errorText {
+  color: #6b7280;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.errorTextDark {
+  color: #d1d5db;
+}
+
+.resultContainer {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  margin-top: 1rem;
+}
+
+.resultContainerDark {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.resultHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.resultTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.resultTitleDark {
+  color: #ffffff;
+}
+
+.templateMeta {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.metaTag {
+  background-color: #e5e7eb;
+  color: #374151;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.metaTagDark {
+  background-color: #4b5563;
+  color: #d1d5db;
+}
+
+.imageSection {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.sectionTitleDark {
+  color: #ffffff;
+}
+
+.imageContainer {
+  text-align: center;
+}
+
+.resultImage {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+.downloadButton {
+  background-color: #059669;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.downloadButtonDark {
+  background-color: #10b981;
+}
+
+.downloadButton:hover {
+  background-color: #047857;
+}
+
+.downloadButtonDark:hover {
+  background-color: #059669;
+}
+
+.descriptionSection {
+  margin-bottom: 2rem;
+}
+
+.descriptionText {
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.descriptionTextDark {
+  color: #d1d5db;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.primaryButton {
+  background-color: #2563eb;
+  color: white;
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.primaryButtonDark {
+  background-color: #3b82f6;
+}
+
+.primaryButton:hover {
+  background-color: #1d4ed8;
+}
+
+.primaryButtonDark:hover {
+  background-color: #2563eb;
+}
+
+.secondaryButton {
+  background-color: transparent;
+  color: #374151;
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.5rem;
+  border: 2px solid #d1d5db;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.secondaryButtonDark {
+  color: #d1d5db;
+  border-color: #6b7280;
+}
+
+.secondaryButton:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.secondaryButtonDark:hover {
+  background-color: #4b5563;
+  border-color: #9ca3af;
+}
+
+@media (min-width: 640px) {
+  .templateFormContent {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .templateFormContent {
+    padding: 0 2rem;
+  }
+}
