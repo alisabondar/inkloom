@@ -3,6 +3,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --header-text-color: white;
+  --header-border-color: rgba(255, 255, 255, 0.1);
+  --header-font-family: var(--font-geist-sans), var(--font-geist-mono), sans-serif;
+  --transition-opacity: opacity 0.2s ease;
+  --hover-opacity: 0.8;
 }
 
 @theme inline {
