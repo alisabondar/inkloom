@@ -64,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const filename = `template-${Date.now()}-${response.id}.png`;
 
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { data, error: uploadError } = await supabaseAdmin.storage
       .from('templates')
       .upload(filename, buffer || '', {
         contentType: 'image/png',

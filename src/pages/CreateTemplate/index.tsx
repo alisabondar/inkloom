@@ -1,2 +1,1 @@
-export * from "./CreateTemplate";
-export * from "./CreateTemplate.module.css";
+export { CreateTemplate as default } from "./CreateTemplate";

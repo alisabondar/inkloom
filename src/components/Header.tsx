@@ -1,4 +1,4 @@
-import styles from "../styles/Home.module.css";
+import styles from "./Header.module.css";
 
 interface HeaderProps {
   title: string;
@@ -15,3 +15,4 @@ export const Header = ({ title }: HeaderProps) => {
     </header>
   );
 };
+

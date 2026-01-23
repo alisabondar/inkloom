@@ -19,6 +19,13 @@ export const CreateTemplate = () => {
     setSelectedOption(option);
   };
 
+  const isFormValid =
+    selectedOption === 'vision' &&
+    visionDescription.trim() !== '' &&
+    workMedium !== '' &&
+    workDifficulty !== '' &&
+    workDuration.trim() !== '';
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -82,7 +89,7 @@ export const CreateTemplate = () => {
 
         if (saveData.success && saveData.template) {
           // Redirect to result page with template ID
-          router.push(`/template-result?id=${saveData.template.id}`);
+          router.push(`/TemplateView?id=${saveData.template.id}`);
         } else {
           throw new Error('Failed to save template to database');
         }
@@ -229,7 +236,7 @@ export const CreateTemplate = () => {
                 <button
                   type="submit"
                   className={`${S.primaryButton} ${S.primaryButtonDark} ${isLoading ? S.buttonLoading : ''}`}
-                  disabled={isLoading}
+                  disabled={isLoading || !isFormValid}
                 >
                   {isLoading ? 'Generating...' : 'Create Template'}
                 </button>

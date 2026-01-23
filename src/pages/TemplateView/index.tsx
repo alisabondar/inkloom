@@ -1,2 +1,1 @@
-export * from "./TemplateView";
-export * from "./TemplateView.module.css";
+export { TemplateView as default } from "./TemplateView";

@@ -11,7 +11,7 @@ export const HomePage = () => {
       <main className={`${styles.main} ${styles.mainDark}`}>
         <div className={styles.mainContent}>
           <div className={styles.homeButtons}>
-            <Link href="/template">
+            <Link href="/CreateTemplate">
               <button className={styles.templateButton}>
                 Create New Template
               </button>

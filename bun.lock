@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "unknown-proj",
+      "name": "gridloom",
       "dependencies": {
         "next": "15.5.4",
         "react": "19.1.0",

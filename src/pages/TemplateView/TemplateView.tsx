@@ -42,14 +42,19 @@ export const TemplateView = () => {
   }, [router.isReady, router.query]);
 
   const handleCreateNew = () => {
-    router.push('/template');
+    router.push('/CreateTemplate');
   };
 
   const handleDownloadImage = () => {
     if (templateData?.image_url) {
+      const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+      const templateName = (templateData.title || 'Untitled-Template')
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/[^a-zA-Z0-9-]/g, ''); // Remove special characters
+
       const link = document.createElement('a');
       link.href = templateData.image_url;
-      link.download = `${templateData.title || templateData.medium || 'template'}-reference.png`;
+      link.download = `${currentDate}-${templateName}-reference.png`;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
