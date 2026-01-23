@@ -1,9 +1,9 @@
 .container {
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   font-family: var(--font-geist-sans), var(--font-geist-mono), sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent;
 }
 
 .main {
@@ -11,9 +11,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   position: relative;
   overflow: hidden;
+  min-height: 0;
 }
 
 .heroSection {
@@ -21,7 +22,7 @@
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  gap: 3rem;
   align-items: center;
   position: relative;
   z-index: 1;
@@ -33,10 +34,10 @@
 }
 
 .heroTitle {
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 800;
   line-height: 1.1;
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
   background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -44,9 +45,9 @@
 }
 
 .heroSubtitle {
-  font-size: 1.25rem;
-  line-height: 1.6;
-  margin: 0 0 2.5rem 0;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin: 0 0 1.5rem 0;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 400;
 }
@@ -93,7 +94,7 @@
 
 .heroVisual {
   position: relative;
-  height: 400px;
+  height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;

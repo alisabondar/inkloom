@@ -6,7 +6,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { title, medium, difficulty, duration, generated_image_id, image_url, source } = body;
 
-    // use hardcoded user_id for now
     const user_id = "1";
 
     const newTemplate: TemplateInsert = {

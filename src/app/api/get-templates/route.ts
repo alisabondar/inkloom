@@ -7,7 +7,6 @@ export async function GET(req: NextRequest) {
     const limit = searchParams.get('limit') || '10';
     const offset = searchParams.get('offset') || '0';
 
-    // use hardcoded user_id for now
     const user_id = "1";
 
     const { data: templates, error, count } = (await supabase

@@ -64,7 +64,6 @@ export default function CreateTemplatePage() {
       }
 
       if (data.success && data.image) {
-        // Save template data to Supabase database
         const saveResponse = await fetch('/api/save-template', {
           method: 'POST',
           headers: {
@@ -88,7 +87,6 @@ export default function CreateTemplatePage() {
         }
 
         if (saveData.success && saveData.template) {
-          // Redirect to result page with template ID
           router.push(`/template-view?id=${saveData.template.id}`);
         } else {
           throw new Error('Failed to save template to database');

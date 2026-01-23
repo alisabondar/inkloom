@@ -16,9 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", width: "100%", background: "transparent", position: "relative" }}>
+        <div style={{ height: "100vh", display: "flex", flexDirection: "column", width: "100%", position: "relative", overflow: "hidden" }}>
           <Header />
-          <main style={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", background: "transparent", position: "relative", zIndex: 1 }}>
+          <main style={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", position: "relative", zIndex: 1, overflowY: "auto" }}>
             {children}
           </main>
           <Footer />

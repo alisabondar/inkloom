@@ -3,11 +3,15 @@
   border-top: 1px solid #e5e7eb;
   padding: 1rem 2rem;
   margin-top: auto;
+  position: relative;
+  z-index: 1;
+  width: 100%;
 }
 
 .footerDark {
-  background-color: #1f2937;
-  border-top-color: #374151;
+  background-color: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(10px);
+  border-top-color: rgba(255, 255, 255, 0.2);
 }
 
 .footerContent {
@@ -23,5 +27,5 @@
 }
 
 .footerTextDark {
-  color: #9ca3af;
+  color: rgba(255, 255, 255, 0.8);
 }
