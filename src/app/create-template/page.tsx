@@ -104,23 +104,20 @@ export default function CreateTemplatePage() {
 
   return (
     <div className={styles.container}>
-      <main className={`${styles.templateForm} ${styles.templateFormDark}`}>
+      <main className={styles.templateForm}>
         <div className={styles.templateFormContent}>
-          <h2 className={`${styles.templateFormTitle} ${styles.templateFormTitleDark}`}>
-            Create New Template
-          </h2>
-          <p className={`${styles.subheader} ${styles.subheaderDark}`}>
+          <p className={styles.subheader}>
             What would you like to create today?
           </p>
-          <div className={`${styles.formContainer} ${styles.formContainerDark}`}>
+          <div className={styles.formContainer}>
             <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.formField}>
-                <label className={`${styles.label} ${styles.labelDark}`}>
+                <label className={styles.label}>
                   Template Title
                 </label>
                 <input
                   type="text"
-                  className={`${styles.textInput} ${styles.textInputDark}`}
+                  className={styles.textInput}
                   placeholder="Enter template title"
                   value={templateTitle}
                   onChange={(e) => setTemplateTitle(e.target.value)}
@@ -128,11 +125,11 @@ export default function CreateTemplatePage() {
               </div>
 
               <div className={styles.formField}>
-                <label className={`${styles.label} ${styles.labelDark}`}>
-                  Artistic Medium <span style={{ color: 'red' }}>*</span>
+                <label className={styles.label}>
+                  Artistic Medium <span style={{ color: '#fca5a5' }}>*</span>
                 </label>
                 <select
-                  className={`${styles.dropdown} ${styles.dropdownDark}`}
+                  className={styles.dropdown}
                   value={workMedium}
                   onChange={(e) => setWorkMedium(e.target.value)}
                   required
@@ -144,11 +141,11 @@ export default function CreateTemplatePage() {
               </div>
 
               <div className={styles.formField}>
-                <label className={`${styles.label} ${styles.labelDark}`}>
-                  Difficulty Level <span style={{ color: 'red' }}>*</span>
+                <label className={styles.label}>
+                  Difficulty Level <span style={{ color: '#fca5a5' }}>*</span>
                 </label>
                 <select
-                  className={`${styles.dropdown} ${styles.dropdownDark}`}
+                  className={styles.dropdown}
                   value={workDifficulty}
                   onChange={(e) => setWorkDifficulty(e.target.value)}
                   required
@@ -161,12 +158,12 @@ export default function CreateTemplatePage() {
               </div>
 
               <div className={styles.formField}>
-                <label className={`${styles.label} ${styles.labelDark}`}>
-                  Estimated Duration <span style={{ color: 'red' }}>*</span>
+                <label className={styles.label}>
+                  Estimated Duration <span style={{ color: '#fca5a5' }}>*</span>
                 </label>
                 <input
                   type="text"
-                  className={`${styles.textInput} ${styles.textInputDark}`}
+                  className={styles.textInput}
                   placeholder="e.g., 2 hours, 1 day, 3 weeks"
                   value={workDuration}
                   onChange={(e) => setWorkDuration(e.target.value)}
@@ -175,42 +172,42 @@ export default function CreateTemplatePage() {
               </div>
 
               <div className={styles.formField}>
-                <label className={`${styles.label} ${styles.labelDark}`}>
+                <label className={styles.label}>
                   How would you like to start?
                 </label>
                 <div className={styles.startOptions}>
                   {selectedOption !== 'vision' && (
                     <div
-                      className={`${styles.optionCard} ${styles.optionCardDark} ${selectedOption === 'images' ? styles.optionCardSelected : ''}`}
+                      className={`${styles.optionCard} ${selectedOption === 'images' ? styles.optionCardSelected : ''}`}
                       onClick={() => handleOptionSelect('images')}
                     >
                       <div className={styles.optionIcon}>📷</div>
                       <div className={styles.optionContent}>
-                        <h3 className={`${styles.optionTitle} ${styles.optionTitleDark}`}>
+                        <h3 className={styles.optionTitle}>
                           I have reference images
                         </h3>
-                        <p className={`${styles.optionSubtext} ${styles.optionSubtextDark}`}>
+                        <p className={styles.optionSubtext}>
                           Upload photos, sketches, or artwork to create your template
                         </p>
                       </div>
                     </div>
                   )}
                   <div
-                    className={`${styles.optionCard} ${styles.optionCardDark} ${selectedOption === 'vision' ? styles.optionCardExpanded : ''} ${selectedOption === 'vision' ? styles.optionCardSelected : ''}`}
+                    className={`${styles.optionCard} ${selectedOption === 'vision' ? styles.optionCardExpanded : ''} ${selectedOption === 'vision' ? styles.optionCardSelected : ''}`}
                     onClick={() => handleOptionSelect('vision')}
                   >
                     <div className={styles.optionIcon}>✨</div>
                     <div className={styles.optionContent}>
-                      <h3 className={`${styles.optionTitle} ${styles.optionTitleDark}`}>
+                      <h3 className={styles.optionTitle}>
                         I&apos;ll describe my vision
                       </h3>
-                      <p className={`${styles.optionSubtext} ${styles.optionSubtextDark}`}>
+                      <p className={styles.optionSubtext}>
                         Use AI to help generate template ideas from your description
                       </p>
                       {selectedOption === 'vision' && (
                         <div className={styles.visionInputContainer}>
                           <textarea
-                            className={`${styles.visionTextarea} ${styles.visionTextareaDark}`}
+                            className={styles.visionTextarea}
                             rows={6}
                             placeholder="Describe your artistic vision and what you want to create..."
                             value={visionDescription}
@@ -227,21 +224,21 @@ export default function CreateTemplatePage() {
               <div className={styles.buttonContainer}>
                 <button
                   type="submit"
-                  className={`${styles.primaryButton} ${styles.primaryButtonDark} ${isLoading ? styles.buttonLoading : ''}`}
+                  className={`${styles.primaryButton} ${isLoading ? styles.buttonLoading : ''}`}
                   disabled={isLoading || !isFormValid}
                 >
                   {isLoading ? 'Generating...' : 'Create Template'}
                 </button>
                 <button
                   type="button"
-                  className={`${styles.secondaryButton} ${styles.secondaryButtonDark}`}
+                  className={styles.secondaryButton}
                 >
                   Save as Draft
                 </button>
               </div>
 
               {error && (
-                <div className={`${styles.errorMessage} ${styles.errorMessageDark}`}>
+                <div className={styles.errorMessage}>
                   {error}
                 </div>
               )}

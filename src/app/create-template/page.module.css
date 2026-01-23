@@ -6,7 +6,6 @@
 }
 
 .templateForm {
-  background-color: #ffffff;
   padding: 4rem 1rem;
   min-height: 60vh;
   display: flex;
@@ -15,7 +14,7 @@
 }
 
 .templateFormDark {
-  background-color: #1f2937;
+  /* Inherits gradient background from body */
 }
 
 .templateFormContent {
@@ -27,36 +26,42 @@
 .templateFormTitle {
   font-size: 2.25rem;
   font-weight: 700;
-  color: #111827;
+  color: white;
   margin-bottom: 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .templateFormTitleDark {
-  color: #ffffff;
+  color: white;
 }
 
 .subheader {
   font-size: 1.125rem;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 2rem;
   line-height: 1.6;
 }
 
 .subheaderDark {
-  color: #d1d5db;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .formContainer {
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
   padding: 2rem;
   margin-top: 1rem;
 }
 
 .formContainerDark {
-  background-color: #374151;
-  border-color: #4b5563;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .form {
@@ -69,45 +74,58 @@
 
 .label {
   display: block;
-  font-weight: 600;
-  color: #374151;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
 }
 
 .labelDark {
-  color: #f3f4f6;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .textInput,
 .dropdown {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0.5rem;
   font-size: 1rem;
-  background-color: #ffffff;
-  color: #111827;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  transition: all 0.2s ease;
 }
 
 .textInputDark,
 .dropdownDark {
-  background-color: #4b5563;
-  border-color: #6b7280;
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
 }
 
 .textInput:focus,
 .dropdown:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
 .textInputDark:focus,
 .dropdownDark:focus {
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.textInput::placeholder,
+.dropdown option {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dropdown option {
+  background: rgba(102, 126, 234, 0.9);
+  color: white;
 }
 
 .startOptions {
@@ -118,37 +136,43 @@
 }
 
 .optionCard {
-  border: 2px solid #e5e7eb;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 0.75rem;
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  background-color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .optionCardDark {
-  border-color: #4b5563;
-  background-color: #374151;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .optionCard:hover {
-  border-color: #2563eb;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .optionCardDark:hover {
-  border-color: #60a5fa;
-  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .optionCardSelected {
-  border-color: #2563eb !important;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .optionCardDark.optionCardSelected {
-  border-color: #60a5fa !important;
-  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .optionCardExpanded {
@@ -169,22 +193,22 @@
 .optionTitle {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: white;
   margin-bottom: 0.5rem;
 }
 
 .optionTitleDark {
-  color: #ffffff;
+  color: white;
 }
 
 .optionSubtext {
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.875rem;
   line-height: 1.5;
 }
 
 .optionSubtextDark {
-  color: #d1d5db;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .visionInputContainer {
@@ -194,31 +218,38 @@
 
 .visionTextarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  background-color: #ffffff;
-  color: #111827;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
   resize: vertical;
   min-height: 80px;
+  transition: all 0.2s ease;
 }
 
 .visionTextareaDark {
-  background-color: #4b5563;
-  border-color: #6b7280;
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
 }
 
 .visionTextarea:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
 .visionTextareaDark:focus {
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.visionTextarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 @keyframes fadeIn {
@@ -240,80 +271,86 @@
 
 .primaryButton {
   flex: 0.6;
-  background-color: #2563eb;
-  color: white;
+  background: white;
+  color: #667eea;
   font-weight: 600;
   padding: 0.875rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
   font-size: 1rem;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .primaryButtonDark {
-  background-color: #3b82f6;
+  background: white;
+  color: #667eea;
 }
 
-.primaryButton:hover {
-  background-color: #1d4ed8;
+.primaryButton:hover:not(:disabled) {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.primaryButtonDark:hover {
-  background-color: #2563eb;
+.primaryButtonDark:hover:not(:disabled) {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .primaryButton:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .buttonLoading {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .secondaryButton {
   flex: 0.4;
-  background-color: transparent;
-  color: #374151;
+  background: transparent;
+  color: white;
   font-weight: 600;
   padding: 0.875rem 1.5rem;
   border-radius: 0.5rem;
-  border: 2px solid #d1d5db;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.2s ease;
 }
 
 .secondaryButtonDark {
-  color: #d1d5db;
-  border-color: #6b7280;
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .secondaryButton:hover {
-  background-color: #f9fafb;
-  border-color: #9ca3af;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .secondaryButtonDark:hover {
-  background-color: #4b5563;
-  border-color: #9ca3af;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .errorMessage {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
   padding: 0.75rem;
   border-radius: 0.5rem;
   margin-top: 1rem;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .errorMessageDark {
-  background-color: #7f1d1d;
-  border-color: #991b1b;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   color: #fca5a5;
 }
 
