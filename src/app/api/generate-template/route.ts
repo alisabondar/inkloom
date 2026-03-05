@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { supabaseAdmin } from '@/lib/supabase';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,26 +39,75 @@ export async function POST(req: NextRequest) {
 
     Generate a black and white line drawing sketch using only black lines on white background. The sketch should be ${complexity}. Use ${lineCount} with ${lineDetail} to create a clear, inspiring reference that shows the artistic concept, composition, and style. No shading, no color, no fills - only clean black lines defining the form and structure that artists can use as guidance for this template.`;
 
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: imagePrompt,
-      tools: [{ type: "image_generation" }],
-    });
+    // deAPI integration
+    const deApiKey = process.env.DEAPI_API_KEY;
+    const deApiUrl = process.env.DEAPI_URL || 'https://api.deapi.com/v1/images/generate';
 
-    const imageData = response.output
-      .filter((output) => output.type === "image_generation_call")
-      .map((output) => output.result);
-
-    if (imageData.length === 0) {
-      throw new Error('No image generated');
+    if (!deApiKey) {
+      throw new Error('DEAPI_API_KEY is not configured');
     }
 
-    const imageBase64 = imageData[0];
+    // Make request to deAPI
+    const deApiResponse = await fetch(deApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${deApiKey}`,
+      },
+      body: JSON.stringify({
+        prompt: imagePrompt,
+        // Adjust these parameters based on deAPI's actual API requirements
+        model: process.env.DEAPI_MODEL || 'default',
+        size: process.env.DEAPI_IMAGE_SIZE || '1024x1024',
+        quality: 'standard',
+        response_format: 'b64_json', // or 'url' depending on deAPI's options
+      }),
+    });
+
+    if (!deApiResponse.ok) {
+      const errorData = await deApiResponse.json().catch(() => ({}));
+      throw new Error(`deAPI request failed: ${deApiResponse.statusText} - ${JSON.stringify(errorData)}`);
+    }
+
+    const deApiData = await deApiResponse.json();
+
+    // Handle different response formats from deAPI
+    // Adjust this based on deAPI's actual response structure
+    let imageBase64: string;
+    let generatedImageId: string;
+
+    if (deApiData.data && Array.isArray(deApiData.data) && deApiData.data.length > 0) {
+      // If response has data array (similar to OpenAI format)
+      const imageItem = deApiData.data[0];
+      imageBase64 = imageItem.b64_json || imageItem.url || imageItem.image;
+      generatedImageId = imageItem.id || deApiData.id || `deapi-${Date.now()}`;
+    } else if (deApiData.image) {
+      // If response has direct image field
+      imageBase64 = deApiData.image;
+      generatedImageId = deApiData.id || `deapi-${Date.now()}`;
+    } else if (deApiData.b64_json) {
+      // If response has b64_json at root
+      imageBase64 = deApiData.b64_json;
+      generatedImageId = deApiData.id || `deapi-${Date.now()}`;
+    } else if (deApiData.url) {
+      // If response is a URL, fetch and convert to base64
+      const imageResponse = await fetch(deApiData.url);
+      const imageBuffer = await imageResponse.arrayBuffer();
+      imageBase64 = `data:image/png;base64,${Buffer.from(imageBuffer).toString('base64')}`;
+      generatedImageId = deApiData.id || `deapi-${Date.now()}`;
+    } else {
+      throw new Error('Unexpected response format from deAPI');
+    }
+
+    // Ensure base64 format includes data URI prefix if not already present
+    if (imageBase64 && !imageBase64.startsWith('data:')) {
+      imageBase64 = `data:image/png;base64,${imageBase64}`;
+    }
 
     const base64Data = imageBase64?.replace(/^data:image\/\w+;base64,/, '');
     const buffer = base64Data && Buffer.from(base64Data, 'base64');
 
-    const filename = `template-${Date.now()}-${response.id}.png`;
+    const filename = `template-${Date.now()}-${generatedImageId}.png`;
 
     const { data, error: uploadError } = await supabaseAdmin.storage
       .from('templates')
@@ -93,12 +137,12 @@ export async function POST(req: NextRequest) {
       medium: workMedium,
       difficulty: workDifficulty,
       duration: workDuration,
-      generated_image_id: response.id,
+      generated_image_id: generatedImageId,
       source: "DESCRIPTION"
     });
 
   } catch (error) {
-    console.error('DALL-E API Error:', error);
+    console.error('deAPI Error:', error);
     return NextResponse.json({
       error: 'Failed to generate image',
       details: error instanceof Error ? error.message : 'Unknown error'

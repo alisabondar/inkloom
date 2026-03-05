@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
+import { FractalBackground } from '@/components/common/FractalBackground';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <div style={{ height: "100vh", display: "flex", flexDirection: "column", width: "100%", position: "relative", overflow: "hidden" }}>
+          <FractalBackground />
           <Header />
           <main style={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", position: "relative", zIndex: 1, overflowY: "auto" }}>
             {children}

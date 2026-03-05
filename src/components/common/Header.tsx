@@ -17,7 +17,7 @@ export const Header = () => {
     if (pathname.includes("create-template")) return "Create Template";
     if (pathname.includes("template-view")) return "Template View";
     if (pathname.includes("account-settings")) return "Account Settings";
-    if (pathname.includes("gallery")) return "Templates";
+    if (pathname.includes("gallery")) return "Gallery";
     return "Inkloom";
   };
 

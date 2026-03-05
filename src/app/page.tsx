@@ -28,11 +28,6 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className={styles.heroVisual}>
-            <div className={styles.decorativeCircle}></div>
-            <div className={styles.decorativeCircle}></div>
-            <div className={styles.decorativeCircle}></div>
-          </div>
         </div>
       </main>
     </div>
