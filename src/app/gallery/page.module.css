@@ -6,7 +6,7 @@
 }
 
 .subtitle {
-  font-family: var(--font-story-script), cursive;
+  font-family: 'Story Script', cursive;
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 2rem 0;
   font-size: 1.75rem;
@@ -34,7 +34,7 @@
   margin: 0;
   font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.8);
-  font-family: var(--font-story-script), cursive;
+  font-family: 'Story Script', cursive;
 }
 
 @keyframes spin {

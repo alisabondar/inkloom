@@ -3,7 +3,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  font-family: var(--font-story-script), cursive;
+  font-family: 'Story Script', cursive;
 }
 
 .templateForm {
@@ -48,7 +48,7 @@
 
 .subheader {
   font-size: 1.6rem;
-  font-family: var(--font-story-script), cursive;
+  font-family: 'Story Script', cursive;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0.5rem;
   line-height: 1.5;

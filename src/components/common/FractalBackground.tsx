@@ -40,7 +40,7 @@ function setLinePoints(iterations: number): PointList {
   for (let i = 0; i < iterations; i++) {
     let point: Point | null = pointList.first;
     while (point?.next) {
-      const nextPoint = point.next;
+      const nextPoint: Point = point.next;
       const dx = nextPoint.x - point.x;
       const newX = 0.5 * (point.x + nextPoint.x);
       let newY = 0.5 * (point.y + nextPoint.y);
@@ -92,6 +92,7 @@ export function FractalBackground() {
 
     const context = canvas.getContext('2d');
     if (!context) return;
+    const ctx = context;
 
     let timerId: ReturnType<typeof setInterval> | null = null;
     let delayId: ReturnType<typeof setTimeout> | null = null;
@@ -111,6 +112,7 @@ export function FractalBackground() {
     let displayHeight = 0;
 
     function resize() {
+      if (!canvas) return;
       displayWidth = window.innerWidth;
       displayHeight = window.innerHeight;
       canvas.width = displayWidth;
@@ -121,7 +123,7 @@ export function FractalBackground() {
       circles = [];
       const maxR = minMaxRad + Math.random() * (maxMaxRad - minMaxRad);
       const minR = minRadFactor * maxR;
-      const grad = context.createRadialGradient(0, 0, minR, 0, 0, maxR);
+      const grad = ctx.createRadialGradient(0, 0, minR, 0, 0, maxR);
       grad.addColorStop(1, 'rgba(0,170,200,0.2)');
       grad.addColorStop(0, 'rgba(0,20,170,0.2)');
 
@@ -143,8 +145,8 @@ export function FractalBackground() {
 
     function startGenerate() {
       drawCount = 0;
-      context.setTransform(1, 0, 0, 1, 0, 0);
-      context.clearRect(0, 0, displayWidth, displayHeight);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, displayWidth, displayHeight);
       setCircles();
     }
 
@@ -161,9 +163,9 @@ export function FractalBackground() {
           }
 
           const cosParam = 0.5 - 0.5 * Math.cos(Math.PI * c.param);
-          context.strokeStyle = c.color;
-          context.lineWidth = lineWidth;
-          context.beginPath();
+          ctx.strokeStyle = c.color;
+          ctx.lineWidth = lineWidth;
+          ctx.beginPath();
 
           let point1 = c.pointList1.first;
           let point2 = c.pointList2.first;
@@ -182,11 +184,11 @@ export function FractalBackground() {
             return true;
           }
 
-          context.setTransform(xSqueeze, 0, 0, 1, drawX, drawY);
+          ctx.setTransform(xSqueeze, 0, 0, 1, drawX, drawY);
 
           let x0 = xSqueeze * rad * Math.cos(theta);
           let y0 = rad * Math.sin(theta);
-          context.lineTo(x0, y0);
+          ctx.lineTo(x0, y0);
 
           while (point1.next) {
             point1 = point1.next;
@@ -195,10 +197,10 @@ export function FractalBackground() {
             rad = c.minRad + (point1.y + cosParam * (point2.y - point1.y)) * (c.maxRad - c.minRad);
             x0 = xSqueeze * rad * Math.cos(theta);
             y0 = rad * Math.sin(theta);
-            context.lineTo(x0, y0);
+            ctx.lineTo(x0, y0);
           }
-          context.closePath();
-          context.stroke();
+          ctx.closePath();
+          ctx.stroke();
         }
       }
       return false;

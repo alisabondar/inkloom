@@ -5,7 +5,7 @@
   --foreground: #171717;
   --header-text-color: white;
   --header-border-color: rgba(255, 255, 255, 0.1);
-  --header-font-family: var(--font-story-script), cursive;
+  --header-font-family: 'Story Script', cursive;
   --transition-opacity: opacity 0.2s ease;
   --hover-opacity: 0.8;
 }
@@ -13,8 +13,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-story-script), cursive;
-  --font-mono: var(--font-story-script), cursive;
+  --font-sans: 'Story Script', cursive;
+  --font-mono: 'Story Script', cursive;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,7 +38,7 @@ body {
 body {
   background: #0d1117;
   color: var(--foreground);
-  font-family: var(--font-story-script), cursive;
+  font-family: 'Story Script', cursive;
 }
 
 /* User inputs use system font for readability, match placeholder size */
