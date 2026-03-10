@@ -1,15 +1,8 @@
 import type { Metadata } from 'next';
-import { Story_Script } from 'next/font/google';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { FractalBackground } from '@/components/common/FractalBackground';
 import '@/styles/globals.css';
-
-const storyScript = Story_Script({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-story-script',
-});
 
 export const metadata: Metadata = {
   title: 'Inkloom',
@@ -22,7 +15,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={storyScript.variable}>
+    <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Story+Script&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>
         <div style={{ height: "100vh", display: "flex", flexDirection: "column", width: "100%", position: "relative", overflow: "hidden" }}>
           <FractalBackground />
