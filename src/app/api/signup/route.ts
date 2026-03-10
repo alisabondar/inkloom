@@ -62,7 +62,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to create user', details: error.message }, { status: 500 });
     }
 
-    const { password: _, ...userWithoutPassword } = data;
+    const userWithoutPassword = Object.fromEntries(
+      Object.entries(data).filter(([key]) => key !== 'password')
+    );
     return NextResponse.json({
       success: true,
       user: userWithoutPassword
