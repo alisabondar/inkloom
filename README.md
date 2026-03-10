@@ -23,6 +23,7 @@ This is the **Minimum Viable Product** (MVP). Core features include:
 
 ### Near-term
 
+- **Image to image support** – Allow users to attach their own image and have AI generate a template from it
 - **Profile customization** – Avatars, display names, bios
 - **More artistic mediums** – Embroidery, watercolor, ink, digital art, etc.
 - **Template iterations** – Generate variations of the same template, refine outputs
