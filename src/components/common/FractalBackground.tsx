@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface Point {
   x: number;
@@ -71,8 +72,19 @@ function setLinePoints(iterations: number): PointList {
   return pointList;
 }
 
+interface AnimationState {
+  circles: Circle[];
+  drawCount: number;
+  displayWidth: number;
+  displayHeight: number;
+}
+
 export function FractalBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
+  const stateRef = useRef<AnimationState | null>(null);
+  const prevIsHomePageRef = useRef<boolean>(isHomePage);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -89,6 +101,7 @@ export function FractalBackground() {
     const minRadFactor = 0;
     const iterations = 10;
     const drawsPerFrame = 8;
+    const fastForwardMultiplier = 15; // Speed up when navigating away
     const lineWidth = 1.01;
     const xSqueeze = 0.92;
 
@@ -135,8 +148,8 @@ export function FractalBackground() {
       setCircles();
     }
 
-    function onTimer() {
-      for (let j = 0; j < drawsPerFrame; j++) {
+    function drawFrame(stepMultiplier: number): boolean {
+      for (let j = 0; j < drawsPerFrame * stepMultiplier; j++) {
         drawCount++;
         for (let i = 0; i < circles.length; i++) {
           const c = circles[i];
@@ -158,22 +171,18 @@ export function FractalBackground() {
           let theta = c.phase;
           let rad = c.minRad + (point1.y + cosParam * (point2.y - point1.y)) * (c.maxRad - c.minRad);
 
-          c.centerX += 0.2;
-          c.centerY -= 0.2;
-          const yOffset = 40 * Math.sin(c.globalPhase + (drawCount / 1000) * TWO_PI);
+          c.centerX += 1.5;
+          c.centerY -= 1.1;
+          const xWobble = 55 * Math.cos(drawCount * 0.0157);
+          const yOffset = 55 * Math.sin(c.globalPhase + drawCount * 0.0157 * Math.PI);
+          const drawX = c.centerX + xWobble;
+          const drawY = c.centerY + yOffset;
 
           if (c.centerX > displayWidth + maxMaxRad || c.centerY < -maxMaxRad) {
-            if (timerId) clearInterval(timerId);
-            timerId = null;
-            delayId = setTimeout(() => {
-              delayId = null;
-              startGenerate();
-              timerId = setInterval(onTimer, 1000 / 50);
-            }, pauseBeforeRestartMs);
-            return;
+            return true;
           }
 
-          context.setTransform(xSqueeze, 0, 0, 1, c.centerX, c.centerY + yOffset);
+          context.setTransform(xSqueeze, 0, 0, 1, drawX, drawY);
 
           let x0 = xSqueeze * rad * Math.cos(theta);
           let y0 = rad * Math.sin(theta);
@@ -192,11 +201,55 @@ export function FractalBackground() {
           context.stroke();
         }
       }
+      return false;
     }
 
-    resize();
-    startGenerate();
-    timerId = setInterval(onTimer, 1000 / 50);
+    function onTimer() {
+      const completed = drawFrame(1);
+      if (isHomePage) {
+        stateRef.current = { circles, drawCount, displayWidth, displayHeight };
+      }
+      if (completed) {
+        if (timerId) clearInterval(timerId);
+        timerId = null;
+        if (isHomePage) {
+          delayId = setTimeout(() => {
+            delayId = null;
+            startGenerate();
+            timerId = setInterval(onTimer, 1000 / 50);
+          }, pauseBeforeRestartMs);
+        }
+      }
+    }
+
+    const wasOnHomePage = prevIsHomePageRef.current;
+    prevIsHomePageRef.current = isHomePage;
+
+    if (isHomePage) {
+      resize();
+      startGenerate();
+      timerId = setInterval(onTimer, 1000 / 50);
+    } else {
+      if (wasOnHomePage && stateRef.current) {
+        const saved = stateRef.current;
+        circles = saved.circles;
+        drawCount = saved.drawCount;
+        displayWidth = saved.displayWidth;
+        displayHeight = saved.displayHeight;
+        let completed = false;
+        while (!completed) {
+          completed = drawFrame(fastForwardMultiplier);
+        }
+      } else {
+        resize();
+        startGenerate();
+        let completed = false;
+        while (!completed) {
+          completed = drawFrame(fastForwardMultiplier);
+        }
+      }
+      stateRef.current = null;
+    }
 
     const handleResize = () => {
       if (delayId) clearTimeout(delayId);
@@ -204,7 +257,14 @@ export function FractalBackground() {
       if (timerId) clearInterval(timerId);
       resize();
       startGenerate();
-      timerId = setInterval(onTimer, 1000 / 50);
+      if (isHomePage) {
+        timerId = setInterval(onTimer, 1000 / 50);
+      } else {
+        let completed = false;
+        while (!completed) {
+          completed = drawFrame(fastForwardMultiplier);
+        }
+      }
     };
     window.addEventListener('resize', handleResize);
 
@@ -213,7 +273,7 @@ export function FractalBackground() {
       if (delayId) clearTimeout(delayId);
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [isHomePage]);
 
   return (
     <canvas

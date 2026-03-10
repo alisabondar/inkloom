@@ -2,15 +2,15 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  font-family: var(--font-geist-sans), var(--font-geist-mono), sans-serif;
+  font-family: 'Story Script', cursive;
   background: transparent;
+  letter-spacing: normal;
 }
 
 .main {
   flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
   padding: 1.5rem 2rem;
   position: relative;
   overflow: visible;
@@ -20,8 +20,9 @@
 .heroSection {
   max-width: 1200px;
   width: 100%;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 3rem;
   align-items: center;
   position: relative;
@@ -34,10 +35,11 @@
 }
 
 .heroTitle {
-  font-size: 3rem;
+  font-size: 4rem;
   font-weight: 800;
   line-height: 1.1;
   margin: 0 0 1rem 0;
+  white-space: nowrap;
   background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -46,9 +48,11 @@
 }
 
 .heroSubtitle {
-  font-size: 1.1rem;
+  font-size: 1.75rem;
+  font-family: 'Story Script', cursive;
   line-height: 1.5;
   margin: 0 0 1.5rem 0;
+  white-space: nowrap;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 400;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.35);
@@ -70,7 +74,7 @@
   transition: all 0.3s ease;
   border: none;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 1.4rem;
   text-decoration: none;
   display: inline-block;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -107,11 +111,13 @@
   }
 
   .heroTitle {
-    font-size: 2.5rem;
+    font-size: 3rem;
+    white-space: normal;
   }
 
   .heroSubtitle {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
+    white-space: normal;
   }
 
   .homeButtons {
@@ -121,7 +127,7 @@
   }
 
   .templateButton {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.85rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.15rem;
   }
 }

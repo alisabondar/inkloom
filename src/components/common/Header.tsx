@@ -22,6 +22,7 @@ export const Header = () => {
   };
 
   const title = getTitle();
+  const isHomePage = pathname === "/" || pathname === "";
   const isAccountSettings = pathname.includes("account-settings");
 
   const handleAvatarClick = (e: React.MouseEvent) => {
@@ -38,7 +39,26 @@ export const Header = () => {
           <h1 className={`${styles.headerTitle} ${styles.headerTitleDark}`}>
             {title}
           </h1>
-          {user ? (
+          <div className={styles.headerIcons}>
+            {!isHomePage && (
+              <Link href="/" className={styles.avatarLink} aria-label="Home">
+                <div className={styles.avatar}>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
+              </Link>
+            )}
+            {user ? (
             <Link href={isAccountSettings ? "/" : "/account-settings"} className={styles.avatarLink}>
               <div className={styles.avatar}>
                 {isAccountSettings ? (
@@ -96,6 +116,7 @@ export const Header = () => {
               </div>
             </button>
           )}
+          </div>
         </div>
       </header>
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

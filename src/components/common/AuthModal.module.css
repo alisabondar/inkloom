@@ -14,7 +14,7 @@
 }
 
 .modal {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(10px);
   border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -22,7 +22,7 @@
   width: 100%;
   max-width: 400px;
   position: relative;
-  color: white;
+  color: black;
 }
 
 .closeButton {
@@ -31,7 +31,7 @@
   right: 1rem;
   background: transparent;
   border: none;
-  color: white;
+  color: black;
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
@@ -42,18 +42,15 @@
 }
 
 .closeButton:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .title {
-  font-size: 1.75rem;
+  font-size: 2.25rem;
   font-weight: 700;
   margin: 0 0 1.5rem 0;
   text-align: center;
-  background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: black;
 }
 
 .form {
@@ -69,50 +66,51 @@
 }
 
 .label {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: black;
 }
 
 .input {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
-  color: white;
-  font-size: 1rem;
+  color: black;
+  font-size: 0.8rem;
   transition: all 0.2s ease;
 }
 
 .input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
 }
 
 .input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-  opacity: 0.6;
+  color: rgba(0, 0, 0, 0.5);
 }
 
 .error {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #b91c1c;
   padding: 0.75rem;
   border-radius: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   text-align: center;
 }
 
 .infoMessage {
-  background: rgba(59, 130, 246, 0.2);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #1d4ed8;
   padding: 0.75rem;
   border-radius: 0.5rem;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   text-align: center;
 }
 
@@ -122,7 +120,7 @@
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -143,15 +141,17 @@
 .switch {
   text-align: center;
   margin-top: 1rem;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  color: black;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .switchButton {
   background: transparent;
   border: none;
-  color: white;
+  color: black;
   font-weight: 600;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   cursor: pointer;
   text-decoration: underline;
   padding: 0;

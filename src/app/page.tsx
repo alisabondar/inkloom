@@ -12,7 +12,7 @@ export default function HomePage() {
             <h1 className={styles.heroTitle}>
               Create Beautiful Templates
             </h1>
-            <p className={styles.heroSubtitle}>
+            <p className={`${styles.heroSubtitle} beauFont`}>
               Design and customize stunning templates for your creative projects
             </p>
             <div className={styles.homeButtons}>

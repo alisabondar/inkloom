@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, Template, TemplateInsert } from '@/lib/supabase';
+import { supabaseAdmin, Template, TemplateInsert } from '@/lib/supabase';
+import { DEFAULT_USER_ID } from '@/constants';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, medium, difficulty, duration, generated_image_id, image_url, source } = body;
+    const { title, medium, difficulty, duration, generated_image_id, image_url, source, public: isPublic } = body;
 
-    const user_id = "1";
+    if (!image_url || typeof image_url !== 'string') {
+      return NextResponse.json(
+        { error: 'image_url is required and must be a string' },
+        { status: 400 }
+      );
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'SUPABASE_SERVICE_ROLE_KEY is not configured' },
+        { status: 500 }
+      );
+    }
 
     const newTemplate: TemplateInsert = {
       title: title || 'Untitled Template',
@@ -16,10 +29,11 @@ export async function POST(req: NextRequest) {
       generated_image_id,
       image_url,
       source,
-      user_id
+      user_id: DEFAULT_USER_ID,
+      public: isPublic === true
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('template')
       .insert([newTemplate])
       .select()

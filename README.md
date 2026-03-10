@@ -1,42 +1,43 @@
 # Inkloom
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+AI-powered art template generation for creative projects. Describe your vision and create custom line-drawing templates for painting, cross-stitch, and other mediums coming soon.
 
-## Getting Started
+## Status: MVP
 
-First, run the development server:
+This is the **Minimum Viable Product** (MVP). Core features include:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- AI-generated templates from text descriptions
+- Template gallery and viewing
+- User accounts and authentication
+- Multiple artistic mediums (e.g., painting, cross-stitch)
+- Reference image upload support
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech Stack
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+- **Framework:** Next.js 15
+- **Database & Auth:** Supabase
+- **AI Image Generation:** Pixazo (Flux Schnell)
+- **Styling:** Tailwind CSS
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Future Roadmap
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+### Near-term
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Profile customization** – Avatars, display names, bios
+- **More artistic mediums** – Embroidery, watercolor, ink, digital art, etc.
+- **Template iterations** – Generate variations of the same template, refine outputs
+- **Entire project generation** – Full project plans with materials, steps, and timelines
 
-## Learn More
+### Future ideas
 
-To learn more about Next.js, take a look at the following resources:
+- **Collaborative projects** – Share templates and works-in-progress with others
+- **Style presets** – Save and reuse favorite style combinations
+- **Export options** – PDF patterns, printable grids, SVG for digital tools
+- **Progress tracking** – Log hours, photos, and notes as you work
+- **Community gallery** – Discover and remix templates from other creators
+- **LoRA / custom styles** – Train on your own artwork for personalized outputs
+- **Mobile app** – Create and view templates on the go
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+Have a suggestion? [Make a PR](https://github.com/alisabondar/inkloom) for review.

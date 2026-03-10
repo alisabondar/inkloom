@@ -98,12 +98,27 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     }
   };
 
+  const isFormValid = isSignUp
+    ? firstName.trim() && email.trim() && password.length >= 6
+    : email.trim() && password.length >= 6;
+
+  const handleClose = () => {
+    setEmail('');
+    setPassword('');
+    setFirstName('');
+    setUsername('');
+    setError(null);
+    setAccountNotFoundMessage(null);
+    setIsSignUp(false);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={handleClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <button className={styles.closeButton} onClick={onClose}>
+        <button className={styles.closeButton} onClick={handleClose}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
@@ -121,7 +136,7 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
           {isSignUp && (
             <>
               <div className={styles.formGroup}>
-                <label className={styles.label}>First Name</label>
+                <label className={styles.label}>First Name <span style={{ color: '#fca5a5' }}>*</span></label>
                 <input
                   type="text"
                   className={styles.input}
@@ -132,13 +147,13 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 />
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.label}>Username (optional)</label>
+                <label className={styles.label}>Username</label>
                 <input
                   type="text"
                   className={styles.input}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Choose a username (optional)"
+                  placeholder="Choose a username"
                 />
               </div>
             </>
@@ -146,7 +161,8 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
           <div className={styles.formGroup}>
             <label className={styles.label}>
-              {isSignUp ? 'Email' : 'Email or Username'}
+              {isSignUp ? 'Email' : 'Email or Username'}{' '}
+              <span style={{ color: '#fca5a5' }}>*</span>
             </label>
             <input
               type={isSignUp ? 'email' : 'text'}
@@ -159,7 +175,7 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Password</label>
+            <label className={styles.label}>Password <span style={{ color: '#fca5a5' }}>*</span></label>
             <input
               type="password"
               className={styles.input}
@@ -177,7 +193,7 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             </div>
           )}
 
-          <button type="submit" className={styles.submitButton} disabled={loading}>
+          <button type="submit" className={styles.submitButton} disabled={loading || !isFormValid}>
             {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
           </button>
 

@@ -39,79 +39,108 @@ export async function POST(req: NextRequest) {
 
     Generate a black and white line drawing sketch using only black lines on white background. The sketch should be ${complexity}. Use ${lineCount} with ${lineDetail} to create a clear, inspiring reference that shows the artistic concept, composition, and style. No shading, no color, no fills - only clean black lines defining the form and structure that artists can use as guidance for this template.`;
 
-    // deAPI integration
-    const deApiKey = process.env.DEAPI_API_KEY;
-    const deApiUrl = process.env.DEAPI_URL || 'https://api.deapi.com/v1/images/generate';
+    const pixazoKey = process.env.PIXAZO_API_KEY;
+    const requestUrl = process.env.PIXAZO_FLUX_SCHNELL_REQUEST_URL || 'https://gateway.pixazo.ai/flux-1-schnell/v1/getData';
 
-    if (!deApiKey) {
-      throw new Error('DEAPI_API_KEY is not configured');
+    if (!pixazoKey) {
+      throw new Error('PIXAZO_API_KEY is not configured. Get a free API key at https://api-console.pixazo.ai/api_keys');
     }
 
-    // Make request to deAPI
-    const deApiResponse = await fetch(deApiUrl, {
+    const pixazoHeaders = {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache',
+      'Ocp-Apim-Subscription-Key': pixazoKey,
+    };
+
+    const requestResponse = await fetch(requestUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${deApiKey}`,
-      },
+      headers: pixazoHeaders,
       body: JSON.stringify({
         prompt: imagePrompt,
-        // Adjust these parameters based on deAPI's actual API requirements
-        model: process.env.DEAPI_MODEL || 'default',
-        size: process.env.DEAPI_IMAGE_SIZE || '1024x1024',
-        quality: 'standard',
-        response_format: 'b64_json', // or 'url' depending on deAPI's options
+        num_steps: 4,
+        seed: Math.floor(Math.random() * 100000),
+        height: 512,
+        width: 512,
       }),
     });
 
-    if (!deApiResponse.ok) {
-      const errorData = await deApiResponse.json().catch(() => ({}));
-      throw new Error(`deAPI request failed: ${deApiResponse.statusText} - ${JSON.stringify(errorData)}`);
+    if (!requestResponse.ok) {
+      const errorData = await requestResponse.json().catch(() => ({}));
+      throw new Error(`Pixazo request failed: ${requestResponse.statusText} - ${JSON.stringify(errorData)}`);
     }
 
-    const deApiData = await deApiResponse.json();
+    let requestData = await requestResponse.json();
+    const generatedImageId = requestData.request_id || `pixazo-${Date.now()}`;
 
-    // Handle different response formats from deAPI
-    // Adjust this based on deAPI's actual response structure
+    if (requestData.status === 'IN_QUEUE' && requestData.request_id) {
+      const resultUrl = (process.env.PIXAZO_FLUX_SCHNELL_RESULT_URL || requestUrl.replace('/getData', '/getData-result'));
+      const maxAttempts = 30;
+      const pollIntervalMs = 2000;
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        await new Promise((r) => setTimeout(r, pollIntervalMs));
+        const resultResponse = await fetch(resultUrl, {
+          method: 'POST',
+          headers: pixazoHeaders,
+          body: JSON.stringify({ request_id: requestData.request_id }),
+        });
+        requestData = await resultResponse.json();
+
+        if (requestData.status === 'COMPLETED' && requestData.images?.length > 0) break;
+        if (requestData.status === 'FAILED') {
+          throw new Error(requestData.message || 'Pixazo image generation failed');
+        }
+      }
+    }
+
     let imageBase64: string;
-    let generatedImageId: string;
-
-    if (deApiData.data && Array.isArray(deApiData.data) && deApiData.data.length > 0) {
-      // If response has data array (similar to OpenAI format)
-      const imageItem = deApiData.data[0];
-      imageBase64 = imageItem.b64_json || imageItem.url || imageItem.image;
-      generatedImageId = imageItem.id || deApiData.id || `deapi-${Date.now()}`;
-    } else if (deApiData.image) {
-      // If response has direct image field
-      imageBase64 = deApiData.image;
-      generatedImageId = deApiData.id || `deapi-${Date.now()}`;
-    } else if (deApiData.b64_json) {
-      // If response has b64_json at root
-      imageBase64 = deApiData.b64_json;
-      generatedImageId = deApiData.id || `deapi-${Date.now()}`;
-    } else if (deApiData.url) {
-      // If response is a URL, fetch and convert to base64
-      const imageResponse = await fetch(deApiData.url);
-      const imageBuffer = await imageResponse.arrayBuffer();
-      imageBase64 = `data:image/png;base64,${Buffer.from(imageBuffer).toString('base64')}`;
-      generatedImageId = deApiData.id || `deapi-${Date.now()}`;
+    if (requestData.images && Array.isArray(requestData.images) && requestData.images.length > 0) {
+      const img = requestData.images[0];
+      const b64 = img.data ?? img.base64;
+      if (b64) {
+        imageBase64 = b64.startsWith('data:') ? b64 : `data:image/png;base64,${b64}`;
+      } else if (img.url) {
+        const imageResponse = await fetch(img.url);
+        const imageBuffer = await imageResponse.arrayBuffer();
+        if (imageBuffer.byteLength < 1000) {
+          throw new Error(`Pixazo image URL returned ${imageBuffer.byteLength} bytes (expected image data).`);
+        }
+        imageBase64 = `data:image/png;base64,${Buffer.from(imageBuffer).toString('base64')}`;
+      } else {
+        throw new Error(`Unexpected Pixazo image format: ${JSON.stringify(img)}`);
+      }
+    } else if (requestData.output || requestData.image) {
+      const out = requestData.output || requestData.image;
+      if (typeof out === 'string' && out.startsWith('http')) {
+        const imageResponse = await fetch(out);
+        const imageBuffer = await imageResponse.arrayBuffer();
+        if (imageBuffer.byteLength < 1000) {
+          throw new Error(`Pixazo output URL returned ${imageBuffer.byteLength} bytes (expected image data).`);
+        }
+        imageBase64 = `data:image/png;base64,${Buffer.from(imageBuffer).toString('base64')}`;
+      } else {
+        imageBase64 = out.startsWith('data:') ? out : `data:image/png;base64,${out}`;
+      }
     } else {
-      throw new Error('Unexpected response format from deAPI');
+      throw new Error(`Pixazo returned no image. Response: ${JSON.stringify(requestData).slice(0, 200)}`);
     }
 
-    // Ensure base64 format includes data URI prefix if not already present
-    if (imageBase64 && !imageBase64.startsWith('data:')) {
-      imageBase64 = `data:image/png;base64,${imageBase64}`;
+    if (!supabaseAdmin) {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured. Add it to .env.local for storage uploads.');
     }
 
-    const base64Data = imageBase64?.replace(/^data:image\/\w+;base64,/, '');
-    const buffer = base64Data && Buffer.from(base64Data, 'base64');
+    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
 
-    const filename = `template-${Date.now()}-${generatedImageId}.png`;
+    if (!buffer?.length || buffer.length < 100) {
+      throw new Error('Invalid or empty image data from Pixazo');
+    }
 
-    const { data, error: uploadError } = await supabaseAdmin.storage
+    const filename = `template-${Date.now()}-${generatedImageId.replace(/[/\\]/g, '-')}.png`;
+
+    const { error: uploadError } = await supabaseAdmin.storage
       .from('templates')
-      .upload(filename, buffer || '', {
+      .upload(filename, buffer, {
         contentType: 'image/png',
         cacheControl: '3600',
         upsert: false
@@ -122,27 +151,22 @@ export async function POST(req: NextRequest) {
       throw new Error('Failed to upload image to storage');
     }
 
-    const { data: urlData } = supabaseAdmin.storage
-      .from('templates')
-      .getPublicUrl(filename);
-
-    const imageUrl = urlData.publicUrl;
-
     return NextResponse.json({
       success: true,
       image: imageBase64,
-      image_url: imageUrl,
+      image_url: filename,
       prompt: imagePrompt,
       title: title,
       medium: workMedium,
       difficulty: workDifficulty,
       duration: workDuration,
       generated_image_id: generatedImageId,
-      source: "DESCRIPTION"
+      source: "DESCRIPTION",
+      provider: "pixazo-flux-schnell"
     });
 
   } catch (error) {
-    console.error('deAPI Error:', error);
+    console.error('Pixazo Error:', error);
     return NextResponse.json({
       error: 'Failed to generate image',
       details: error instanceof Error ? error.message : 'Unknown error'

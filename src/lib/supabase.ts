@@ -25,6 +25,7 @@ export interface Template {
   image_url?: string;
   source?: string;
   user_id: string;
+  public?: boolean;
   created_at: string;
   updated_at?: string;
 }
@@ -38,6 +39,7 @@ export interface TemplateInsert {
   image_url?: string;
   source?: string;
   user_id: string;
+  public?: boolean;
 }
 
 export interface SupabaseQueryResponse<T> {

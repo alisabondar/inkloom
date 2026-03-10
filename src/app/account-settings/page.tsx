@@ -122,10 +122,6 @@ export default function AccountSettingsPage() {
   return (
     <div className={styles.container}>
       <div className={styles.profileContent}>
-        <div className={styles.headerSection}>
-          <p className={styles.pageSubtitle}>Manage your account information and settings</p>
-        </div>
-
         <section className={styles.settingsCard}>
           <div className={styles.profileSection}>
             <div className={styles.cardHeader}>

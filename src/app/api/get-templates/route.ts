@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, Template, SupabaseQueryResponse } from '@/lib/supabase';
+import { supabaseAdmin, Template, SupabaseQueryResponse } from '@/lib/supabase';
+import { DEFAULT_USER_ID } from '@/constants';
 
 export async function GET(req: NextRequest) {
   try {
@@ -7,12 +8,17 @@ export async function GET(req: NextRequest) {
     const limit = searchParams.get('limit') || '10';
     const offset = searchParams.get('offset') || '0';
 
-    const user_id = "1";
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'SUPABASE_SERVICE_ROLE_KEY is not configured' },
+        { status: 500 }
+      );
+    }
 
-    const { data: templates, error, count } = (await supabase
+    const { data: templates, error, count } = (await supabaseAdmin
       .from('template')
       .select('*', { count: 'exact' })
-      .eq('user_id', user_id)
+      .eq('user_id', DEFAULT_USER_ID)
       .order('created_at', { ascending: false })
       .limit(parseInt(limit))
       .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1)) as SupabaseQueryResponse<Template[]>;

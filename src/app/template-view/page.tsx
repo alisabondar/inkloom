@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
 import styles from "./page.module.css";
 import { Template } from "@/lib/supabase";
 
@@ -13,14 +12,27 @@ function TemplateViewContent() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTemplate = async () => {
-      const id = searchParams.get('id');
+    const id = searchParams.get('id');
 
-      if (!id) {
-        setIsLoading(false);
-        return;
+    if (!id) {
+      setIsLoading(false);
+      return;
+    }
+
+    const cached = typeof window !== 'undefined' ? sessionStorage.getItem(`template-${id}`) : null;
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached) as Template;
+        setTemplateData(parsed);
+        sessionStorage.removeItem(`template-${id}`);
+      } catch {
+        // Fall through to fetch
       }
+      setIsLoading(false);
+      return;
+    }
 
+    const fetchTemplate = async () => {
       try {
         const response = await fetch(`/api/get-template?id=${id}`);
         const data = await response.json();
@@ -47,7 +59,7 @@ function TemplateViewContent() {
   const handleDownloadImage = () => {
     if (templateData?.image_url) {
       const currentDate = new Date().toISOString().split('T')[0];
-      const templateName = (templateData.title || 'Untitled-Template')
+      const templateName = (templateData.title || `Template-${templateData.id}`)
         .replace(/\s+/g, '-')
         .replace(/[^a-zA-Z0-9-]/g, '');
 
@@ -67,10 +79,8 @@ function TemplateViewContent() {
         <div className={`${styles.templateForm} ${styles.templateFormDark}`}>
           <div className={styles.templateFormContent}>
             <div className={`${styles.loadingContainer} ${styles.loadingContainerDark}`}>
-              <div className={styles.loadingSpinner}></div>
-              <p className={`${styles.loadingText} ${styles.loadingTextDark}`}>
-                Loading your template...
-              </p>
+              <div className={styles.loadingSpinner} />
+              <p className={`${styles.loadingText} ${styles.loadingTextDark}`}>Loading...</p>
             </div>
           </div>
         </div>
@@ -110,7 +120,7 @@ function TemplateViewContent() {
           <div className={`${styles.resultContainer} ${styles.resultContainerDark}`}>
             <div className={styles.resultHeader}>
               <h2 className={`${styles.resultTitle} ${styles.resultTitleDark}`}>
-                {templateData.title || 'My Template'}
+                {templateData.title || `Template #${templateData.id}`}
               </h2>
               <div className={styles.templateMeta}>
                 <span className={`${styles.metaTag} ${styles.metaTagDark}`}>
@@ -123,53 +133,36 @@ function TemplateViewContent() {
                   {templateData.duration}
                 </span>
               </div>
-            </div>
-
-            <div className={styles.imageSection}>
-              <h3 className={`${styles.sectionTitle} ${styles.sectionTitleDark}`}>
-                Generated Reference Image
-              </h3>
-              {templateData.image_url && (
-                <div className={styles.imageContainer}>
-                  <Image
-                    src={templateData.image_url}
-                    alt="Generated template reference"
-                    width={800}
-                    height={800}
-                    className={styles.resultImage}
-                    priority
-                  />
-                  <button
-                    onClick={handleDownloadImage}
-                    className={`${styles.downloadButton} ${styles.downloadButtonDark}`}
-                  >
-                    📥 Download Image
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.descriptionSection}>
-              <h3 className={`${styles.sectionTitle} ${styles.sectionTitleDark}`}>
-                Your Vision
-              </h3>
               <p className={`${styles.descriptionText} ${styles.descriptionTextDark}`}>
                 {templateData.source}
               </p>
             </div>
 
+            <div className={styles.imageSection}>
+              {templateData.image_url && (
+                <div className={styles.imageContainer}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={templateData.image_url}
+                    alt="Generated template reference"
+                    className={styles.resultImage}
+                  />
+                </div>
+              )}
+            </div>
+
             <div className={styles.actionButtons}>
+              <button
+                onClick={handleDownloadImage}
+                className={`${styles.downloadButton} ${styles.downloadButtonDark}`}
+              >
+                Download Image <span className={styles.downloadIcon}>📥</span>
+              </button>
               <button
                 onClick={handleCreateNew}
                 className={`${styles.primaryButton} ${styles.primaryButtonDark}`}
               >
-                Create Another Template
-              </button>
-              <button
-                onClick={() => router.push('/')}
-                className={`${styles.secondaryButton} ${styles.secondaryButtonDark}`}
-              >
-                Back to Home
+                New Template
               </button>
             </div>
           </div>
@@ -179,22 +172,22 @@ function TemplateViewContent() {
   );
 }
 
-export default function TemplateViewPage() {
-  return (
-    <Suspense fallback={
-      <div className={styles.container}>
-        <div className={`${styles.templateForm} ${styles.templateFormDark}`}>
-          <div className={styles.templateFormContent}>
-            <div className={`${styles.loadingContainer} ${styles.loadingContainerDark}`}>
-              <div className={styles.loadingSpinner}></div>
-              <p className={`${styles.loadingText} ${styles.loadingTextDark}`}>
-                Loading...
-              </p>
-            </div>
-          </div>
+const loadingFallback = (
+  <div className={styles.container}>
+    <div className={`${styles.templateForm} ${styles.templateFormDark}`}>
+      <div className={styles.templateFormContent}>
+        <div className={`${styles.loadingContainer} ${styles.loadingContainerDark}`}>
+          <div className={styles.loadingSpinner} />
+          <p className={`${styles.loadingText} ${styles.loadingTextDark}`}>Loading...</p>
         </div>
       </div>
-    }>
+    </div>
+  </div>
+);
+
+export default function TemplateViewPage() {
+  return (
+    <Suspense fallback={loadingFallback}>
       <TemplateViewContent />
     </Suspense>
   );

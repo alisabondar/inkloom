@@ -2,8 +2,9 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 2rem;
-  font-family: var(--font-geist-sans), var(--font-geist-mono), sans-serif;
+  padding: 2rem 2rem 2rem 2rem;
+  font-family: 'Story Script', cursive;
+  box-sizing: border-box;
 }
 
 .profileContent {
@@ -13,6 +14,7 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  padding-bottom: 2rem;
 }
 
 .headerSection {
@@ -21,7 +23,7 @@
 }
 
 .pageTitle {
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: white;
   margin: 0 0 0.5rem 0;
@@ -32,7 +34,7 @@
 }
 
 .pageSubtitle {
-  font-size: 1.1rem;
+  font-size: 1.75rem;
   color: rgba(255, 255, 255, 0.8);
   margin: 0;
 }
@@ -90,7 +92,7 @@
 }
 
 .cardTitle {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
   color: white;
   margin: 0;
@@ -98,7 +100,7 @@
 
 .savingIndicator {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
+  font-size: 1.75rem;
   font-weight: 400;
 }
 
@@ -134,7 +136,7 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  font-size: 0.85rem;
+  font-size: 1.75rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -152,7 +154,7 @@
 }
 
 .label {
-  font-size: 1.1rem;
+  font-size: 1.75rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.95);
   min-width: 140px;
@@ -166,7 +168,7 @@
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   color: white;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   transition: all 0.2s ease;
   flex: 1;
   cursor: text;
@@ -242,7 +244,7 @@
 
 .value {
   color: white;
-  font-size: 1rem;
+  font-size: 1.75rem;
   padding: 0.75rem 0;
   flex: 1;
 }
@@ -259,7 +261,7 @@
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 1.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -283,7 +285,7 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 1.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -312,14 +314,14 @@
 }
 
 .preferenceTitle {
-  font-size: 1rem;
+  font-size: 1.75rem;
   font-weight: 600;
   color: white;
   margin: 0 0 0.25rem 0;
 }
 
 .preferenceDescription {
-  font-size: 0.85rem;
+  font-size: 1.75rem;
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
 }
@@ -377,7 +379,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 1.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -401,7 +403,7 @@
   border: 1px solid rgba(239, 68, 68, 0.3);
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 1.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -416,15 +418,19 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 1rem;
+    padding: 1rem 1rem 1rem 1rem;
+  }
+
+  .profileContent {
+    padding-bottom: 1rem;
   }
 
   .pageTitle {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .pageSubtitle {
-    font-size: 1rem;
+    font-size: 1.75rem;
   }
 
   .settingsCard {
@@ -437,7 +443,7 @@
   }
 
   .cardTitle {
-    font-size: 1.25rem;
+    font-size: 1.75rem;
   }
 
   .buttonGroup {
