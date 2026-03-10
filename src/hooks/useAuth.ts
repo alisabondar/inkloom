@@ -19,7 +19,7 @@ export const useAuth = () => {
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
-      } catch (e) {
+      } catch {
         localStorage.removeItem('user');
       }
     }

@@ -54,7 +54,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
-    const { password: _, ...userWithoutPassword } = user;
+    const userWithoutPassword = Object.fromEntries(
+      Object.entries(user).filter(([key]) => key !== 'password')
+    );
     return NextResponse.json({
       success: true,
       user: userWithoutPassword

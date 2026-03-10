@@ -9,7 +9,7 @@ import styles from "./Header.module.css";
 
 export const Header = () => {
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const getTitle = () => {
