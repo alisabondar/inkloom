@@ -25,11 +25,22 @@ function TemplateViewContent() {
         const parsed = JSON.parse(cached) as Template;
         setTemplateData(parsed);
         sessionStorage.removeItem(`template-${id}`);
+
+        // If the cached image is already a Supabase signed URL, we can render immediately.
+        // Otherwise, fall through to `/api/get-template` to ensure the image is signed.
+        const img = parsed.image_url;
+        const looksLikeSignedSupabaseUrl =
+          typeof img === 'string' &&
+          img.includes('/storage/v1/object/sign/') &&
+          img.includes('/templates/');
+
+        if (looksLikeSignedSupabaseUrl) {
+          setIsLoading(false);
+          return;
+        }
       } catch {
         // Fall through to fetch
       }
-      setIsLoading(false);
-      return;
     }
 
     const fetchTemplate = async () => {
