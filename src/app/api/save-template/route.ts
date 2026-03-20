@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, Template, TemplateInsert } from '@/lib/supabase';
 import { DEFAULT_USER_ID } from '@/constants';
+import { ensureTemplateImageSignedUrl } from '@/lib/storage';
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,9 +45,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to save template to database' }, { status: 500 });
     }
 
+    const templateWithSignedUrl = await ensureTemplateImageSignedUrl(data as Template);
+
     return NextResponse.json({
       success: true,
-      template: data
+      template: templateWithSignedUrl
     }, { status: 201 });
 
   } catch (error) {

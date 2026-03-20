@@ -8,6 +8,16 @@
   z-index: 10;
 }
 
+.headerOverlay {
+  /* Keep layout elements but remove the visible "header bar" chrome */
+  background-color: transparent;
+  border-bottom: none;
+  backdrop-filter: none;
+  padding: 1.5rem 2rem;
+  position: relative;
+  z-index: 10;
+}
+
 .headerContent {
   max-width: 1200px;
   margin: 0 auto;

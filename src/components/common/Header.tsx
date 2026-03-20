@@ -12,6 +12,8 @@ export const Header = () => {
   const { user } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
+  const isTemplateView = pathname?.includes('template-view');
+
   const getTitle = () => {
     if (pathname === "/" || pathname === "") return "Inkloom";
     if (pathname.includes("create-template")) return "Create Template";
@@ -34,7 +36,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className={`${styles.header} ${styles.headerDark}`}>
+      <header className={isTemplateView ? styles.headerOverlay : `${styles.header} ${styles.headerDark}`}>
         <div className={styles.headerContent}>
           <h1 className={`${styles.headerTitle} ${styles.headerTitleDark}`}>
             {title}
