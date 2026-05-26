@@ -1,66 +1,124 @@
 .container {
-  padding: 2rem;
-  max-width: 1400px;
+  width: min(100%, 1320px);
   margin: 0 auto;
-  text-align: left;
+  padding: 2rem;
+  animation: pageEnter 420ms var(--inkloom-ease) both;
+}
+
+.galleryHeader {
+  width: 100%;
+  max-width: none;
+  margin-bottom: 1.4rem;
+}
+
+.kicker {
+  color: var(--inkloom-teal);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  margin: 0 0 0.45rem;
+  text-transform: uppercase;
+}
+
+.title {
+  color: #050505;
+  font-family: var(--display-font);
+  font-size: 2.7rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
 }
 
 .subtitle {
-  font-family: 'Story Script', cursive;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 2rem 0;
-  font-size: 1.75rem;
-  text-align: left;
+  color: #050505;
+  margin: 0.65rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  max-width: none;
 }
 
 .galleryLoading {
+  min-height: 54vh;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0;
+  text-align: center;
 }
 
 .loadingSpinner {
-  width: 2rem;
-  height: 2rem;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  width: 3.2rem;
+  height: 3.2rem;
+  aspect-ratio: 1;
+  background-color: rgb(18, 119, 111);
+  filter: drop-shadow(0 10px 18px rgba(31, 138, 125, 0.16));
+  animation: splatSpin 1.4s linear infinite;
+  -webkit-mask-image: url("/paint-splat-mask.png?v=2");
+  mask-image: url("/paint-splat-mask.png?v=2");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 .loadingText {
   margin: 0;
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-family: 'Story Script', cursive;
+  font-size: 0.92rem;
+  font-weight: 750;
+  color: rgba(23, 32, 51, 0.72);
 }
 
-@keyframes spin {
+@keyframes splatSpin {
   to {
     transform: rotate(360deg);
   }
 }
 
 .examplesSection {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
+}
+
+.galleryNotice {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 0.9rem;
+  border-radius: 16px 8px 16px 9px;
+  background: rgba(255, 177, 153, 0.22);
+  color: #7a3d2a;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  padding: 0.45rem 0.7rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .examplesGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 1.1rem;
 }
 
 .exampleCard {
-  border-radius: 12px;
+  border: 0;
+  border-radius: 23px 12px 26px 14px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   opacity: 0;
-  animation: fadeIn 0.8s ease-out forwards;
+  animation: fadeIn 0.5s var(--inkloom-ease) forwards;
   aspect-ratio: 1;
   position: relative;
+  transition: transform 0.28s var(--inkloom-ease), box-shadow 0.28s var(--inkloom-ease), filter 0.28s var(--inkloom-ease);
+}
+
+a.exampleCard:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 24px 68px rgba(0, 0, 0, 0.34), 0 0 0 1px rgba(119, 215, 200, 0.24);
+  filter: saturate(1.05);
 }
 
 .exampleCard:nth-child(1) {
@@ -68,11 +126,11 @@
 }
 
 .exampleCard:nth-child(2) {
-  animation-delay: 0.5s;
+  animation-delay: 0.08s;
 }
 
 .exampleCard:nth-child(3) {
-  animation-delay: 1s;
+  animation-delay: 0.16s;
 }
 
 .exampleCard img,
@@ -83,6 +141,33 @@
   object-fit: cover;
   position: absolute;
   inset: 0;
+  transition: transform 0.36s var(--inkloom-ease);
+}
+
+a.exampleCard:hover img,
+a.exampleCard:hover .exampleCardImage {
+  transform: scale(1.035);
+}
+
+.templateOverlay {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 1;
+  padding: 2rem 0.75rem 0.75rem;
+  background: linear-gradient(180deg, transparent, rgba(7, 12, 23, 0.74));
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1.25;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.28s var(--inkloom-ease), transform 0.28s var(--inkloom-ease);
+}
+
+a.exampleCard:hover .templateOverlay,
+a.exampleCard:focus-visible .templateOverlay {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .exampleCardPlaceholder {
@@ -91,8 +176,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1rem;
+  color: rgba(23, 32, 51, 0.64);
+  font-size: 0.92rem;
+  line-height: 1.35;
   text-align: center;
   padding: 1rem;
 }
@@ -100,20 +186,36 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1180px) {
   .examplesGrid {
-    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    grid-template-columns: repeat(3, minmax(190px, 1fr));
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: 820px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 2.15rem;
+  }
+
   .examplesGrid {
-    grid-template-columns: minmax(260px, 1fr);
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .examplesGrid {
+    grid-template-columns: 1fr;
   }
 }

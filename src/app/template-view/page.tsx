@@ -67,20 +67,40 @@ function TemplateViewContent() {
     router.push('/create-template');
   };
 
-  const handleDownloadImage = () => {
+  const handleDownloadImage = async () => {
     if (templateData?.image_url) {
       const currentDate = new Date().toISOString().split('T')[0];
       const templateName = (templateData.title || `Template-${templateData.id}`)
         .replace(/\s+/g, '-')
         .replace(/[^a-zA-Z0-9-]/g, '');
+      const fileName = `${currentDate}-${templateName}-reference.png`;
 
-      const link = document.createElement('a');
-      link.href = templateData.image_url;
-      link.download = `${currentDate}-${templateName}-reference.png`;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      try {
+        const response = await fetch(templateData.image_url);
+
+        if (!response.ok) {
+          throw new Error('Image download failed');
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Download image error:', error);
+        const link = document.createElement('a');
+        link.href = templateData.image_url;
+        link.download = fileName;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     }
   };
 
@@ -167,7 +187,7 @@ function TemplateViewContent() {
                 onClick={handleDownloadImage}
                 className={`${styles.downloadButton} ${styles.downloadButtonDark}`}
               >
-                Download Image <span className={styles.downloadIcon}>📥</span>
+                Download PNG
               </button>
               <button
                 onClick={handleCreateNew}
