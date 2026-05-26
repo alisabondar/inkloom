@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await client
       .from('user')
-      .select('id, email, first_name, username, favorite_medium')
+      .select('id, email, first_name, username, favorite_medium, avatar_url')
       .eq('id', userId)
       .single();
 
@@ -34,9 +34,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to retrieve user data' }, { status: 500 });
     }
 
+    let user = data;
+
+    if (data.avatar_url) {
+      const { data: signedAvatar } = await client.storage
+        .from('avatars')
+        .createSignedUrl(data.avatar_url, 60 * 60);
+
+      user = {
+        ...data,
+        avatar_url: signedAvatar?.signedUrl || data.avatar_url
+      };
+    }
+
     return NextResponse.json({
       success: true,
-      user: data
+      user
     });
 
   } catch (error) {
@@ -47,4 +60,3 @@ export async function GET(req: NextRequest) {
     }, { status: 500 });
   }
 }
-
