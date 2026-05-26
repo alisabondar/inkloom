@@ -1,7 +1,7 @@
 .footer {
-  background-color: #ffffff;
-  border-top: 1px solid #e5e7eb;
-  padding: 1rem 2rem;
+  background: linear-gradient(0deg, rgba(7, 12, 23, 0.58), rgba(7, 12, 23, 0.2));
+  border-top: 0;
+  padding: 0.7rem 2rem;
   margin-top: auto;
   position: relative;
   z-index: 1;
@@ -9,9 +9,9 @@
 }
 
 .footerDark {
-  background-color: rgba(31, 41, 55, 0.8);
+  background-color: transparent;
   backdrop-filter: blur(10px);
-  border-top-color: rgba(255, 255, 255, 0.2);
+  border-top-color: transparent;
 }
 
 .footerContent {
@@ -21,8 +21,8 @@
 }
 
 .footerText {
-  color: #6b7280;
-  font-size: 0.875rem;
+  color: rgba(235, 241, 255, 0.62);
+  font-size: 0.72rem;
   margin: 0;
 }
 

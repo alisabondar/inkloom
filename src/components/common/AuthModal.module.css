@@ -1,11 +1,11 @@
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(119, 215, 200, 0.16), transparent 30%),
+    radial-gradient(circle at 82% 20%, rgba(244, 128, 183, 0.12), transparent 34%),
+    rgba(247, 244, 238, 0.62);
+  backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,146 +14,165 @@
 }
 
 .modal {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(10px);
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 2rem;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(119, 215, 200, 0.18), transparent 34%),
+    radial-gradient(circle at 92% 18%, rgba(244, 128, 183, 0.12), transparent 34%),
+    rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 24px 70px rgba(54, 72, 92, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  padding: 1.35rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 430px;
   position: relative;
-  color: black;
+  color: #172033;
+  animation: modalEnter 260ms var(--inkloom-ease) both;
 }
 
 .closeButton {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: transparent;
-  border: none;
-  color: black;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(23, 32, 51, 0.08);
+  color: rgba(23, 32, 51, 0.72);
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.5rem;
-  transition: background 0.2s ease;
+  border-radius: 12px;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .closeButton:hover {
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.76);
+  color: #172033;
+  transform: translateY(-1px);
 }
 
 .title {
-  font-size: 2.25rem;
-  font-weight: 700;
-  margin: 0 0 1.5rem 0;
+  color: var(--inkloom-teal);
+  font-family: var(--display-font);
+  font-size: 2.1rem;
+  font-weight: 750;
+  line-height: 1.05;
+  margin: 0 2.5rem 1.25rem;
   text-align: center;
-  color: black;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.9rem;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .label {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: black;
+  color: rgba(23, 32, 51, 0.82);
+  font-size: 0.78rem;
+  font-weight: 750;
 }
 
 .input {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  color: black;
-  font-size: 0.8rem;
-  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(23, 32, 51, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.64);
+  color: #172033;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  min-height: 2.55rem;
+  padding: 0.65rem 0.75rem;
+  transition: border-color 0.22s var(--inkloom-ease), background 0.22s var(--inkloom-ease), box-shadow 0.22s var(--inkloom-ease);
 }
 
 .input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.7);
-  border-color: rgba(0, 0, 0, 0.3);
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(31, 138, 125, 0.46);
+  box-shadow: 0 0 0 3px rgba(119, 215, 200, 0.2);
 }
 
 .input::placeholder {
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(23, 32, 51, 0.42);
 }
 
 .error {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #b91c1c;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
+  background: rgba(254, 226, 226, 0.78);
+  border: 0;
+  color: #991b1b;
+  padding: 0.65rem 0.75rem;
+  border-radius: 14px;
   font-size: 0.8rem;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.4;
   text-align: center;
 }
 
 .infoMessage {
-  background: rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.4);
-  color: #1d4ed8;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
+  background: rgba(119, 215, 200, 0.2);
+  border: 0;
+  color: #195a52;
+  padding: 0.65rem 0.75rem;
+  border-radius: 14px;
   font-size: 0.8rem;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.4;
   text-align: center;
 }
 
 .submitButton {
-  background: white;
-  color: #667eea;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1.125rem;
-  font-weight: 600;
+  width: 100%;
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(119, 215, 200, 0.68), rgba(146, 236, 221, 0.42));
+  color: #073f3b;
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 0.5rem;
+  font-family: var(--display-font);
+  font-size: 1.02rem;
+  font-weight: 800;
+  line-height: 1;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 32px rgba(31, 138, 125, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.68);
+  transition: transform 0.2s var(--inkloom-ease), box-shadow 0.2s var(--inkloom-ease), opacity 0.2s var(--inkloom-ease), filter 0.2s var(--inkloom-ease);
+  margin-top: 0.25rem;
 }
 
 .submitButton:hover:not(:disabled) {
-  background: #f3f4f6;
+  filter: saturate(1.08);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 16px 38px rgba(31, 138, 125, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
 .submitButton:disabled {
-  opacity: 0.6;
+  opacity: 0.58;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .switch {
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 0.35rem;
   font-size: 0.8rem;
-  color: black;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: rgba(23, 32, 51, 0.66);
 }
 
 .switchButton {
   background: transparent;
   border: none;
-  color: black;
-  font-weight: 600;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--inkloom-teal);
+  font-weight: 800;
   cursor: pointer;
-  text-decoration: underline;
   padding: 0;
   margin-left: 0.25rem;
   transition: opacity 0.2s ease;
@@ -163,3 +182,23 @@
   opacity: 0.8;
 }
 
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .modal {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.85rem;
+  }
+}

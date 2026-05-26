@@ -9,22 +9,19 @@ export default function HomePage() {
       <main className={styles.main}>
         <div className={styles.heroSection}>
           <div className={styles.heroContent}>
+            <p className={styles.kicker}>AI template studio for artists</p>
             <h1 className={styles.heroTitle}>
-              Create Beautiful Templates
+              Inkloom
             </h1>
-            <p className={`${styles.heroSubtitle} beauFont`}>
-              Design and customize stunning templates for your creative projects
+            <p className={styles.heroSubtitle}>
+              Turn a creative idea into a clean reference template, then bring it into color without needing a hand sketch.
             </p>
             <div className={styles.homeButtons}>
-              <Link href="/create-template">
-                <button className={styles.templateButton}>
-                  Create New Template
-                </button>
+              <Link href="/create-template" className={styles.templateButton}>
+                Create Template
               </Link>
-              <Link href="/gallery">
-                <button className={`${styles.templateButton} ${styles.templateButtonSecondary}`}>
-                  Gallery
-                </button>
+              <Link href="/gallery" className={`${styles.templateButton} ${styles.templateButtonSecondary}`}>
+                View Gallery
               </Link>
             </div>
           </div>

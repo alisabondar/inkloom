@@ -1,9 +1,9 @@
 .header,
 .headerDark {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid var(--header-border-color);
-  padding: 1.5rem 2rem;
-  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.34));
+  border-bottom: 0;
+  padding: 0.75rem 2rem;
+  backdrop-filter: blur(18px);
   position: relative;
   z-index: 10;
 }
@@ -13,14 +13,19 @@
   background-color: transparent;
   border-bottom: none;
   backdrop-filter: none;
-  padding: 1.5rem 2rem;
-  position: relative;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
 }
 
 .headerContent {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -33,17 +38,17 @@
 }
 
 .headerTitle {
-  font-size: 2.25rem;
+  font-size: 1.45rem;
   font-weight: 700;
-  color: var(--header-text-color);
+  color: rgb(18, 119, 111);
   font-family: var(--header-font-family);
-  line-height: 1;
+  line-height: 1.05;
   margin: 0;
   padding: 0;
 }
 
 .headerTitleDark {
-  color: var(--header-text-color);
+  color: rgb(18, 119, 111);
 }
 
 .avatarLink {
@@ -51,28 +56,46 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  transition: var(--transition-opacity);
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 .avatarLink:hover {
-  opacity: var(--hover-opacity);
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.54);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--header-text-color);
+  color: rgb(18, 119, 111);
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: background-color 0.22s var(--inkloom-ease), transform 0.22s var(--inkloom-ease);
+  border: 0;
+  box-shadow: inset 0 0 0 1px rgba(31, 138, 125, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 10px 28px rgba(54, 72, 92, 0.14);
 }
 
 .avatar:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(119, 215, 200, 0.28);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 720px) {
+  .header,
+  .headerDark {
+    padding: 0.65rem 1rem;
+  }
+
+  .headerTitle {
+    font-size: 1.45rem;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+  }
 }
