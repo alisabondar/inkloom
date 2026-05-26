@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useSyncExternalStore } from 'react';
 
 interface User {
   id: string;
@@ -8,23 +8,70 @@ interface User {
   first_name: string | null;
   username: string | null;
   favorite_medium: string | null;
+  avatar_url?: string | null;
+}
+
+const AUTH_STORAGE_KEY = 'user';
+const AUTH_STORAGE_EVENT = 'inkloom-auth-storage';
+
+let cachedStoredUserValue: string | null | undefined;
+let cachedStoredUser: User | null = null;
+
+function getStoredUser() {
+  if (typeof window === 'undefined') return null;
+
+  const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
+  if (storedUser === cachedStoredUserValue) return cachedStoredUser;
+
+  cachedStoredUserValue = storedUser;
+  if (!storedUser) {
+    cachedStoredUser = null;
+    return null;
+  }
+
+  try {
+    cachedStoredUser = JSON.parse(storedUser) as User;
+    return cachedStoredUser;
+  } catch {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    cachedStoredUserValue = null;
+    cachedStoredUser = null;
+    return null;
+  }
+}
+
+function subscribeToAuthStore(callback: () => void) {
+  window.addEventListener('storage', callback);
+  window.addEventListener(AUTH_STORAGE_EVENT, callback);
+
+  return () => {
+    window.removeEventListener('storage', callback);
+    window.removeEventListener(AUTH_STORAGE_EVENT, callback);
+  };
+}
+
+function emitAuthStoreChange() {
+  window.dispatchEvent(new Event(AUTH_STORAGE_EVENT));
+}
+
+function storeUser(user: User) {
+  const serializedUser = JSON.stringify(user);
+  cachedStoredUserValue = serializedUser;
+  cachedStoredUser = user;
+  localStorage.setItem(AUTH_STORAGE_KEY, serializedUser);
+  emitAuthStoreChange();
+}
+
+function clearStoredUser() {
+  cachedStoredUserValue = null;
+  cachedStoredUser = null;
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+  emitAuthStoreChange();
 }
 
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        localStorage.removeItem('user');
-      }
-    }
-    setLoading(false);
-  }, []);
+  const user = useSyncExternalStore(subscribeToAuthStore, getStoredUser, () => null);
+  const loading = false;
 
   const signIn = async (emailOrUsername: string, password: string) => {
     try {
@@ -44,8 +91,7 @@ export const useAuth = () => {
       }
 
       if (result.success && result.user) {
-        setUser(result.user);
-        localStorage.setItem('user', JSON.stringify(result.user));
+        storeUser(result.user);
         return { data: { user: result.user }, error: null };
       }
 
@@ -79,8 +125,7 @@ export const useAuth = () => {
       }
 
       if (result.success && result.user) {
-        setUser(result.user);
-        localStorage.setItem('user', JSON.stringify(result.user));
+        storeUser(result.user);
         return { data: { user: result.user }, error: null };
       }
 
@@ -97,8 +142,7 @@ export const useAuth = () => {
   };
 
   const signOut = async () => {
-    setUser(null);
-    localStorage.removeItem('user');
+    clearStoredUser();
   };
 
   return {
