@@ -3,10 +3,12 @@ import { supabaseAdmin, Template, TemplateInsert } from '@/lib/supabase';
 import { DEFAULT_USER_ID } from '@/constants';
 import { ensureTemplateImageSignedUrl } from '@/lib/storage';
 
+const isNumericId = (value: string) => /^\d+$/.test(value);
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, medium, difficulty, duration, generated_image_id, image_url, source, public: isPublic } = body;
+    const { title, medium, difficulty, duration, generated_image_id, image_url, source, public: isPublic, user_id } = body;
 
     if (!image_url || typeof image_url !== 'string') {
       return NextResponse.json(
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
       generated_image_id,
       image_url,
       source,
-      user_id: DEFAULT_USER_ID,
+      user_id: typeof user_id === 'string' && isNumericId(user_id) ? user_id : DEFAULT_USER_ID,
       public: isPublic === true
     };
 
@@ -60,4 +62,3 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
   }
 }
-
