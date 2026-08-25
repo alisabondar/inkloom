@@ -31,13 +31,18 @@ export async function POST(req: NextRequest) {
       complexity += " and refined details";
     }
 
+    const textRequestedInVision = /\b(words?|text|lettering|letters?|typography|quote|caption|label|sign|banner|says?|spell(?:s|ed|ing)?|write|written)\b/i.test(description || '');
+    const textInstruction = textRequestedInVision
+      ? 'Only include readable words, letters, signs, labels, or typography if they are explicitly requested in the Vision description, and keep any requested wording faithful to that description.'
+      : 'Do not include any readable words, letters, numbers, labels, signatures, watermarks, captions, signs, typography, or pseudo-text anywhere in the image.';
+
     const imagePrompt = `Create a black and white line sketch reference for an art template: ${title || 'My Template'}.
     Medium: ${workMedium},
     Difficulty: ${workDifficulty || 'intermediate'} (${lineDetail}, ${lineCount}),
     Duration: ${workDuration || '2-3 hours'}.
     Vision: ${description}.
 
-    Generate a black and white line drawing sketch using only black lines on white background. The sketch should be ${complexity}. Use ${lineCount} with ${lineDetail} to create a clear, inspiring reference that shows the artistic concept, composition, and style. No shading, no color, no fills - only clean black lines defining the form and structure that artists can use as guidance for this template.`;
+    Generate a black and white line drawing sketch using only black lines on white background. The sketch should be ${complexity}. Use ${lineCount} with ${lineDetail} to create a clear, inspiring reference that shows the artistic concept, composition, and style. ${textInstruction} No shading, no color, no fills - only clean black lines defining the form and structure that artists can use as guidance for this template.`;
 
     const pixazoKey = process.env.PIXAZO_API_KEY;
     const requestUrl = process.env.PIXAZO_FLUX_SCHNELL_REQUEST_URL || 'https://gateway.pixazo.ai/flux-1-schnell/v1/getData';
@@ -173,4 +178,3 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
   }
 }
-
