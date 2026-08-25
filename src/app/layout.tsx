@@ -7,6 +7,11 @@ import '@/styles/globals.css';
 export const metadata: Metadata = {
   title: 'Inkloom',
   description: 'Art template creation platform',
+  icons: {
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({
