@@ -36,3 +36,22 @@ Previous README audit: AUDIT-README.md
 31. S0.9.2: "Requests over the limit get a 429 response with a `Retry-After` header."
 32. S0.10.1: "Unit tests cover session resolution (401 without a session) and the rate limiter."
 33. S0.10.2: "`npm run lint`, `npx tsc --noEmit`, and `npm test -- --run` pass."
+
+## Round 1 (2026-10-20, fresh auditor subagent)
+Result: 33 MET, 0 PARTIAL, 0 MISSING. New items: 0.
+
+Commands: `npm run lint` clean; `npx tsc --noEmit` exit 0; `npm test -- --run` 20/20 pass (session 4, user-routes-auth 9, rate-limit 3, Header 4).
+
+Evidence highlights: session cookies `src/lib/auth/session.ts:11-22`, verify/refresh `:37-59`; 401 guard `:76-108`; Auth signup/signin `signup/route.ts:42`, `signin/route.ts:36`; change-password `change-password/route.ts:30-39`; delete-account `delete-account/route.ts:18-50`; useAuth server session `src/hooks/useAuth.ts:30-42`; RLS `supabase/migrations/0002_enable_rls.sql`; account migration `scripts/migrate-users-to-auth.mjs`; rate limit 429 `generate-template/route.ts:12-16`.
+
+### Findings
+None.
+
+### Out-of-scope
+- Migration script reads the legacy plaintext `password` column (one-off migration, not runtime)
+- Extra `user_delete_own` RLS policy beyond read/update
+- `check-user` returns email for a username lookup (account enumeration)
+- Rate limiter is in-memory per server instance
+
+## Outcome
+Done after Round 1: zero PARTIAL/MISSING. Scope-creep breaker did not fire.
