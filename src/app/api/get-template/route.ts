@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin, Template } from '@/lib/supabase';
+import { Template } from '@/lib/supabase';
+import { getOptionalSessionClient } from '@/lib/auth/session';
 import { ensureTemplateImageSignedUrl } from '@/lib/storage';
 
 export async function GET(req: NextRequest) {
@@ -11,14 +12,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Template ID is required' }, { status: 400 });
     }
 
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: 'SUPABASE_SERVICE_ROLE_KEY is not configured' },
-        { status: 500 }
-      );
-    }
+    const { db, respond } = await getOptionalSessionClient(req);
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await db
       .from('template')
       .select('*')
       .eq('id', id)
@@ -33,10 +29,10 @@ export async function GET(req: NextRequest) {
 
     const template = await ensureTemplateImageSignedUrl({ ...data });
 
-    return NextResponse.json({
+    return respond(NextResponse.json({
       success: true,
       template
-    });
+    }));
 
   } catch (error) {
     console.error('Get template error:', error);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin, Template } from '@/lib/supabase';
+import { Template } from '@/lib/supabase';
+import { getOptionalSessionClient } from '@/lib/auth/session';
 import { ensureTemplateImageSignedUrl } from '@/lib/storage';
 
 export async function GET(req: NextRequest) {
@@ -8,14 +9,9 @@ export async function GET(req: NextRequest) {
     const limit = searchParams.get('limit') || '50';
     const offset = searchParams.get('offset') || '0';
 
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: 'SUPABASE_SERVICE_ROLE_KEY is not configured' },
-        { status: 500 }
-      );
-    }
+    const { db, respond } = await getOptionalSessionClient(req);
 
-    const { data: templates, error } = await supabaseAdmin
+    const { data: templates, error } = await db
       .from('template')
       .select('*')
       .eq('public', true)
@@ -33,10 +29,10 @@ export async function GET(req: NextRequest) {
       (templates || []).map((t) => ensureTemplateImageSignedUrl(t as Template))
     );
 
-    return NextResponse.json({
+    return respond(NextResponse.json({
       success: true,
       templates: templatesWithSignedUrls,
-    });
+    }));
   } catch (error) {
     return NextResponse.json({
       error: 'Failed to retrieve public templates',

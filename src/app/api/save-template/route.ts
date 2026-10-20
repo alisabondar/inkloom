@@ -1,26 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin, Template, TemplateInsert } from '@/lib/supabase';
-import { DEFAULT_USER_ID } from '@/constants';
+import { Template, TemplateInsert } from '@/lib/supabase';
 import { ensureTemplateImageSignedUrl } from '@/lib/storage';
-
-const isNumericId = (value: string) => /^\d+$/.test(value);
+import { requireProfile } from '@/lib/auth/session';
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireProfile(req);
+    if (auth instanceof NextResponse) return auth;
+
     const body = await req.json();
-    const { title, medium, difficulty, duration, generated_image_id, image_url, source, public: isPublic, user_id } = body;
+    const { title, medium, difficulty, duration, generated_image_id, image_url, source, public: isPublic } = body;
 
     if (!image_url || typeof image_url !== 'string') {
       return NextResponse.json(
         { error: 'image_url is required and must be a string' },
         { status: 400 }
-      );
-    }
-
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: 'SUPABASE_SERVICE_ROLE_KEY is not configured' },
-        { status: 500 }
       );
     }
 
@@ -32,11 +26,11 @@ export async function POST(req: NextRequest) {
       generated_image_id,
       image_url,
       source,
-      user_id: typeof user_id === 'string' && isNumericId(user_id) ? user_id : DEFAULT_USER_ID,
+      user_id: auth.profile.id,
       public: isPublic === true
     };
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await auth.db
       .from('template')
       .insert([newTemplate])
       .select()
@@ -49,10 +43,10 @@ export async function POST(req: NextRequest) {
 
     const templateWithSignedUrl = await ensureTemplateImageSignedUrl(data as Template);
 
-    return NextResponse.json({
+    return auth.respond(NextResponse.json({
       success: true,
       template: templateWithSignedUrl
-    }, { status: 201 });
+    }, { status: 201 }));
 
   } catch (error) {
     console.error('Save template error:', error);
