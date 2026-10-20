@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from 'react';
 
 interface User {
-  id: string;
+  id: string | number;
   email: string;
   first_name: string | null;
   username: string | null;
@@ -11,67 +11,62 @@ interface User {
   avatar_url?: string | null;
 }
 
-const AUTH_STORAGE_KEY = 'user';
-const AUTH_STORAGE_EVENT = 'inkloom-auth-storage';
+interface AuthState {
+  user: User | null;
+  loading: boolean;
+}
 
-let cachedStoredUserValue: string | null | undefined;
-let cachedStoredUser: User | null = null;
+// Identity comes from the server session (httpOnly cookies); this store only mirrors it for rendering.
+let authState: AuthState = { user: null, loading: true };
+let sessionRequest: Promise<void> | null = null;
+const listeners = new Set<() => void>();
+const SERVER_STATE: AuthState = { user: null, loading: true };
 
-function getStoredUser() {
-  if (typeof window === 'undefined') return null;
+function setAuthState(next: AuthState) {
+  authState = next;
+  listeners.forEach((listener) => listener());
+}
 
-  const storedUser = localStorage.getItem(AUTH_STORAGE_KEY);
-  if (storedUser === cachedStoredUserValue) return cachedStoredUser;
-
-  cachedStoredUserValue = storedUser;
-  if (!storedUser) {
-    cachedStoredUser = null;
-    return null;
+function loadSession() {
+  if (!sessionRequest) {
+    sessionRequest = fetch('/api/get-user')
+      .then(async (response) => {
+        const result = response.ok ? await response.json() : null;
+        setAuthState({ user: result?.success ? result.user : null, loading: false });
+      })
+      .catch(() => {
+        setAuthState({ user: null, loading: false });
+      });
   }
-
-  try {
-    cachedStoredUser = JSON.parse(storedUser) as User;
-    return cachedStoredUser;
-  } catch {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    cachedStoredUserValue = null;
-    cachedStoredUser = null;
-    return null;
-  }
+  return sessionRequest;
 }
 
 function subscribeToAuthStore(callback: () => void) {
-  window.addEventListener('storage', callback);
-  window.addEventListener(AUTH_STORAGE_EVENT, callback);
-
+  listeners.add(callback);
+  loadSession();
   return () => {
-    window.removeEventListener('storage', callback);
-    window.removeEventListener(AUTH_STORAGE_EVENT, callback);
+    listeners.delete(callback);
   };
 }
 
-function emitAuthStoreChange() {
-  window.dispatchEvent(new Event(AUTH_STORAGE_EVENT));
+function getAuthState() {
+  return authState;
+}
+
+function getServerAuthState() {
+  return SERVER_STATE;
 }
 
 function storeUser(user: User) {
-  const serializedUser = JSON.stringify(user);
-  cachedStoredUserValue = serializedUser;
-  cachedStoredUser = user;
-  localStorage.setItem(AUTH_STORAGE_KEY, serializedUser);
-  emitAuthStoreChange();
+  setAuthState({ user, loading: false });
 }
 
 function clearStoredUser() {
-  cachedStoredUserValue = null;
-  cachedStoredUser = null;
-  localStorage.removeItem(AUTH_STORAGE_KEY);
-  emitAuthStoreChange();
+  setAuthState({ user: null, loading: false });
 }
 
 export const useAuth = () => {
-  const user = useSyncExternalStore(subscribeToAuthStore, getStoredUser, () => null);
-  const loading = false;
+  const { user, loading } = useSyncExternalStore(subscribeToAuthStore, getAuthState, getServerAuthState);
 
   const signIn = async (emailOrUsername: string, password: string) => {
     try {
@@ -124,6 +119,13 @@ export const useAuth = () => {
         };
       }
 
+      if (result.success && result.needsConfirmation) {
+        return {
+          data: null,
+          error: { message: 'Check your email to confirm your account, then sign in.' },
+        };
+      }
+
       if (result.success && result.user) {
         storeUser(result.user);
         return { data: { user: result.user }, error: null };
@@ -142,7 +144,12 @@ export const useAuth = () => {
   };
 
   const signOut = async () => {
+    await fetch('/api/signout', { method: 'POST' }).catch(() => undefined);
     clearStoredUser();
+  };
+
+  const updateUser = (changes: Partial<User>) => {
+    if (authState.user) storeUser({ ...authState.user, ...changes });
   };
 
   return {
@@ -151,5 +158,6 @@ export const useAuth = () => {
     signIn,
     signUp,
     signOut,
+    updateUser,
   };
 };
