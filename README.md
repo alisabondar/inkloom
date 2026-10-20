@@ -99,6 +99,7 @@ Apply these in order:
    ```
 
 3. Apply `supabase/migrations/0002_enable_rls.sql` (enables Row Level Security and drops the old `password` column).
+4. Set `legacy_owner_email` at the top of `supabase/migrations/0003_template_user_id_uuid.sql`, then apply it (changes `template.user_id` to a uuid that references `user.id`; existing templates all carried a placeholder owner and are assigned to that email).
 
 Accounts whose old password was shorter than 6 characters are created without a password and need a password reset.
 

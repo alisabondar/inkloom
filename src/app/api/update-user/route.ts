@@ -23,14 +23,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Only fields present in the request are changed.
+    const changes: Record<string, string | null> = { email: nextEmail };
+    if (first_name !== undefined) changes.first_name = first_name;
+    if (username !== undefined) changes.username = username?.trim() || null;
+    if (favorite_medium !== undefined) changes.favorite_medium = favorite_medium || null;
+
     const { data, error } = await auth.db
       .from('user')
-      .update({
-        email: nextEmail,
-        first_name: first_name,
-        username: username?.trim() || null,
-        favorite_medium: favorite_medium || null,
-      })
+      .update(changes)
       .eq('id', auth.profile.id)
       .select(PROFILE_FIELDS)
       .single();

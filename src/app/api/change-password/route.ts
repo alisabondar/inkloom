@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthClient, supabaseAdmin } from '@/lib/supabase';
-import { requireUser } from '@/lib/auth/session';
+import { requireUser, setSessionCookies } from '@/lib/auth/session';
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,7 +45,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to change password' }, { status: 500 });
     }
 
-    return auth.respond(NextResponse.json({ success: true }));
+    // Changing the password ends existing sessions, so sign in again with the new password to keep this one.
+    const { data: newSession } = await createAuthClient().auth.signInWithPassword({
+      email: auth.authUser.email,
+      password: newPassword,
+    });
+
+    const res = NextResponse.json({ success: true });
+    return newSession.session ? setSessionCookies(res, newSession.session) : res;
   } catch (error) {
     console.error('Change password route error:', error);
     return NextResponse.json({
