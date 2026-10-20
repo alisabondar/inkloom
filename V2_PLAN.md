@@ -31,7 +31,7 @@
 - 0.5.3 Client pages no longer send user IDs to the API.
 
 ### Step 0.6 — Row Level Security
-- 0.6.1 A SQL migration in `supabase/migrations/` enables Row Level Security on the `user` and `template` tables.
+- 0.6.1 SQL migrations in `supabase/migrations/` enable Row Level Security on the `user` and `template` tables.
 - 0.6.2 The `user` table links to Supabase Auth through an `auth_id uuid` column.
 - 0.6.3 Policies let a user read and update only their own `user` row.
 - 0.6.4 Policies let a user read, insert, update, and delete only their own `template` rows.
@@ -40,7 +40,7 @@
 
 ### Step 0.7 — Migrate existing accounts
 - 0.7.1 A one-off script in `scripts/` creates a Supabase Auth user for each existing `user` row and sets its `auth_id`.
-- 0.7.2 The README documents the order: run the script, then apply the migration.
+- 0.7.2 The README documents the order: apply the migration that adds `auth_id`, run the script, then apply the Row Level Security migration.
 
 ### Step 0.8 — Service-role key scope
 - 0.8.1 Reads and writes of the `user` and `template` tables in user-scoped routes go through a client bound to the user's session, so RLS applies.
