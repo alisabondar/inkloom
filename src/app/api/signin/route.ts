@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAuthClient, createUserClient, supabaseAdmin, PROFILE_FIELDS } from '@/lib/supabase';
+import { setSessionCookies } from '@/lib/auth/session';
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,57 +11,47 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email/username and password are required' }, { status: 400 });
     }
 
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-    if (!serviceRoleKey || !supabaseUrl) {
+    if (!supabaseAdmin) {
       return NextResponse.json({
         error: 'Server configuration error'
       }, { status: 500 });
     }
 
-    const client = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
-
     const isEmail = emailOrUsername.includes('@');
+    let email = emailOrUsername;
 
-    let user;
-    if (isEmail) {
-      const { data, error } = await client
+    if (!isEmail) {
+      const { data } = await supabaseAdmin
         .from('user')
-        .select('*')
-        .eq('email', emailOrUsername)
-        .single();
-
-      if (error || !data) {
-        return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
-      }
-      user = data;
-    } else {
-      const { data, error } = await client
-        .from('user')
-        .select('*')
+        .select('email')
         .eq('username', emailOrUsername)
         .single();
 
-      if (error || !data) {
+      if (!data?.email) {
         return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
       }
-      user = data;
+      email = data.email;
     }
 
-    if (user.password !== password) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    const { data: authData, error: authError } = await createAuthClient().auth.signInWithPassword({ email, password });
+
+    if (authError || !authData.session) {
+      return NextResponse.json({
+        error: isEmail ? 'Invalid email or password' : 'Invalid username or password'
+      }, { status: 401 });
     }
 
-    const userWithoutPassword = Object.fromEntries(
-      Object.entries(user).filter(([key]) => key !== 'password')
-    );
-    return NextResponse.json({
-      success: true,
-      user: userWithoutPassword
-    });
+    const { data: profile, error: profileError } = await createUserClient(authData.session.access_token)
+      .from('user')
+      .select(PROFILE_FIELDS)
+      .eq('auth_id', authData.user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json({ error: 'Account profile not found' }, { status: 404 });
+    }
+
+    return setSessionCookies(NextResponse.json({ success: true, user: profile }), authData.session);
 
   } catch (error) {
     console.error('Signin error:', error);
@@ -70,4 +61,3 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
   }
 }
-

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAuthClient, supabaseAdmin, PROFILE_FIELDS } from '@/lib/supabase';
+import { setSessionCookies } from '@/lib/auth/session';
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,20 +11,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email, password, and first name are required' }, { status: 400 });
     }
 
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-    if (!serviceRoleKey || !supabaseUrl) {
+    if (!supabaseAdmin) {
       return NextResponse.json({
         error: 'Server configuration error'
       }, { status: 500 });
     }
 
-    const client = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
-
-    const { data: existingEmail } = await client
+    const { data: existingEmail } = await supabaseAdmin
       .from('user')
       .select('email')
       .eq('email', email)
@@ -34,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (username?.trim()) {
-      const { data: existingUsername } = await client
+      const { data: existingUsername } = await supabaseAdmin
         .from('user')
         .select('username')
         .eq('username', username.trim())
@@ -45,30 +39,36 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const { data, error } = await client
+    const { data: authData, error: authError } = await createAuthClient().auth.signUp({ email, password });
+
+    if (authError || !authData.user) {
+      return NextResponse.json({ error: authError?.message || 'Failed to create account' }, { status: 400 });
+    }
+
+    const { data: profile, error } = await supabaseAdmin
       .from('user')
       .insert({
+        auth_id: authData.user.id,
         email: email,
-        password: password,
         first_name: first_name,
         username: username?.trim() || null,
         favorite_medium: null,
       })
-      .select()
+      .select(PROFILE_FIELDS)
       .single();
 
     if (error) {
       console.error('Error creating user:', error);
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json({ error: 'Failed to create user', details: error.message }, { status: 500 });
     }
 
-    const userWithoutPassword = Object.fromEntries(
-      Object.entries(data).filter(([key]) => key !== 'password')
-    );
-    return NextResponse.json({
-      success: true,
-      user: userWithoutPassword
-    });
+    // With email confirmation enabled, Supabase returns no session until the email is confirmed.
+    if (!authData.session) {
+      return NextResponse.json({ success: true, user: profile, needsConfirmation: true });
+    }
+
+    return setSessionCookies(NextResponse.json({ success: true, user: profile }), authData.session);
 
   } catch (error) {
     console.error('Signup error:', error);
@@ -78,4 +78,3 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
   }
 }
-
