@@ -43,6 +43,12 @@ SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 PIXAZO_API_KEY=your-pixazo-api-key
 ```
 
+Optional: generations allowed per user per hour (default 10):
+
+```bash
+GENERATE_RATE_LIMIT_PER_HOUR=10
+```
+
 Optional Pixazo overrides:
 
 ```bash
@@ -77,6 +83,24 @@ The app currently uses:
 - `template` for saved generated templates
 - `templates` storage bucket for generated artwork files
 - `avatars` storage bucket for profile images
+
+Accounts and passwords are handled by Supabase Auth. The server keeps the session in httpOnly cookies, and each `user` row links to its Auth account through `auth_id`. Row Level Security limits each user to their own profile and templates; public templates can be read by anyone.
+
+### Migrating an existing database
+
+Apply these in order:
+
+1. Apply `supabase/migrations/0001_link_user_to_auth.sql` (adds `auth_id`).
+2. Run the account migration script, which creates a Supabase Auth user for each existing `user` row and sets its `auth_id`:
+
+   ```bash
+   node --env-file=.env.local scripts/migrate-users-to-auth.mjs --dry-run
+   node --env-file=.env.local scripts/migrate-users-to-auth.mjs
+   ```
+
+3. Apply `supabase/migrations/0002_enable_rls.sql` (enables Row Level Security and drops the old `password` column).
+
+Accounts whose old password was shorter than 6 characters are created without a password and need a password reset.
 
 ## Roadmap
 
