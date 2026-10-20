@@ -30,3 +30,21 @@ Scope: all README sections except "Roadmap" (labelled "ideas", not requirements)
 25. Supabase: "`template` for saved generated templates"
 26. Supabase: "`templates` storage bucket for generated artwork files"
 27. Supabase: "`avatars` storage bucket for profile images"
+
+## Round 1 (2026-10-20, fresh auditor subagent)
+Result: 26 MET, 1 PARTIAL, 0 MISSING. New items: 1.
+
+Evidence highlights: lint exit 0; `tsc --noEmit` exit 0; `npm test -- --run` 4/4 pass; generation in `src/app/api/generate-template/route.ts` (Pixazo flux-1-schnell, env overrides at :48/:81); visibility at `save-template/route.ts:36` + `get-public-templates/route.ts:19-21`; buckets `templates` (generate-template:147) and `avatars` (upload-avatar:74).
+
+### Findings
+- #23 PARTIAL — `npm run build` not verified: stalls at "Creating an optimized production build ..." with no error (>9 min auditor run; 275 s retry with telemetry disabled). No code error is emitted and lint/tsc pass; the stall is attributed to the Seatbelt sandbox, not the code. **Blocker (environmental):** verify by running `npm run build` outside the sandbox.
+
+### Out-of-scope
+- Hardcoded example images in gallery (`gallery/page.tsx:31-37`)
+- Unused deps `openai`, `react-router-dom`
+- Sign-in also accepts username
+- Vite CJS deprecation warning
+- README clone path says `unknown-proj`
+
+## Outcome
+Stopped after Round 1: no code findings remain; #23 is blocked on environment, not fixable by a code change. Scope-creep breaker did not fire.
