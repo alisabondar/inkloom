@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
 import styles from "./page.module.css";
 
 export default function CreateTemplatePage() {
   const router = useRouter();
-  const { user } = useAuth();
   const [selectedOption, setSelectedOption] = useState<string>('vision');
   const [visionDescription, setVisionDescription] = useState("");
   const [templateTitle, setTemplateTitle] = useState("");
@@ -80,8 +78,7 @@ export default function CreateTemplatePage() {
             generated_image_id: data.generated_image_id,
             image_url: data.image_url,
             source: visionDescription,
-            public: shareInGallery,
-            user_id: user?.id
+            public: shareInGallery
           }),
         });
 

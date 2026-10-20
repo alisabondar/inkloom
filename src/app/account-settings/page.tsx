@@ -27,7 +27,7 @@ function preloadImage(src: string) {
 }
 
 export default function AccountSettingsPage() {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut, updateUser } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -50,7 +50,7 @@ export default function AccountSettingsPage() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/get-user?id=${user.id}`);
+      const response = await fetch('/api/get-user');
       let nextEmail = user.email || '';
       let nextDisplayName = user.first_name || '';
       let nextUsername = user.username || '';
@@ -109,7 +109,6 @@ export default function AccountSettingsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: user.id,
           email: email || user.email,
           first_name: displayName,
           username: username,
@@ -124,8 +123,7 @@ export default function AccountSettingsPage() {
       } else {
         const result = await response.json();
         if (result.success && result.user) {
-          const updatedUser = { ...user, ...result.user };
-          localStorage.setItem('user', JSON.stringify(updatedUser));
+          updateUser(result.user);
         }
       }
     } catch (error) {
@@ -151,7 +149,6 @@ export default function AccountSettingsPage() {
 
     try {
       const formData = new FormData();
-      formData.append('userId', user.id);
       formData.append('avatar', file);
 
       const response = await fetch('/api/upload-avatar', {
@@ -171,7 +168,7 @@ export default function AccountSettingsPage() {
       setAvatarUrl(avatarLoaded ? nextAvatarUrl : '');
 
       if (result.user) {
-        localStorage.setItem('user', JSON.stringify({ ...user, ...result.user }));
+        updateUser(result.user);
       }
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -218,7 +215,6 @@ export default function AccountSettingsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: user.id,
           currentPassword,
           newPassword,
         }),
@@ -248,7 +244,7 @@ export default function AccountSettingsPage() {
 
     setActiveAction('download');
     try {
-      const response = await fetch(`/api/export-user-data?id=${user.id}`);
+      const response = await fetch('/api/export-user-data');
       const exportData = await response.json();
 
       if (!response.ok) {
@@ -291,7 +287,7 @@ export default function AccountSettingsPage() {
       const response = await fetch('/api/delete-account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: user.id }),
+        body: JSON.stringify({}),
       });
 
       const result = await response.json().catch(() => ({}));
