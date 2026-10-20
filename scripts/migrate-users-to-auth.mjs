@@ -22,7 +22,13 @@ const { data: rows, error } = await admin
   .is('auth_id', null);
 
 if (error) {
-  console.error('Failed to read "user" rows. Did you apply 0001_link_user_to_auth.sql?', error.message);
+  if (/fetch failed/i.test(error.message)) {
+    // Network failure: the request never reached Supabase.
+    console.error(`Could not reach ${supabaseUrl}.`, error.details || error.message);
+    console.error('Check NEXT_PUBLIC_SUPABASE_URL, your network/VPN, and that the project is not paused in the Supabase dashboard.');
+  } else {
+    console.error('Failed to read "user" rows. Did you apply 0001_link_user_to_auth.sql?', error.message);
+  }
   process.exit(1);
 }
 
