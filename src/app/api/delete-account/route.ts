@@ -1,53 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase';
+import { clearSessionCookies, requireProfile } from '@/lib/auth/session';
 
 const AVATAR_BUCKET = 'avatars';
 
 export async function POST(req: NextRequest) {
   try {
-    const { id } = await req.json();
+    const auth = await requireProfile(req);
+    if (auth instanceof NextResponse) return auth;
 
-    if (!id) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
-    }
-
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-    if (!serviceRoleKey || !supabaseUrl) {
+    if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
-    const client = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
+    const profileId = String(auth.profile.id);
 
-    const { data: avatarFiles } = await client.storage
+    const { data: avatarFiles } = await supabaseAdmin.storage
       .from(AVATAR_BUCKET)
-      .list(id);
+      .list(profileId);
 
     if (avatarFiles?.length) {
-      await client.storage
+      await supabaseAdmin.storage
         .from(AVATAR_BUCKET)
-        .remove(avatarFiles.map((file) => `${id}/${file.name}`));
+        .remove(avatarFiles.map((file) => `${profileId}/${file.name}`));
     }
 
-    await client
+    await auth.db
       .from('template')
       .delete()
-      .eq('user_id', id);
+      .eq('user_id', auth.profile.id);
 
-    const { error: deleteError } = await client
+    const { error: deleteError } = await auth.db
       .from('user')
       .delete()
-      .eq('id', id);
+      .eq('id', auth.profile.id);
 
     if (deleteError) {
       console.error('Delete account error:', deleteError);
       return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true });
+    const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(auth.authUser.id);
+
+    if (authDeleteError) {
+      console.error('Delete auth user error:', authDeleteError);
+      return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 });
+    }
+
+    return clearSessionCookies(NextResponse.json({ success: true }));
   } catch (error) {
     console.error('Delete account route error:', error);
     return NextResponse.json({

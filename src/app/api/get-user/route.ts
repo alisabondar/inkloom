@@ -1,56 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase';
+import { requireProfile } from '@/lib/auth/session';
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('id');
+    const auth = await requireProfile(req);
+    if (auth instanceof NextResponse) return auth;
 
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
-    }
+    let user = auth.profile;
 
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-    if (!serviceRoleKey || !supabaseUrl) {
-      return NextResponse.json({
-        error: 'Server configuration error'
-      }, { status: 500 });
-    }
-
-    const client = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
-
-    const { data, error } = await client
-      .from('user')
-      .select('id, email, first_name, username, favorite_medium, avatar_url')
-      .eq('id', userId)
-      .single();
-
-    if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json({ error: 'Failed to retrieve user data' }, { status: 500 });
-    }
-
-    let user = data;
-
-    if (data.avatar_url) {
-      const { data: signedAvatar } = await client.storage
+    if (user.avatar_url && supabaseAdmin) {
+      const { data: signedAvatar } = await supabaseAdmin.storage
         .from('avatars')
-        .createSignedUrl(data.avatar_url, 60 * 60);
+        .createSignedUrl(user.avatar_url, 60 * 60);
 
       user = {
-        ...data,
-        avatar_url: signedAvatar?.signedUrl || data.avatar_url
+        ...user,
+        avatar_url: signedAvatar?.signedUrl || user.avatar_url
       };
     }
 
-    return NextResponse.json({
+    return auth.respond(NextResponse.json({
       success: true,
       user
-    });
+    }));
 
   } catch (error) {
     console.error('Get user error:', error);

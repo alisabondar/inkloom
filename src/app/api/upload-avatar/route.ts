@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin, PROFILE_FIELDS } from '@/lib/supabase';
+import { requireProfile } from '@/lib/auth/session';
 
 const AVATAR_BUCKET = 'avatars';
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
@@ -26,13 +28,11 @@ async function ensureAvatarBucket(storage: SupabaseStorageClient) {
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const userId = formData.get('userId');
-    const file = formData.get('avatar');
+    const auth = await requireProfile(req);
+    if (auth instanceof NextResponse) return auth;
 
-    if (typeof userId !== 'string' || !userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
-    }
+    const formData = await req.formData();
+    const file = formData.get('avatar');
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: 'Avatar image is required' }, { status: 400 });
@@ -46,18 +46,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Avatar must be smaller than 5MB' }, { status: 400 });
     }
 
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-    if (!serviceRoleKey || !supabaseUrl) {
+    if (!supabaseAdmin) {
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
-    const client = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
-
-    const bucketError = await ensureAvatarBucket(client.storage);
+    const bucketError = await ensureAvatarBucket(supabaseAdmin.storage);
 
     if (bucketError) {
       console.error('Avatar bucket setup error:', bucketError);
@@ -68,10 +61,10 @@ export async function POST(req: NextRequest) {
     }
 
     const extension = file.name.split('.').pop()?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'png';
-    const storagePath = `${userId}/avatar-${Date.now()}.${extension}`;
+    const storagePath = `${auth.profile.id}/avatar-${Date.now()}.${extension}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const { error: uploadError } = await client.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from(AVATAR_BUCKET)
       .upload(storagePath, buffer, {
         contentType: file.type,
@@ -87,11 +80,11 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
-    const { data: updatedUser, error: updateError } = await client
+    const { data: updatedUser, error: updateError } = await auth.db
       .from('user')
       .update({ avatar_url: storagePath })
-      .eq('id', userId)
-      .select('id, email, first_name, username, favorite_medium, avatar_url')
+      .eq('id', auth.profile.id)
+      .select(PROFILE_FIELDS)
       .single();
 
     if (updateError) {
@@ -102,18 +95,18 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
-    const { data: signedAvatar } = await client.storage
+    const { data: signedAvatar } = await supabaseAdmin.storage
       .from(AVATAR_BUCKET)
       .createSignedUrl(storagePath, 60 * 60);
 
-    return NextResponse.json({
+    return auth.respond(NextResponse.json({
       success: true,
       avatar_url: signedAvatar?.signedUrl || storagePath,
       user: {
         ...updatedUser,
         avatar_url: signedAvatar?.signedUrl || storagePath
       }
-    });
+    }));
   } catch (error) {
     console.error('Upload avatar error:', error);
     return NextResponse.json({

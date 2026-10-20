@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { requireUser } from '@/lib/auth/session';
+import { checkGenerateRateLimit } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireUser(req);
+    if (auth instanceof NextResponse) return auth;
+
+    const rateLimit = checkGenerateRateLimit(auth.authUser.id);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Generation limit reached. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const body = await req.json();
     const { description, title, workMedium, workDifficulty, workDuration } = body;
 
@@ -156,7 +169,7 @@ export async function POST(req: NextRequest) {
       throw new Error('Failed to upload image to storage');
     }
 
-    return NextResponse.json({
+    return auth.respond(NextResponse.json({
       success: true,
       image: imageBase64,
       image_url: filename,
@@ -168,7 +181,7 @@ export async function POST(req: NextRequest) {
       generated_image_id: generatedImageId,
       source: "DESCRIPTION",
       provider: "pixazo-flux-schnell"
-    });
+    }));
 
   } catch (error) {
     console.error('Pixazo Error:', error);
