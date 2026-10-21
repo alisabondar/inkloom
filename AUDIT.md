@@ -73,3 +73,17 @@ Commands: lint clean; `tsc --noEmit` clean; `npm test -- --run` 64/64 pass.
 - 0004 now copies legacy templates by default (to `legacy_owner_email` if set, else the earliest-created legacy account) and skips rows already copied.
 - Added `imageFile`, `avatarSchema`, and `referencePhotoSchema` to `src/lib/validation.ts`; both actions use them (with tests).
 - `deleteTemplateAction` returns `{ fieldErrors }` / `{ error }`; the workspace uses it through `useActionState` and shows the error.
+
+## Round 2 (2026-10-21, fresh auditor subagent)
+Result: 52 MET, 0 PARTIAL, 0 MISSING. New items: 0.
+
+Commands: lint clean; `tsc --noEmit` exit 0; `npm test -- --run` 66/66 pass.
+
+### Findings
+None.
+
+### Out-of-scope
+- Extra columns (`batch_id`, `options`, `finished_at`, `templates.generation_id`), email-change trigger, `setNewPasswordAction` + new-password page, `public_profiles` view.
+
+## Outcome
+Done after Round 2: zero PARTIAL/MISSING. Scope-creep breaker did not fire (new items per round: 3, 0).
