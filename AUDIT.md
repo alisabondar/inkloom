@@ -55,3 +55,21 @@ Earlier audits: AUDIT-README.md, AUDIT-PHASE0.md
 50. S9.1: "Unit tests cover validation, the processing functions, the plan builder, provider selection and fallback, and the rate limit."
 51. S9.2: "`npm run lint`, `npx tsc --noEmit`, and `npm test -- --run` pass."
 52. S9.3: "The README documents V3 setup: environment variables, migration 0004, and the providers."
+
+## Round 1 (2026-10-21, fresh auditor subagent)
+Result: 49 MET, 3 PARTIAL, 0 MISSING. New items: 3.
+
+Commands: lint clean; `tsc --noEmit` clean; `npm test -- --run` 64/64 pass.
+
+### Findings
+- S1.9 PARTIAL — legacy templates were copied only when `legacy_owner_email` was edited in; as shipped, none were copied.
+- S3.1 PARTIAL — avatar and reference-photo files were validated inline in the actions, not by validators in `src/lib/validation.ts`.
+- S3.2 PARTIAL — `deleteTemplateAction` returned nothing on invalid input instead of field errors.
+
+### Out-of-scope
+- Extras beyond the plan: `public_profiles` view, `batch_id`/`options`/`finished_at` columns, email-change trigger, `setNewPasswordAction`.
+
+### Fixes
+- 0004 now copies legacy templates by default (to `legacy_owner_email` if set, else the earliest-created legacy account) and skips rows already copied.
+- Added `imageFile`, `avatarSchema`, and `referencePhotoSchema` to `src/lib/validation.ts`; both actions use them (with tests).
+- `deleteTemplateAction` returns `{ fieldErrors }` / `{ error }`; the workspace uses it through `useActionState` and shows the error.

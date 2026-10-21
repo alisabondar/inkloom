@@ -1,9 +1,9 @@
 -- Inkloom V3 schema: profiles keyed by Supabase Auth id, templates and generation jobs owned by profiles.
 -- Supersedes the legacy "user" and "template" tables (left in place, unused) and migration 0003.
 --
--- BEFORE RUNNING: set legacy_owner_email (near the bottom) to the account that should own the legacy
--- templates. Legacy templates were all saved under a placeholder owner, so real owners can't be recovered.
--- Leave it as '' to skip copying legacy templates.
+-- Legacy templates were all saved under a placeholder owner, so real owners can't be recovered.
+-- They are copied to the account named by legacy_owner_email (near the bottom) or, when that is left
+-- empty, to the earliest-created legacy account.
 
 create extension if not exists pgcrypto;
 
@@ -170,24 +170,36 @@ begin
     on conflict (id) do nothing;
   end if;
 
-  -- Templates: all legacy rows go to legacy_owner_email (see note at the top).
-  if legacy_owner_email <> '' and to_regclass('public.template') is not null then
-    select id into legacy_owner from public.profiles where email = legacy_owner_email;
-    if legacy_owner is null then
-      raise exception 'No profile with email %', legacy_owner_email;
+  -- Templates: all legacy rows go to one owner (see the note at the top).
+  if to_regclass('public.template') is not null then
+    if legacy_owner_email <> '' then
+      select id into legacy_owner from public.profiles where email = legacy_owner_email;
+      if legacy_owner is null then
+        raise exception 'No profile with email %', legacy_owner_email;
+      end if;
+    elsif to_regclass('public."user"') is not null then
+      select p.id into legacy_owner
+      from public.profiles p
+      join public."user" u on u.auth_id = p.id
+      join auth.users a on a.id = p.id
+      order by a.created_at
+      limit 1;
     end if;
 
-    insert into public.templates (owner_id, title, medium, difficulty, prompt, concept_path, is_public, created_at)
-    select
-      legacy_owner,
-      coalesce(t.title, 'Untitled template'),
-      coalesce(lower(t.medium), 'pencil'),
-      case when lower(t.difficulty) in ('beginner', 'intermediate', 'advanced') then lower(t.difficulty) else 'intermediate' end,
-      t.source,
-      t.image_url,
-      coalesce(t.public, false),
-      coalesce(t.created_at, now())
-    from public.template t
-    where t.image_url is not null;
+    if legacy_owner is not null then
+      insert into public.templates (owner_id, title, medium, difficulty, prompt, concept_path, is_public, created_at)
+      select
+        legacy_owner,
+        coalesce(t.title, 'Untitled template'),
+        case when lower(t.medium) in ('pencil', 'watercolor', 'acrylic', 'paint-by-number', 'embroidery', 'tattoo') then lower(t.medium) else 'pencil' end,
+        case when lower(t.difficulty) in ('beginner', 'intermediate', 'advanced') then lower(t.difficulty) else 'intermediate' end,
+        t.source,
+        t.image_url,
+        coalesce(t.public, false),
+        coalesce(t.created_at, now())
+      from public.template t
+      where t.image_url is not null
+        and not exists (select 1 from public.templates n where n.concept_path = t.image_url);
+    end if;
   end if;
 end $$;

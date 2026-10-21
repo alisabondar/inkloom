@@ -4,10 +4,8 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getAdminClient, signStoragePath } from '@/lib/supabase/admin';
 import { clearSessionCookies, createAuthClient, requireUser, setSessionCookies } from '@/lib/supabase/server';
-import { changePasswordSchema, profileSchema, type ActionState } from '@/lib/validation';
+import { avatarSchema, changePasswordSchema, profileSchema, type ActionState } from '@/lib/validation';
 import type { ProfileRow, TemplateRow } from '@/lib/db/types';
-
-const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 export async function updateProfileAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = profileSchema(formData);
@@ -33,10 +31,9 @@ export async function updateProfileAction(_prev: ActionState, formData: FormData
 }
 
 export async function uploadAvatarAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const file = formData.get('avatar');
-  if (!(file instanceof File) || !file.size) return { fieldErrors: { avatar: 'Choose an image' } };
-  if (!file.type.startsWith('image/')) return { fieldErrors: { avatar: 'Avatar must be an image' } };
-  if (file.size > MAX_AVATAR_BYTES) return { fieldErrors: { avatar: 'Avatar must be smaller than 5 MB' } };
+  const parsed = avatarSchema(formData);
+  if (!parsed.ok) return { fieldErrors: parsed.fieldErrors };
+  const file = parsed.data.avatar;
 
   const { supabase, user } = await requireUser();
   const extension = file.type.split('/')[1]?.replace(/[^a-z0-9]/g, '') || 'png';

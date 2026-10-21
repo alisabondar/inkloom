@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, PencilSlider, Tape, Wash } from '@/components/studio';
 import { settingsForDifficulty, type Difficulty, type RasterImage } from '@/lib/processing';
 import { buildProjectPlan, MEDIUMS } from '@/lib/plan';
 import type { TemplateCard } from '@/lib/db/queries';
 import type { WorkspaceLayer } from '@/lib/db/types';
+import type { ActionState } from '@/lib/validation';
 import { deleteTemplateAction, setVisibilityAction, updateWorkspaceSettingsAction } from '@/app/actions/templates';
 import { processAll, type ProcessParams, type ProcessResult, type WorkerRequest, type WorkerResponse } from './processing';
 import styles from './Workspace.module.css';
@@ -168,6 +169,7 @@ function visibleOnPaper(palette: { hex: string; rgb: [number, number, number] }[
 export interface WorkspaceProps { template: TemplateCard; isOwner: boolean }
 
 export function Workspace({ template, isOwner }: WorkspaceProps) {
+  const [deleteState, deleteAction] = useActionState(deleteTemplateAction, {} as ActionState);
   const [settings, setSettings] = useState<Settings>(() => initialSettings(template));
   const [difficulty, setDifficulty] = useState<Difficulty>(template.difficulty);
   const [source, setSource] = useState<{ raster: RasterImage; url: string } | null>(null);
@@ -398,8 +400,9 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
                 <Button variant="mint" size="sm" aria-pressed={isPublic} onClick={toggleVisibility}>
                   {isPublic ? 'Public · make private' : 'Private · make public'}
                 </Button>
+                {deleteState.error && <p className={styles.error} role="alert">{deleteState.error}</p>}
                 <form
-                  action={deleteTemplateAction}
+                  action={deleteAction}
                   onSubmit={(e) => { if (!window.confirm('Delete this template? This cannot be undone.')) e.preventDefault(); }}
                 >
                   <input type="hidden" name="id" value={template.id} />

@@ -90,7 +90,7 @@ Apply in this order:
 1. `supabase/migrations/0001_link_user_to_auth.sql`
 2. `node --env-file=.env.local scripts/migrate-users-to-auth.mjs --dry-run`, then without `--dry-run` (creates or links a Supabase Auth user for each legacy `user` row)
 3. `supabase/migrations/0002_enable_rls.sql`
-4. Set `legacy_owner_email` near the bottom of `0004_v3_schema.sql` to the account that should own the old templates (V2 saved every template under a placeholder owner), then run it. It copies legacy profiles and templates into the new tables; the legacy tables are left in place and are no longer used.
+4. Run `0004_v3_schema.sql`. It copies legacy profiles and templates into the new tables; the legacy tables are left in place and are no longer used. V2 saved every template under a placeholder owner, so legacy templates go to the earliest-created account — set `legacy_owner_email` near the bottom of the file first to choose a different owner.
 
 ## Project structure
 

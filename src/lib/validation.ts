@@ -69,6 +69,18 @@ export function uuid(label = 'Id'): Field<string> {
   return string({ label, pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, message: `${label} is invalid` });
 }
 
+export function imageFile(options: { maxBytes: number; types?: readonly string[]; label?: string }): Field<File> {
+  const { maxBytes, types, label = 'Image' } = options;
+  const megabytes = Math.round(maxBytes / (1024 * 1024));
+  return (raw) => {
+    if (typeof File === 'undefined' || !(raw instanceof File) || raw.size === 0) return fail(`Choose ${label.toLowerCase()} to upload`);
+    const typeOk = types ? types.includes(raw.type) : raw.type.startsWith('image/');
+    if (!typeOk) return fail(types ? 'Use a JPG, PNG, WebP or GIF image' : `${label} must be an image`);
+    if (raw.size > maxBytes) return fail(`${label} must be ${megabytes} MB or smaller`);
+    return ok(raw);
+  };
+}
+
 export function object<S extends Record<string, Field<unknown>>>(shape: S) {
   type Out = { [K in keyof S]: S[K] extends Field<infer T> ? T : never };
   return (input: FormData | Record<string, unknown>): ValidationResult<Out> => {
@@ -136,6 +148,17 @@ export const saveTemplateSchema = object({
   generationId: uuid('Concept'),
   title: string({ label: 'Title', max: 120 }),
   difficulty: oneOf(DIFFICULTIES, 'Difficulty'),
+});
+
+export const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
+
+export const avatarSchema = object({ avatar: imageFile({ maxBytes: 5 * 1024 * 1024, label: 'Avatar' }) });
+
+export const referencePhotoSchema = object({
+  photo: imageFile({ maxBytes: 8 * 1024 * 1024, types: PHOTO_TYPES, label: 'Photo' }),
+  medium: oneOf(MEDIUM_IDS, 'Medium'),
+  title: optional(string({ label: 'Title', max: 120 })),
+  idea: optional(string({ label: 'Idea', max: 1000 })),
 });
 
 export const templateIdSchema = object({ id: uuid('Template') });
