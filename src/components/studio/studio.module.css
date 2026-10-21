@@ -15,8 +15,8 @@
 .light {
   position: absolute; inset: 0; pointer-events: none; z-index: 5; mix-blend-mode: soft-light;
   background:
-    linear-gradient(118deg, rgba(255,236,190,.75) 0%, rgba(255,236,190,0) 46%),
-    repeating-linear-gradient(118deg, transparent 0 150px, rgba(60,40,10,.10) 150px 162px, transparent 162px 330px);
+    linear-gradient(118deg, rgba(255,236,190,.38) 0%, rgba(255,236,190,0) 40%),
+    repeating-linear-gradient(118deg, transparent 0 150px, rgba(60,40,10,.06) 150px 162px, transparent 162px 330px);
 }
 
 .paper {

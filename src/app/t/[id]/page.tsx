@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTemplateForViewer } from '@/lib/db/queries';
 import { Workspace } from './Workspace';
 
-export const metadata: Metadata = { title: 'Workspace · Inkloom' };
+export const metadata: Metadata = { title: 'Workspace' };
 
 // Private templates are hidden by RLS, so getTemplateForViewer 404s for anyone but the owner.
 export default async function WorkspacePage({ params }: { params: Promise<{ id: string }> }) {

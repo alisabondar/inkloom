@@ -1,27 +1,29 @@
 import Link from 'next/link';
 import { getCurrentProfile } from '@/lib/db/queries';
+import { getServerClient } from '@/lib/supabase/server';
 import { signOutAction } from '@/app/actions/auth';
 import { Button } from '@/components/studio';
 import { NavLinks } from './NavLinks';
 import styles from './site.module.css';
 
 export async function SiteHeader() {
-  const profile = await getCurrentProfile();
-  const initial = (profile?.first_name || profile?.username || profile?.email || '?').charAt(0).toUpperCase();
+  const { user } = await getServerClient();
+  const profile = user ? await getCurrentProfile() : null;
+  const initial = (profile?.first_name || profile?.username || user?.email || '?').charAt(0).toUpperCase();
 
   return (
     <header className={styles.header}>
       <Link href="/" className={styles.logo}>Inkloom</Link>
-      <NavLinks signedIn={Boolean(profile)} />
+      <NavLinks signedIn={Boolean(user)} />
       <div className={styles.spacer} />
-      {profile ? (
+      {user ? (
         <div className={styles.account}>
           <form action={signOutAction}>
             <button type="submit" className={styles.signOut}>Sign out</button>
           </form>
           <Link href="/settings" className={styles.avatar} aria-label="Account settings">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : initial}
+            {profile?.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : initial}
           </Link>
         </div>
       ) : (
