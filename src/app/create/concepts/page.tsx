@@ -6,7 +6,7 @@ import { SignInCard } from '../SignInCard';
 import { ConceptsStage } from './ConceptsStage';
 import styles from '../create.module.css';
 
-export const metadata: Metadata = { title: 'Your concepts · Inkloom' };
+export const metadata: Metadata = { title: 'Your concepts' };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type Search = Promise<Record<string, string | string[] | undefined>>;

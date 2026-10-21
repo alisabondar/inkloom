@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, PencilSlider, StudioBackground, Tape, Wash } from '@/components/studio';
+import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, PencilSlider, Tape, Wash } from '@/components/studio';
 import { settingsForDifficulty, type Difficulty, type RasterImage } from '@/lib/processing';
 import { buildProjectPlan, MEDIUMS } from '@/lib/plan';
 import type { TemplateCard } from '@/lib/db/queries';
@@ -159,6 +159,12 @@ function useProcessor() {
   }, []);
 }
 
+// The first palette colour dark enough to show on the paper (light colours vanish), else coral.
+function visibleOnPaper(palette: { hex: string; rgb: [number, number, number] }[]) {
+  const match = palette.find(({ rgb: [r, g, b] }) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 < 0.72);
+  return match?.hex ?? 'var(--studio-coral)';
+}
+
 export interface WorkspaceProps { template: TemplateCard; isOwner: boolean }
 
 export function Workspace({ template, isOwner }: WorkspaceProps) {
@@ -288,10 +294,9 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
   const timeLabel = hours ? `${hours} h ${mins ? `${mins} min` : ''}` : `${mins} min`;
 
   return (
-    <StudioBackground light className={styles.root}>
+    <div className={styles.root}>
       <div className={styles.screen}>
         <header className={styles.top}>
-          <Link href="/" className={styles.logo}>Inkloom</Link>
           <div className={styles.crumbs}>
             <Link href={isOwner ? '/projects' : '/gallery'}>{isOwner ? 'My projects' : 'Gallery'}</Link> / <b>{template.title}</b>{' '}
             <em>{mediumLabel} · {difficulty}</em>
@@ -343,12 +348,12 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
           </div>
           {view === 'sheet' ? (
             <div className={styles.sheetWrap}>
-              <Paper className={styles.sheet} rotate={-0.6} style={{ aspectRatio: aspect }}>
+              <Paper className={styles.sheet} rotate={-0.6}>
                 <Tape className={styles.tapeTL} angle={-36} />
                 <Tape className={styles.tapeTR} angle={36} />
                 <Tape className={styles.tapeBL} angle={36} />
                 <Tape className={styles.tapeBR} angle={-36} />
-                <div className={styles.stack} role="img" aria-label={`${template.title}: ${LAYER_ORDER.filter((l) => settings.layers[l.id]).map((l) => l.label).join(', ') || 'no layers'} visible`}>
+                <div className={styles.stack} style={{ aspectRatio: aspect }} role="img" aria-label={`${template.title}: ${LAYER_ORDER.filter((l) => settings.layers[l.id]).map((l) => l.label).join(', ') || 'no layers'} visible`}>
                   {/* eslint-disable @next/next/no-img-element */}
                   {source && settings.layers.colour && <img src={source.url} alt="" className={styles.layerImg} />}
                   {result && settings.layers.values && <img src={result.urls.values} alt="" className={`${styles.layerImg} ${styles.multiply}`} style={{ opacity: settings.layers.colour ? 0.6 : 1 }} />}
@@ -379,7 +384,7 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
             <PencilSlider id="ws-detail" label="Line detail" min={0} max={1} step={0.05} value={settings.detail} valueLabel={`${Math.round(settings.detail * 100)}%`} onChange={(v) => update({ detail: v })} />
             <PencilSlider id="ws-weight" label="Line weight" min={1} max={4} step={1} value={settings.weight} onChange={(v) => update({ weight: v })} color="var(--studio-ink)" />
             <PencilSlider id="ws-values" label="Value steps" min={2} max={9} value={settings.valueSteps} onChange={(v) => update({ valueSteps: v })} color="var(--studio-pencil)" />
-            <PencilSlider id="ws-palette" label="Palette size" min={3} max={16} value={settings.paletteSize} onChange={(v) => update({ paletteSize: v })} color={palette[0]?.hex} />
+            <PencilSlider id="ws-palette" label="Palette size" min={3} max={16} value={settings.paletteSize} onChange={(v) => update({ paletteSize: v })} color={visibleOnPaper(palette)} />
             <PencilSlider id="ws-grid" label="Grid" min={0} max={12} value={settings.gridSize} valueLabel={settings.gridSize ? `${settings.gridSize}×${settings.gridSize}` : 'off'} onChange={(v) => update({ gridSize: v, layers: { ...settings.layers, grid: v > 0 } })} color="var(--studio-teal)" />
             <p className={styles.time}>About <b>{timeLabel}</b> of {mediumLabel.toLowerCase()} work</p>
             {saveNote && isOwner && <HandNote className={styles.saved} rotate={-3}><span role="status">{saveNote}</span></HandNote>}
@@ -414,7 +419,7 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
         valueSteps={settings.valueSteps}
         plan={plan}
       />
-    </StudioBackground>
+    </div>
   );
 }
 

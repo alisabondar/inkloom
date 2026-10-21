@@ -6,7 +6,7 @@ import { CreateFlow } from './CreateFlow';
 import { SignInCard } from './SignInCard';
 import styles from './create.module.css';
 
-export const metadata: Metadata = { title: 'Create · Inkloom' };
+export const metadata: Metadata = { title: 'Create' };
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);

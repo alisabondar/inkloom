@@ -49,7 +49,7 @@
 .tapeTR { right: -26px; top: 4px; }
 .tapeBL { left: -26px; bottom: 6px; }
 .tapeBR { right: -26px; bottom: 6px; }
-.stack { position: relative; width: 100%; height: 100%; background: #fffdf8; overflow: hidden; }
+.stack { position: relative; width: 100%; background: #fffdf8; overflow: hidden; }
 .layerImg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transition: opacity 0.25s var(--studio-ease); }
 .multiply { mix-blend-mode: multiply; }
 .gridOverlay {
