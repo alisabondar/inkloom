@@ -1,32 +1,27 @@
 # Inkloom
 
-Inkloom is an AI-assisted template studio for artists. Users can describe an idea, generate a clean visual template, save it to their account, browse public templates, and manage profile settings in a polished creative workspace.
+Inkloom is a template studio for artists. Describe an idea (or upload a reference photo), pick one of four AI colour concepts, and Inkloom turns it into a working template: line art, a value study, a paint-by-number map, a grid, a named palette, and a step-by-step plan for your medium. Everything after the concept is computed in the browser, so the sliders redraw instantly without another AI call.
 
-## Status
+## Features
 
-Inkloom is currently an MVP focused on the core template-generation flow and account experience.
+- **Create:** choose a medium (pencil & ink, watercolor, acrylic, paint by number, embroidery, tattoo stencil), describe the idea, and get 4 concepts — or use your own photo as the concept.
+- **Workspace (`/t/[id]`):** toggle layers (line art, values, paint by number, grid, colour reference), tune detail, line weight, value steps, palette size, and grid, switch difficulty presets, and read the generated project plan. Settings are saved with the template.
+- **Export:** download a PNG of the visible layers, or print a pack with the template, palette sheet, value scale, and plan.
+- **Gallery:** public templates with medium and difficulty filters. **My projects:** your own templates, public or private.
+- **Accounts:** Supabase Auth with email confirmation, password reset, profile and avatar, password change, data export, and account deletion.
+- **Look:** the "Studio Table" design — paper, tape, and watercolour accents (see `public/mockups/vibes.html`).
 
-Current features include:
+## Tech stack
 
-- Text-to-template generation for creative project ideas
-- Template saving, viewing, gallery browsing, and PNG download
-- Public/private template visibility support
-- Email-based account creation and sign in
-- Account settings with profile editing, avatar upload, password change, data export, and account deletion
-- Responsive UI with animated artwork, paint-splatter loading states, and shared visual styling
-
-## Tech Stack
-
-- **Framework:** Next.js 16 with the App Router
-- **UI:** React 19, CSS Modules, shared global design tokens, Tailwind CSS import support
-- **Database, Auth, and Storage:** Supabase
-- **AI Image Generation:** Pixazo Flux Schnell
+- **Framework:** Next.js 16 (App Router, Server Components, Server Actions, `proxy.ts`)
+- **UI:** React 19, CSS Modules, Studio Table design system in `src/components/studio`
+- **Database, Auth, Storage:** Supabase, with Row Level Security on every table
+- **AI image generation:** Pixazo FLUX.1-schnell and Cloudflare Workers AI FLUX, with automatic fallback
+- **Template processing:** pure TypeScript in `src/lib/processing` (edge detection, posterization, k-means palette, region outlines), run in a Web Worker
 - **Testing:** Vitest and React Testing Library
 - **Language:** TypeScript
 
-## Running Locally
-
-Clone the repository and install dependencies:
+## Running locally
 
 ```bash
 git clone https://github.com/alisabondar/unknown-proj.git
@@ -34,29 +29,30 @@ cd unknown-proj
 npm install
 ```
 
-Create a `.env.local` file:
+Create `.env.local`:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+
+# At least one image provider
 PIXAZO_API_KEY=your-pixazo-api-key
+CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
+CLOUDFLARE_API_TOKEN=your-workers-ai-token
 ```
 
-Optional: generations allowed per user per hour (default 10):
+Optional:
 
 ```bash
-GENERATE_RATE_LIMIT_PER_HOUR=10
-```
-
-Optional Pixazo overrides:
-
-```bash
+IMAGE_PROVIDER=cloudflare            # primary provider: pixazo or cloudflare (the other is the fallback)
+GENERATE_RATE_LIMIT_PER_HOUR=10      # concepts per user per hour (each idea uses 4)
+CLOUDFLARE_IMAGE_MODEL=@cf/black-forest-labs/flux-1-schnell
 PIXAZO_FLUX_SCHNELL_REQUEST_URL=https://gateway.pixazo.ai/flux-1-schnell/v1/getData
 PIXAZO_FLUX_SCHNELL_RESULT_URL=https://gateway.pixazo.ai/flux-1-schnell/v1/getData-result
 ```
 
-Start the development server:
+Then:
 
 ```bash
 npm run dev
@@ -64,7 +60,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Useful Scripts
+## Useful scripts
 
 ```bash
 npm run lint
@@ -73,49 +69,54 @@ npm test -- --run
 npm run build
 ```
 
-## Supabase Notes
+## Supabase setup
 
-Inkloom expects Supabase tables for users and templates, plus storage buckets for generated templates and avatars.
+### New project
 
-The app currently uses:
+Run `supabase/migrations/0004_v3_schema.sql` in the SQL Editor. It creates:
 
-- `user` for profile/account data
-- `template` for saved generated templates
-- `templates` storage bucket for generated artwork files
-- `avatars` storage bucket for profile images
+- `profiles` — one per Auth user (`id` = `auth.users.id`), created automatically by a trigger on sign-up
+- `templates` — owned by a profile, with workspace `settings` (jsonb) and `is_public`
+- `generations` — background image jobs (`queued` → `running` → `succeeded` / `failed`)
+- the `avatars` and `templates` storage buckets, with policies that only let users write inside a folder named with their user id
+- Row Level Security: owners have full access to their rows; anyone can read public templates
 
-Accounts and passwords are handled by Supabase Auth. The server keeps the session in httpOnly cookies, and each `user` row links to its Auth account through `auth_id`. Row Level Security limits each user to their own profile and templates; public templates can be read by anyone.
+In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your production URL) to the redirect URLs. Confirmation and reset emails work with Supabase's default templates; if you switch the templates to `{{ .TokenHash }}` links pointing at `/auth/callback?token_hash={{ .TokenHash }}&type=…`, the callback verifies those too.
 
-### Migrating an existing database
+### Upgrading a V1/V2 database
 
-Apply these in order:
+Apply in this order:
 
-1. Apply `supabase/migrations/0001_link_user_to_auth.sql` (adds `auth_id`).
-2. Run the account migration script, which creates a Supabase Auth user for each existing `user` row and sets its `auth_id`:
+1. `supabase/migrations/0001_link_user_to_auth.sql`
+2. `node --env-file=.env.local scripts/migrate-users-to-auth.mjs --dry-run`, then without `--dry-run` (creates or links a Supabase Auth user for each legacy `user` row)
+3. `supabase/migrations/0002_enable_rls.sql`
+4. Set `legacy_owner_email` near the bottom of `0004_v3_schema.sql` to the account that should own the old templates (V2 saved every template under a placeholder owner), then run it. It copies legacy profiles and templates into the new tables; the legacy tables are left in place and are no longer used.
 
-   ```bash
-   node --env-file=.env.local scripts/migrate-users-to-auth.mjs --dry-run
-   node --env-file=.env.local scripts/migrate-users-to-auth.mjs
-   ```
+## Project structure
 
-3. Apply `supabase/migrations/0002_enable_rls.sql` (enables Row Level Security and drops the old `password` column).
-
-Accounts whose old password was shorter than 6 characters are created without a password and need a password reset.
+```
+src/
+  app/
+    actions/           Server Actions (auth, profile, templates, generations, uploads)
+    api/generations/   generation status endpoint, polled by the concepts page
+    auth/callback/     email-link handler
+    create/            medium → idea → concepts flow
+    t/[id]/            workspace (processing runs in a Web Worker)
+    gallery/ projects/ settings/ signin/ signup/ reset/
+  components/studio/   design system
+  components/site/     header, footer, template grid, forms
+  lib/
+    supabase/          session-bound server client, admin client (the only reader of the service-role key)
+    ai/                providers, prompt builder, background jobs, quota
+    processing/        deterministic template processing
+    plan.ts            mediums and project plans
+    validation.ts      Server Action input validators
+  proxy.ts             refreshes expired sessions before pages render
+```
 
 ## Roadmap
 
-Near-term ideas:
-
-- Image-to-image support for turning reference uploads into generated templates
-- More artistic mediums such as embroidery, watercolor, ink, and digital art
-- Template iterations and refinement controls
-- Full project plans with materials, steps, and timelines
-
-Future ideas:
-
-- Collaborative projects and shared works in progress
-- Saved style presets
-- PDF/SVG export formats
-- Progress tracking with notes and photos
-- Community remixing
-- Personalized custom styles
+- Numbers drawn inside paint-by-number regions
+- SVG export (potrace) and tiled large-format printing
+- Refinement of a chosen concept ("simpler", "more like this")
+- Remixing gallery templates and a progress journal
