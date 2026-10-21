@@ -94,3 +94,39 @@ p:not(.heroSubtitle):not(.beauFont),
 .errorText {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
+/* ===== Studio Table design tokens (V3 Stage 7) ===== */
+:root {
+  --studio-desk: #ece2cd;
+  --studio-desk-grain: rgba(110, 80, 35, 0.08);
+  --studio-desk-grain-soft: rgba(110, 80, 35, 0.05);
+  --studio-paper: #fffdf8;
+  --studio-ink: #172033;
+  --studio-ink-soft: #5d5446;
+  --studio-muted: #8a7a5c;
+  --studio-pencil: #6b6355;
+  --studio-mint: #77d7c8;
+  --studio-teal: #12776f;
+  --studio-coral: #c2553a;
+  --studio-butter: #f6d77a;
+  --studio-tape: rgba(246, 222, 150, 0.72);
+  --studio-rule: #d8ccb1;
+  --studio-shadow-sheet: 0 1px 2px rgba(60, 40, 10, 0.18), 0 26px 40px -20px rgba(60, 40, 10, 0.55), 0 50px 70px -40px rgba(60, 40, 10, 0.35);
+  --studio-shadow-card: 0 1px 2px rgba(60, 40, 10, 0.15), 0 22px 30px -18px rgba(60, 40, 10, 0.5);
+  --studio-font-display: 'Fraunces', Georgia, serif;
+  --studio-font-hand: 'Caveat', 'Comic Sans MS', cursive;
+  --studio-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --studio-radius-sm: 3px;
+  --studio-radius-md: 6px;
+  --studio-radius-lg: 12px;
+  --studio-ease: cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+/* Cold-press paper tooth (same filter as mockup #tooth), used by <Paper>. */
+.studio-tooth {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='11'/%3E%3CfeDiffuseLighting lighting-color='%23fffdf8' surfaceScale='0.5'%3E%3CfeDistantLight azimuth='235' elevation='58'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23t)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-motion, .studio-motion * { animation: none !important; transition: none !important; }
+}
