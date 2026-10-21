@@ -72,12 +72,13 @@ export async function setVisibilityAction(input: Record<string, unknown>): Promi
   return { ok: true };
 }
 
-export async function deleteTemplateAction(formData: FormData) {
+export async function deleteTemplateAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = templateIdSchema(formData);
-  if (!parsed.ok) return;
+  if (!parsed.ok) return { fieldErrors: parsed.fieldErrors };
   const { supabase } = await requireUser();
 
-  await supabase.from('templates').delete().eq('id', parsed.data.id);
+  const { error } = await supabase.from('templates').delete().eq('id', parsed.data.id);
+  if (error) return { error: 'Could not delete the template' };
   revalidatePath('/projects');
   redirect('/projects');
 }

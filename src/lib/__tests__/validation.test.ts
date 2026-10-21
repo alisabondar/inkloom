@@ -1,7 +1,10 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import {
+  avatarSchema,
   boolean,
+  imageFile,
+  referencePhotoSchema,
   number,
   object,
   oneOf,
@@ -73,5 +76,30 @@ describe('action schemas', () => {
     expect(workspaceSettingsSchema(base).ok).toBe(true);
     expect(workspaceSettingsSchema({ ...base, valueSteps: 12 }).ok).toBe(false);
     expect(workspaceSettingsSchema({ ...base, id: 'not-a-uuid' }).ok).toBe(false);
+  });
+});
+
+describe('file validators', () => {
+  const png = (bytes: number, type = 'image/png') => new File([new Uint8Array(bytes)], 'a.png', { type });
+
+  it('checks presence, type, and size', () => {
+    const field = imageFile({ maxBytes: 1024, types: ['image/png'], label: 'Photo' });
+    expect(field(png(10)).ok).toBe(true);
+    expect(field(null)).toEqual({ ok: false, error: 'Choose photo to upload' });
+    expect(field(png(10, 'application/pdf'))).toEqual({ ok: false, error: 'Use a JPG, PNG, WebP or GIF image' });
+    expect(field(png(4096)).ok).toBe(false);
+  });
+
+  it('validates the avatar and reference photo forms', () => {
+    const avatar = new FormData();
+    avatar.set('avatar', png(10));
+    expect(avatarSchema(avatar).ok).toBe(true);
+
+    const photo = new FormData();
+    photo.set('photo', png(10, 'image/svg+xml'));
+    photo.set('medium', 'watercolor');
+    const result = referencePhotoSchema(photo);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(Object.keys(result.fieldErrors)).toEqual(['photo']);
   });
 });
