@@ -1,67 +1,57 @@
-'use client';
-
-import Image from 'next/image';
 import Link from 'next/link';
-import styles from './page.module.css';
-import { usePublicTemplates } from '@/hooks/usePublicTemplates';
+import type { Metadata } from 'next';
+import { HandNote } from '@/components/studio';
+import { TemplateGrid } from '@/components/site/TemplateGrid';
+import { listPublicTemplates } from '@/lib/db/queries';
+import { MEDIUMS, type Medium } from '@/lib/plan';
+import type { Difficulty } from '@/lib/processing';
+import styles from '../pages.module.css';
 
-export default function GalleryPage() {
-  const { templates: publicTemplates, isLoading, error } = usePublicTemplates();
+export const metadata: Metadata = { title: 'Gallery' };
+
+const DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced'];
+
+function hrefWith(current: { medium?: string; difficulty?: string }, change: { medium?: string; difficulty?: string }) {
+  const next = { ...current, ...change };
+  const params = new URLSearchParams(Object.entries(next).filter(([, value]) => value) as [string, string][]);
+  const query = params.toString();
+  return query ? `/gallery?${query}` : '/gallery';
+}
+
+export default async function GalleryPage({ searchParams }: { searchParams: Promise<{ medium?: string; difficulty?: string }> }) {
+  const params = await searchParams;
+  const medium = MEDIUMS.some((m) => m.id === params.medium) ? (params.medium as Medium) : undefined;
+  const difficulty = DIFFICULTIES.includes(params.difficulty as Difficulty) ? (params.difficulty as Difficulty) : undefined;
+  const templates = await listPublicTemplates({ medium, difficulty });
+  const current = { medium, difficulty };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.galleryHeader}>
-        <h2 className={styles.title}>Browse templates made by fellow artists</h2>
-      </div>
+    <div className={styles.page}>
+      <h1 className={styles.title}>The gallery</h1>
+      <p className={styles.sub}>Templates people have shared from their studio tables.</p>
 
-      {isLoading ? (
-        <div className={styles.galleryLoading}>
-          <div className={styles.loadingSpinner} />
-          <p className={styles.loadingText}>Loading gallery...</p>
-        </div>
+      <nav className={styles.filters} aria-label="Filter templates">
+        <Link href={hrefWith(current, { medium: undefined })} className={`${styles.filter} ${!medium ? styles.filterActive : ''}`}>All mediums</Link>
+        {MEDIUMS.map((m) => (
+          <Link key={m.id} href={hrefWith(current, { medium: m.id })} className={`${styles.filter} ${medium === m.id ? styles.filterActive : ''}`}>{m.label}</Link>
+        ))}
+        <span className={styles.divider} aria-hidden="true">|</span>
+        {DIFFICULTIES.map((d) => (
+          <Link
+            key={d}
+            href={hrefWith(current, { difficulty: difficulty === d ? undefined : d })}
+            className={`${styles.filter} ${difficulty === d ? styles.filterActive : ''}`}
+            aria-pressed={difficulty === d}
+          >
+            {d}
+          </Link>
+        ))}
+      </nav>
+
+      {templates.length ? (
+        <TemplateGrid templates={templates} />
       ) : (
-      <section className={styles.examplesSection}>
-        {error && (
-          <p className={styles.galleryNotice}>
-            Shared templates are taking a minute to load, so showing examples for now.
-          </p>
-        )}
-        <div className={styles.examplesGrid}>
-          <div className={styles.exampleCard}>
-            <Image src="/cat.png" alt="Example template" width={450} height={450} />
-          </div>
-          <div className={styles.exampleCard}>
-            <Image src="/meadow.png" alt="Example template" width={360} height={360} />
-          </div>
-          <div className={styles.exampleCard}>
-            <Image src="/dog.png" alt="Example template" width={240} height={240} />
-          </div>
-          {publicTemplates.map((t, i) => (
-            <Link
-              key={t.id}
-              href={`/template-view?id=${t.id}`}
-              className={styles.exampleCard}
-              style={{ animationDelay: `${1.5 + i * 0.15}s` }}
-            >
-              {t.image_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={t.image_url}
-                  alt={t.title || 'Template'}
-                  className={styles.exampleCardImage}
-                />
-              ) : (
-                <div className={styles.exampleCardPlaceholder}>
-                  {t.title || 'Template'}
-                </div>
-              )}
-              <div className={styles.templateOverlay}>
-                <span>{t.title || 'Untitled template'}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+        <HandNote>Nothing here yet for these filters — try another medium.</HandNote>
       )}
     </div>
   );
