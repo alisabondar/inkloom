@@ -1,17 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
 import { Button } from '@/components/studio';
 import { requestPasswordResetAction, setNewPasswordAction, signInAction, signUpAction } from '@/app/actions/auth';
-import type { ActionState } from '@/lib/validation';
 import { Field, FormStatus } from './FormBits';
+import { useFormAction } from './useFormAction';
 import styles from '@/app/pages.module.css';
 
-const initial: ActionState = {};
-
 export function SignInForm({ next }: { next: string }) {
-  const [state, action, pending] = useActionState(signInAction, initial);
+  const [state, action, pending] = useFormAction(signInAction);
   return (
     <form action={action} className={styles.form}>
       <input type="hidden" name="next" value={next} />
@@ -27,7 +24,7 @@ export function SignInForm({ next }: { next: string }) {
 }
 
 export function SignUpForm({ next }: { next: string }) {
-  const [state, action, pending] = useActionState(signUpAction, initial);
+  const [state, action, pending] = useFormAction(signUpAction);
   if (state.ok && state.message) return <FormStatus state={state} />;
   return (
     <form action={action} className={styles.form}>
@@ -43,7 +40,7 @@ export function SignUpForm({ next }: { next: string }) {
 }
 
 export function ResetRequestForm() {
-  const [state, action, pending] = useActionState(requestPasswordResetAction, initial);
+  const [state, action, pending] = useFormAction(requestPasswordResetAction);
   return (
     <form action={action} className={styles.form}>
       <FormStatus state={state} />
@@ -54,7 +51,7 @@ export function ResetRequestForm() {
 }
 
 export function NewPasswordForm() {
-  const [state, action, pending] = useActionState(setNewPasswordAction, initial);
+  const [state, action, pending] = useFormAction(setNewPasswordAction);
   return (
     <form action={action} className={styles.form}>
       <FormStatus state={state} />

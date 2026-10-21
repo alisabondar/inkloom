@@ -52,6 +52,14 @@ PIXAZO_FLUX_SCHNELL_REQUEST_URL=https://gateway.pixazo.ai/flux-1-schnell/v1/getD
 PIXAZO_FLUX_SCHNELL_RESULT_URL=https://gateway.pixazo.ai/flux-1-schnell/v1/getData-result
 ```
 
+Local testing without signing in (ignored when `NODE_ENV=production`): every request is signed in as a confirmed dev account (`dev@inkloom.test`, created on first use). It is a real Supabase user, so Row Level Security still applies.
+
+```bash
+DEV_AUTH_BYPASS=true
+DEV_USER_EMAIL=dev@inkloom.test        # optional
+DEV_USER_PASSWORD=choose-a-local-one   # optional
+```
+
 Then:
 
 ```bash

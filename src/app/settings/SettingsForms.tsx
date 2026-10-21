@@ -1,18 +1,16 @@
 'use client';
 
-import { useActionState, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/studio';
 import { changePasswordAction, deleteAccountAction, exportDataAction, updateProfileAction, uploadAvatarAction } from '@/app/actions/profile';
 import { Field, FormStatus } from '@/components/site/FormBits';
+import { useFormAction } from '@/components/site/useFormAction';
 import { MEDIUMS } from '@/lib/plan';
 import type { CurrentProfile } from '@/lib/db/queries';
-import type { ActionState } from '@/lib/validation';
 import styles from '../pages.module.css';
 
-const initial: ActionState = {};
-
 export function ProfileForm({ profile }: { profile: CurrentProfile }) {
-  const [state, action, pending] = useActionState(updateProfileAction, initial);
+  const [state, action, pending] = useFormAction(updateProfileAction);
   return (
     <form action={action} className={styles.form}>
       <FormStatus state={state} />
@@ -21,7 +19,7 @@ export function ProfileForm({ profile }: { profile: CurrentProfile }) {
       <Field label="Email" name="email" type="email" defaultValue={profile.email ?? ''} required state={state} />
       <div className={styles.field}>
         <label htmlFor="favorite_medium" className={styles.label}>Favourite medium</label>
-        <select id="favorite_medium" name="favorite_medium" className={styles.select} defaultValue={profile.favorite_medium ?? ''}>
+        <select id="favorite_medium" name="favorite_medium" className={styles.select} defaultValue={state.values?.favorite_medium ?? profile.favorite_medium ?? ''} key={state.values?.favorite_medium}>
           <option value="">No favourite</option>
           {MEDIUMS.map((medium) => <option key={medium.id} value={medium.id}>{medium.label}</option>)}
         </select>
@@ -32,7 +30,7 @@ export function ProfileForm({ profile }: { profile: CurrentProfile }) {
 }
 
 export function AvatarForm({ profile }: { profile: CurrentProfile }) {
-  const [state, action, pending] = useActionState(uploadAvatarAction, initial);
+  const [state, action, pending] = useFormAction(uploadAvatarAction);
   return (
     <form action={action} className={styles.form}>
       <FormStatus state={state} />
@@ -47,7 +45,7 @@ export function AvatarForm({ profile }: { profile: CurrentProfile }) {
 }
 
 export function PasswordForm() {
-  const [state, action, pending] = useActionState(changePasswordAction, initial);
+  const [state, action, pending] = useFormAction(changePasswordAction);
   return (
     <form action={action} className={styles.form}>
       <FormStatus state={state} />

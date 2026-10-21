@@ -1,8 +1,8 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useFormAction } from '@/components/site/useFormAction';
 import { saveTemplateAction } from '@/app/actions/templates';
-import type { ActionState } from '@/lib/validation';
 import type { Difficulty } from '@/lib/processing';
 import type { Medium } from '@/lib/plan';
 import { Button, Chip, HandNote, Paper, Wash } from '@/components/studio';
@@ -184,7 +184,7 @@ function ConceptSlot({ concept, index, selected, onSelect }: { concept: Concept;
 }
 
 function SavePanel({ generationId, defaultTitle }: { generationId: string; defaultTitle: string }) {
-  const [state, formAction, pending] = useActionState(saveTemplateAction, {} as ActionState);
+  const [state, formAction, pending] = useFormAction(saveTemplateAction);
   const [difficulty, setDifficulty] = useState<Difficulty>('beginner');
 
   return (
@@ -195,7 +195,7 @@ function SavePanel({ generationId, defaultTitle }: { generationId: string; defau
         <div className={styles.panelGrid}>
           <div>
             <label className={styles.label} htmlFor="concept-title">Title</label>
-            <input id="concept-title" name="title" className={styles.input} defaultValue={defaultTitle} maxLength={120} required />
+            <input id="concept-title" name="title" className={styles.input} defaultValue={state.values?.title ?? defaultTitle} maxLength={120} required />
             {state.fieldErrors?.title && <p className={styles.error}>{state.fieldErrors.title}</p>}
           </div>
           <div>
