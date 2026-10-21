@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
+  experimental: {
+    // Reference photos (up to 8 MB) are uploaded through a Server Action.
+    serverActions: { bodySizeLimit: '9mb' },
+  },
   images: {
     remotePatterns: [
       {
