@@ -1,57 +1,57 @@
-# Spec Audit — Source: V2_PLAN.md, Phase 0
+# Spec Audit — Source: V3_PLAN.md (Stages 1–9)
 
-Previous README audit: AUDIT-README.md
+Earlier audits: AUDIT-README.md, AUDIT-PHASE0.md
 
 ## Checklist
-1. S0.1.1: "Passwords are managed by Supabase Auth; the app never stores, reads, or compares passwords itself."
-2. S0.1.2: "Sessions are carried in httpOnly cookies set by the server."
-3. S0.1.3: "Server code resolves the current user from the session cookie, verified with Supabase Auth."
-4. S0.1.4: "An expired access token is refreshed with the refresh token and the cookies are updated."
-5. S0.2.1: "`/api/signup` creates the account with Supabase Auth and creates the matching `user` profile row."
-6. S0.2.2: "`/api/signin` signs in with Supabase Auth using an email or a username (a username is resolved to its email on the server)."
-7. S0.2.3: "A new `/api/signout` route ends the session and clears the session cookies."
-8. S0.2.4: "Sign in, sign up, and sign out responses never include a password."
-9. S0.3.1: "These routes take the user identity from the session only: `get-user`, `update-user`, `upload-avatar`, `change-password`, `export-user-data`, `delete-account`, `save-template`, `get-templates`, `generate-template`."
-10. S0.3.2: "Those routes return 401 when there is no valid session."
-11. S0.3.3: "User IDs sent by the client in the body, query string, or form data are ignored."
-12. S0.3.4: "`save-template` stores the template under the signed-in user's id; `get-templates` and `export-user-data` return only the signed-in user's templates."
-13. S0.3.5: "`DEFAULT_USER_ID` is removed."
-14. S0.4.1: "`change-password` verifies the current password with Supabase Auth and sets the new password with Supabase Auth."
-15. S0.4.2: "`delete-account` deletes the user's avatar files, templates, profile row, and Supabase Auth user, then clears the session cookies."
-16. S0.5.1: "`useAuth` no longer uses `localStorage` as the source of identity; it loads the current user from the server session."
-17. S0.5.2: "`signOut` calls `/api/signout`."
-18. S0.5.3: "Client pages no longer send user IDs to the API."
-19. S0.6.1: "SQL migrations in `supabase/migrations/` enable Row Level Security on the `user` and `template` tables."
-20. S0.6.2: "The `user` table links to Supabase Auth through an `auth_id uuid` column."
-21. S0.6.3: "Policies let a user read and update only their own `user` row."
-22. S0.6.4: "Policies let a user read, insert, update, and delete only their own `template` rows."
-23. S0.6.5: "Policies let anyone read `template` rows where `public` is true."
-24. S0.6.6: "The migration drops the `password` column from `user`."
-25. S0.7.1: "A one-off script in `scripts/` creates a Supabase Auth user for each existing `user` row and sets its `auth_id`."
-26. S0.7.2: "The README documents the order: apply the migration that adds `auth_id`, run the script, then apply the Row Level Security migration."
-27. S0.8.1: "Reads and writes of the `user` and `template` tables in user-scoped routes go through a client bound to the user's session, so RLS applies."
-28. S0.8.2: "The service-role client is used only for Storage operations, Supabase Auth admin operations, and the pre-session routes `signup`, `signin`, `check-user`, and `check-username`."
-29. S0.8.3: "`get-template` and `get-public-templates` read tables with the session client (or the anon client when signed out), so private templates are visible only to their owner."
-30. S0.9.1: "`generate-template` limits each user to a number of generations per hour, configurable with `GENERATE_RATE_LIMIT_PER_HOUR` (default 10)."
-31. S0.9.2: "Requests over the limit get a 429 response with a `Retry-After` header."
-32. S0.10.1: "Unit tests cover session resolution (401 without a session) and the rate limiter."
-33. S0.10.2: "`npm run lint`, `npx tsc --noEmit`, and `npm test -- --run` pass."
-
-## Round 1 (2026-10-20, fresh auditor subagent)
-Result: 33 MET, 0 PARTIAL, 0 MISSING. New items: 0.
-
-Commands: `npm run lint` clean; `npx tsc --noEmit` exit 0; `npm test -- --run` 20/20 pass (session 4, user-routes-auth 9, rate-limit 3, Header 4).
-
-Evidence highlights: session cookies `src/lib/auth/session.ts:11-22`, verify/refresh `:37-59`; 401 guard `:76-108`; Auth signup/signin `signup/route.ts:42`, `signin/route.ts:36`; change-password `change-password/route.ts:30-39`; delete-account `delete-account/route.ts:18-50`; useAuth server session `src/hooks/useAuth.ts:30-42`; RLS `supabase/migrations/0002_enable_rls.sql`; account migration `scripts/migrate-users-to-auth.mjs`; rate limit 429 `generate-template/route.ts:12-16`.
-
-### Findings
-None.
-
-### Out-of-scope
-- Migration script reads the legacy plaintext `password` column (one-off migration, not runtime)
-- Extra `user_delete_own` RLS policy beyond read/update
-- `check-user` returns email for a username lookup (account enumeration)
-- Rate limiter is in-memory per server instance
-
-## Outcome
-Done after Round 1: zero PARTIAL/MISSING. Scope-creep breaker did not fire.
+1. S1.1: "A migration `supabase/migrations/0004_v3_schema.sql` creates `profiles`, `templates`, and `generations` tables."
+2. S1.2: "`profiles.id` is a uuid primary key that references `auth.users(id)`."
+3. S1.3: "`templates.owner_id` and `generations.owner_id` are uuids that reference `profiles(id)` and default to `auth.uid()`."
+4. S1.4: "`templates` stores title, medium, difficulty, prompt, concept image path, workspace settings (jsonb), visibility, and timestamps."
+5. S1.5: "`generations` stores status (`queued`, `running`, `succeeded`, `failed`), provider, prompt, result image path, error, and timestamps."
+6. S1.6: "A trigger creates a `profiles` row when a Supabase Auth user is created."
+7. S1.7: "Row Level Security is enabled on all three tables: owners have full access to their own rows, and anyone can read templates where `is_public` is true."
+8. S1.8: "Storage policies limit writes in the `avatars` and `templates` buckets to paths starting with the user's id."
+9. S1.9: "The migration copies existing data from the legacy `user` and `template` tables into the new tables."
+10. S1.10: "Migration `0003_template_user_id_uuid.sql` is removed, because 0004 supersedes it."
+11. S2.1: "`src/lib/supabase/server.ts` creates a Supabase client bound to the request's session cookies, for Server Components, Server Actions, and route handlers."
+12. S2.2: "`src/lib/supabase/admin.ts` is the only module that reads `SUPABASE_SERVICE_ROLE_KEY`."
+13. S2.3: "`src/proxy.ts` refreshes an expired session on page requests and updates the cookies."
+14. S2.4: "`src/lib/db/types.ts` defines TypeScript types for the `profiles`, `templates`, and `generations` rows."
+15. S3.1: "`src/lib/validation.ts` provides typed validators for every Server Action input."
+16. S3.2: "Every Server Action validates its input before using it and returns field errors on failure."
+17. S4.1: "Auth actions: sign up, sign in (email or username), sign out, and request a password reset."
+18. S4.2: "`src/app/auth/callback/route.ts` completes email confirmation and password-reset links and signs the user in."
+19. S4.3: "Profile actions: update profile, upload avatar, change password, export data, and delete account."
+20. S4.4: "Template actions: save a template, update its workspace settings, set its visibility, and delete it."
+21. S4.5: "Server Actions take the user's identity from the session only."
+22. S4.6: "The old routes in `src/app/api/` are removed, except the generation status route (5.5)."
+23. S5.1: "Image providers implement one interface in `src/lib/ai/providers/`: Pixazo and Cloudflare Workers AI."
+24. S5.2: "`IMAGE_PROVIDER` selects the primary provider, and the other configured provider is used as a fallback when the primary fails."
+25. S5.3: "A prompt builder turns the idea, medium, and options into a colour concept prompt."
+26. S5.4: "Starting a generation inserts a `generations` row, returns its id immediately, and runs the provider after the response."
+27. S5.5: "`GET /api/generations/[id]` returns the status and, when finished, a signed URL for the result."
+28. S5.6: "Generation is rate limited per user by counting the user's `generations` rows from the last hour (`GENERATE_RATE_LIMIT_PER_HOUR`, default 10)."
+29. S5.7: "Creating concepts starts 4 generations for one idea."
+30. S6.1: "`src/lib/processing/` contains pure functions that work on RGBA image data."
+31. S6.2: "Line art: edge detection with adjustable detail and line weight, producing black lines on white."
+32. S6.3: "Value study: posterized greyscale with an adjustable number of steps."
+33. S6.4: "Palette: k-means colour extraction with an adjustable colour count, giving hex, share, and a colour name for each colour."
+34. S6.5: "Paint by number: pixels quantized to the palette, with region outlines."
+35. S6.6: "Difficulty presets map beginner, intermediate, and advanced to detail, value steps, and palette size."
+36. S6.7: "`src/lib/plan.ts` builds a project plan (materials, ordered steps, time estimate) from the medium, palette, value steps, and difficulty."
+37. S7.1: "Design tokens for the Studio Table direction are defined in `src/styles/globals.css`."
+38. S7.2: "`src/components/studio/` provides Paper, Tape, Button, Chip, PencilSlider, Wash (SVG watercolour), HandNote, StudioBackground, LayerCard, and PaintTin components."
+39. S7.3: "The Caveat handwriting font is loaded alongside Fraunces and Inter."
+40. S7.4: "Motion respects `prefers-reduced-motion`."
+41. S8.1: "Home: a prompt bar with medium shortcuts and a strip of recent public templates."
+42. S8.2: "Create: choose a medium, describe the idea (with an optional reference photo), see the generation stages, then pick one of the concepts."
+43. S8.3: "Workspace `/t/[id]`: layer toggles (line art, values, paint by number, grid, colour reference), live sliders for the processing settings, the palette, and the project plan."
+44. S8.4: "Workspace settings are saved to the template."
+45. S8.5: "Export from the workspace: PNG of the visible layers, and a printable pack (template, palette, and plan) using print styles."
+46. S8.6: "Gallery: a masonry grid of public templates with medium and difficulty filters."
+47. S8.7: "My projects: the signed-in user's templates."
+48. S8.8: "Settings: profile, avatar, password, data export, and account deletion."
+49. S8.9: "Private templates return 404 to anyone who is not the owner."
+50. S9.1: "Unit tests cover validation, the processing functions, the plan builder, provider selection and fallback, and the rate limit."
+51. S9.2: "`npm run lint`, `npx tsc --noEmit`, and `npm test -- --run` pass."
+52. S9.3: "The README documents V3 setup: environment variables, migration 0004, and the providers."
