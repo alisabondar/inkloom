@@ -15,7 +15,8 @@ export const cloudflareProvider: ImageProvider = {
 
   isConfigured: () => Boolean(process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN),
 
-  async generate({ prompt, seed }) {
+  // FLUX-schnell on Workers AI accepts only prompt and steps (a seed is rejected as bad input).
+  async generate({ prompt }) {
     const model = process.env.CLOUDFLARE_IMAGE_MODEL || DEFAULT_MODEL;
     const url = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`;
 
@@ -25,7 +26,7 @@ export const cloudflareProvider: ImageProvider = {
         Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prompt, steps: 8, ...(seed !== undefined ? { seed } : {}) }),
+      body: JSON.stringify({ prompt, steps: 8 }),
     });
 
     const data = (await response.json().catch(() => ({}))) as CloudflareResponse;
