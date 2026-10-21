@@ -8,6 +8,7 @@ import {
   supabaseAnonKey,
   supabaseUrl,
 } from './env';
+import { getDevSession, isDevAuthBypass } from './devAuth';
 
 export class AuthRequiredError extends Error {
   constructor() {
@@ -52,6 +53,11 @@ interface ResolvedSession {
 // refreshed; cookies can only be written from Server Actions and route handlers, so in Server
 // Components the refreshed token is used for this request and src/proxy.ts persists it next time.
 export const getSession = cache(async (): Promise<ResolvedSession | null> => {
+  if (isDevAuthBypass()) {
+    const session = await getDevSession();
+    return { user: session.user, accessToken: session.access_token };
+  }
+
   const store = await cookies();
   const accessToken = store.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = store.get(REFRESH_TOKEN_COOKIE)?.value;
