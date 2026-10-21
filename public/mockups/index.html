@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Inkloom V3 — UI & flow mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,600..850,45,1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --cream: #faf8f2;
+    --paper: #fffdf8;
+    --ink: #172033;
+    --ink-soft: #5b6475;
+    --line: #e7e1d4;
+    --mint: #77d7c8;
+    --mint-soft: #dff4ef;
+    --teal: #12776f;
+    --teal-strong: #38b8aa;
+    --coral: #ffb199;
+    --coral-soft: #ffe6dc;
+    --butter: #f6d77a;
+    --lilac: #c9b8f0;
+    --display: 'Fraunces', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+    --radius: 18px;
+    --shadow: 0 1px 2px rgba(23,32,51,.06), 0 12px 32px -12px rgba(23,32,51,.18);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #efebe1; color: var(--ink); font-family: var(--sans); font-size: 14px; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- page chrome ---------- */
+  .index { position: sticky; white-space: nowrap; overflow-x: auto; flex-wrap: nowrap !important; top: 0; z-index: 50; background: rgba(239,235,225,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); padding: 14px 28px; display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+  .index h1 { font-family: var(--display); font-size: 20px; margin: 0 12px 0 0; color: var(--teal); }
+  .index a { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); padding: 6px 10px; border-radius: 999px; }
+  .index a:hover { background: var(--paper); color: var(--ink); }
+  .mock { max-width: 1240px; margin: 48px auto 72px; padding: 0 28px; }
+  .mock-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
+  .mock-num { font-family: var(--display); font-size: 40px; color: var(--teal); line-height: 1; }
+  .mock-title { font-family: var(--display); font-size: 26px; margin: 0; }
+  .mock-note { color: var(--ink-soft); margin: 4px 0 0; max-width: 820px; line-height: 1.5; }
+  .inspo { display: inline-flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .inspo span { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: var(--paper); border: 1px solid var(--line); padding: 3px 8px; border-radius: 999px; color: var(--ink-soft); }
+
+  .frame { background: var(--cream); border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; border: 1px solid #ddd6c6; position: relative; }
+  .browser { height: 34px; background: #ece7db; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-bottom: 1px solid #ddd6c6; }
+  .browser i { width: 10px; height: 10px; border-radius: 50%; background: #d8d0bf; }
+  .browser .url { margin-left: 14px; font-size: 11px; color: var(--ink-soft); background: var(--paper); padding: 4px 14px; border-radius: 8px; }
+  .screen { min-height: 640px; position: relative; overflow: hidden; }
+
+  /* ---------- app chrome ---------- */
+  .topbar { display: flex; align-items: center; gap: 24px; padding: 16px 28px; position: relative; z-index: 2; }
+  .logo { font-family: var(--display); font-weight: 800; font-size: 24px; color: var(--teal); }
+  .nav { display: flex; gap: 4px; }
+  .nav a { padding: 8px 14px; border-radius: 999px; font-weight: 600; color: var(--ink-soft); font-size: 13px; }
+  .nav a.on { background: var(--paper); color: var(--ink); box-shadow: var(--shadow); }
+  .spacer { flex: 1; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--mint-soft); display: grid; place-items: center; font-weight: 700; color: var(--teal); }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 12px; padding: 11px 18px; font: 700 13.5px var(--sans); cursor: pointer; }
+  .btn-primary { background: linear-gradient(135deg, var(--mint), #bfeee5); color: #0c4f49; box-shadow: 0 6px 18px -8px rgba(18,119,111,.6); }
+  .btn-dark { background: var(--ink); color: white; }
+  .btn-ghost { background: var(--paper); color: var(--ink); border: 1px solid var(--line); }
+  .btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 10px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+  .chip.on { background: var(--ink); color: white; border-color: var(--ink); }
+  .kicker { color: var(--teal); font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .display { font-family: var(--display); }
+  .card { background: var(--paper); border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--shadow); }
+  .muted { color: var(--ink-soft); }
+
+  .splat { position: absolute; width: 180px; height: 180px; -webkit-mask: url(/paint-splat-mask.png) center/contain no-repeat; mask: url(/paint-splat-mask.png) center/contain no-repeat; opacity: .35; z-index: 0; pointer-events: none; }
+
+  .art { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .f-values { filter: url(#values); }
+  .f-poster { filter: url(#poster); }
+  .f-lines { filter: url(#lines); }
+
+  /* slider */
+  .slider { margin: 14px 0; }
+  .slider label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+  .slider label span { color: var(--ink-soft); font-weight: 600; }
+  .track { height: 6px; border-radius: 999px; background: var(--line); position: relative; }
+  .track b { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--teal-strong); }
+  .track b::after { content: ''; position: absolute; right: -8px; top: -5px; width: 16px; height: 16px; border-radius: 50%; background: white; border: 3px solid var(--teal-strong); box-shadow: var(--shadow); }
+  .toggle { width: 32px; height: 18px; border-radius: 999px; background: var(--line); position: relative; flex: none; }
+  .toggle::after { content: ''; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: white; }
+  .toggle.on { background: var(--teal-strong); }
+  .toggle.on::after { left: 16px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <filter id="values">
+    <feColorMatrix type="saturate" values="0" />
+    <feComponentTransfer>
+      <feFuncR type="discrete" tableValues="0.13 0.38 0.62 0.86 0.98" />
+      <feFuncG type="discrete" tableValues="0.13 0.38 0.62 0.86 0.98" />
+      <feFuncB type="discrete" tableValues="0.13 0.38 0.62 0.86 0.98" />
+    </feComponentTransfer>
+  </filter>
+  <filter id="poster">
+    <feComponentTransfer>
+      <feFuncR type="discrete" tableValues="0.18 0.5 0.78 0.96" />
+      <feFuncG type="discrete" tableValues="0.18 0.5 0.78 0.96" />
+      <feFuncB type="discrete" tableValues="0.18 0.5 0.78 0.96" />
+    </feComponentTransfer>
+  </filter>
+  <filter id="lines">
+    <feColorMatrix type="saturate" values="0" />
+    <feGaussianBlur stdDeviation="1.6" />
+    <feConvolveMatrix order="3" kernelMatrix="-1 -1 -1 -1 8 -1 -1 -1 -1" preserveAlpha="true" />
+    <feComponentTransfer>
+      <feFuncR type="linear" slope="7" />
+      <feFuncG type="linear" slope="7" />
+      <feFuncB type="linear" slope="7" />
+    </feComponentTransfer>
+    <feComponentTransfer>
+      <feFuncR type="discrete" tableValues="1 1 0.3 0.08" />
+      <feFuncG type="discrete" tableValues="1 1 0.3 0.08" />
+      <feFuncB type="discrete" tableValues="1 1 0.3 0.08" />
+    </feComponentTransfer>
+  </filter>
+</svg>
+
+<nav class="index">
+  <h1>Inkloom V3 mockups</h1>
+  <a href="#m1">1 Home</a><a href="#m2">2 Medium</a><a href="#m3">3 Describe</a><a href="#m4">4 Generating</a><a href="#m5">5 Concepts</a>
+  <a href="#m6">6 Workspace</a><a href="#m7">7 Palette &amp; values</a><a href="#m8">8 Project plan</a><a href="#m9">9 Export</a><a href="#m10">10 Gallery</a><a href="/mockups/vibes.html" style="margin-left:auto;color:#12776f">Vibe directions →</a>
+</nav>
+
+<!-- ======================================================= 1 HOME -->
+<section class="mock" id="m1">
+  <div class="mock-head"><div class="mock-num">01</div><div>
+    <h2 class="mock-title">Home — start from one prompt bar</h2>
+    <p class="mock-note">The current hero stays (Fraunces wordmark, splats) but the primary action becomes a single prompt bar with "upload a reference" built in, so users start creating without a form. Below it, medium shortcuts and a live strip of community templates show what's possible.</p>
+    <div class="inspo"><span>Midjourney web</span><span>Krea</span><span>Pinterest</span><span>Current Inkloom hero</span></div>
+  </div></div>
+  <div class="frame"><div class="browser"><i></i><i></i><i></i><div class="url">inkloom.app</div></div>
+  <div class="screen" style="min-height:700px">
+    <div class="splat" style="background:#f4a7c0;left:-40px;top:160px"></div>
+    <div class="splat" style="background:var(--mint);right:60px;top:60px;width:120px;height:120px"></div>
+    <div class="splat" style="background:var(--butter);right:-30px;bottom:180px"></div>
+    <div class="topbar"><div class="logo">Inkloom</div><div class="nav"><a class="on">Create</a><a>Gallery</a><a>My projects</a></div><div class="spacer"></div><a class="btn btn-ghost btn-sm">Sign in</a></div>
+    <div style="position:relative;z-index:1;text-align:center;padding:56px 40px 0">
+      <div class="kicker">AI template studio for artists</div>
+      <h1 class="display" style="font-size:76px;margin:10px 0 6px;letter-spacing:-.02em">What will you make?</h1>
+      <p class="muted" style="font-size:16px;margin:0 0 28px">Describe an idea or drop in a photo. Get line art, values, a palette, and a step-by-step plan.</p>
+      <div class="card" style="max-width:760px;margin:0 auto;padding:10px 10px 10px 20px;display:flex;align-items:center;gap:12px;border-radius:22px">
+        <span style="font-size:20px">✎</span>
+        <span style="flex:1;text-align:left;font-size:16px;color:var(--ink-soft)">A fox curled up in a teacup, autumn leaves…</span>
+        <span class="chip">⇪ Reference</span>
+        <a class="btn btn-primary">Create →</a>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
+        <span class="chip on">✦ Any medium</span><span class="chip">Pencil</span><span class="chip">Watercolor</span><span class="chip">Acrylic</span><span class="chip">Embroidery</span><span class="chip">Paint by number</span><span class="chip">Tattoo stencil</span>
+      </div>
+    </div>
+    <div style="position:relative;z-index:1;padding:56px 40px 0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px"><b class="display" style="font-size:20px">Made with Inkloom this week</b><a class="muted" style="font-weight:600">Browse gallery →</a></div>
+      <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1.3fr 1fr;gap:12px;height:170px">
+        <div class="card" style="overflow:hidden"><img class="art" src="/meadow.png"></div>
+        <div class="card" style="overflow:hidden"><img class="art" src="/cat.png"></div>
+        <div class="card" style="overflow:hidden"><img class="art f-values" src="/landscape-painting.png"></div>
+        <div class="card" style="overflow:hidden"><img class="art" src="/dog.png"></div>
+        <div class="card" style="overflow:hidden"><img class="art" src="/landscape-painting.png"></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ======================================================= 2 MEDIUM -->
+<section class="mock" id="m2">
+  <div class="mock-head"><div class="mock-num">02</div><div>
+    <h2 class="mock-title">Choose a medium — see what you'll get</h2>
+    <p class="mock-note">Medium moves from a dropdown to visual cards, because it decides which outputs are produced. Each card lists its deliverables, so the user knows up front that "Watercolor" means a value study + palette, and "Embroidery" means stitch outlines + thread colours.</p>
+    <div class="inspo"><span>Canva template picker</span><span>Domestika course cards</span></div>
+  </div></div>
+  <div class="frame"><div class="browser"><i></i><i></i><i></i><div class="url">inkloom.app/create</div></div>
+  <div class="screen">
+    <div class="topbar"><div class="logo">Inkloom</div><div class="spacer"></div>
+      <div style="display:flex;gap:8px;align-items:center;font-size:12px;font-weight:700"><span class="chip on">1 Medium</span><span class="muted">—</span><span class="chip">2 Idea</span><span class="muted">—</span><span class="chip">3 Concept</span><span class="muted">—</span><span class="chip">4 Template</span></div>
+      <div class="spacer"></div><div class="avatar">A</div></div>
+    <div style="padding:20px 40px 40px">
+      <h2 class="display" style="font-size:38px;margin:0 0 4px">What are you working in?</h2>
+      <p class="muted" style="margin:0 0 24px">You can change this later — the template recalculates.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <div class="card" style="overflow:hidden;outline:3px solid var(--teal-strong)">
+          <div style="height:150px;background:#fff"><img class="art" src="/meadow.png"></div>
+          <div style="padding:14px 16px"><b class="display" style="font-size:18px">Pencil &amp; ink</b><p class="muted" style="margin:4px 0 10px;font-size:12.5px">Clean line art with adjustable weight</p><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip btn-sm">Line art</span><span class="chip btn-sm">Grid</span><span class="chip btn-sm">SVG</span></div></div>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <div style="height:150px;display:grid;grid-template-columns:1fr 1fr"><img class="art f-values" src="/landscape-painting.png"><img class="art" src="/landscape-painting.png"></div>
+          <div style="padding:14px 16px"><b class="display" style="font-size:18px">Watercolor</b><p class="muted" style="margin:4px 0 10px;font-size:12.5px">Light-to-dark wash order from a value map</p><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip btn-sm">Value study</span><span class="chip btn-sm">Palette</span><span class="chip btn-sm">Light lines</span></div></div>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <div style="height:150px"><img class="art f-poster" src="/landscape-painting.png"></div>
+          <div style="padding:14px 16px"><b class="display" style="font-size:18px">Paint by number</b><p class="muted" style="margin:4px 0 10px;font-size:12.5px">Numbered regions with a mixing guide</p><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip btn-sm">Regions</span><span class="chip btn-sm">Numbers</span><span class="chip btn-sm">Palette</span></div></div>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <div style="height:150px;background:#fff"><img class="art" src="/cat.png" style="object-fit:contain"></div>
+          <div style="padding:14px 16px"><b class="display" style="font-size:18px">Embroidery</b><p class="muted" style="margin:4px 0 10px;font-size:12.5px">Stitch-friendly outlines and thread colours</p><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip btn-sm">Outlines</span><span class="chip btn-sm">Threads</span><span class="chip btn-sm">Hoop size</span></div></div>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <div style="height:150px"><img class="art" src="/landscape-painting.png"></div>
+          <div style="padding:14px 16px"><b class="display" style="font-size:18px">Acrylic &amp; oil</b><p class="muted" style="margin:4px 0 10px;font-size:12.5px">Block-in shapes, values, and paint mixes</p><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip btn-sm">Block-in</span><span class="chip btn-sm">Values</span><span class="chip btn-sm">Mixes</span></div></div>
+        </div>
+        <div class="card" style="overflow:hidden">
+          <div style="height:150px;background:#fff"><img class="art" src="/meadow.png"></div>
+          <div style="padding:14px 16px"><b class="display" style="font-size:18px">Tattoo stencil</b><p class="muted" style="margin:4px 0 10px;font-size:12.5px">Bold closed outlines, mirrored for transfer</p><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip btn-sm">Stencil</span><span class="chip btn-sm">Mirror</span><span class="chip btn-sm">Size</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ======================================================= 3 DESCRIBE -->
+<section class="mock" id="m3">
+  <div class="mock-head"><div class="mock-num">03</div><div>
+    <h2 class="mock-title">Describe or upload — a composer, not a form</h2>
+    <p class="mock-note">One big text area with tappable "add detail" chips replaces the six required fields. A reference photo is optional and side-by-side. Difficulty and duration are gone from this step — they become live sliders in the workspace, where their effect is visible.</p>
+    <div class="inspo"><span>ChatGPT / Claude composer</span><span>Krea</span><span>Notion AI</span></div>
+  </div></div>
+  <div class="frame"><div class="browser"><i></i><i></i><i></i><div class="url">inkloom.app/create/idea</div></div>
+  <div class="screen">
+    <div class="splat" style="background:var(--coral);right:-40px;top:80px"></div>
+    <div class="topbar"><div class="logo">Inkloom</div><div class="spacer"></div>
+      <div style="display:flex;gap:8px;align-items:center;font-size:12px;font-weight:700"><span class="chip">✓ Watercolor</span><span class="muted">—</span><span class="chip on">2 Idea</span><span class="muted">—</span><span class="chip">3 Concept</span><span class="muted">—</span><span class="chip">4 Template</span></div>
+      <div class="spacer"></div><div class="avatar">A</div></div>
+    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:24px;padding:20px 40px 40px;position:relative;z-index:1">
+      <div class="card" style="padding:24px">
+        <div class="kicker" style="margin-bottom:10px">Your idea</div>
+        <div style="font-size:22px;line-height:1.45;min-height:140px" class="display">A quiet mountain valley at golden hour, a winding river, wildflowers in the foreground<span style="border-left:2px solid var(--teal);margin-left:2px"></span></div>
+        <div class="muted" style="font-size:12px;font-weight:700;margin:16px 0 8px">ADD DETAIL</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="chip">+ Mood: calm</span><span class="chip">+ Time of day</span><span class="chip">+ Season</span><span class="chip">+ Style: loose / tight</span><span class="chip">+ Composition</span><span class="chip">+ Main colours</span>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:22px;align-items:center;border-top:1px solid var(--line);padding-top:18px">
+          <span class="chip">✦ Improve my prompt</span>
+          <span class="muted" style="font-size:12px">Uses Gemini Flash to expand your idea — you'll see the result before generating</span>
+          <div class="spacer"></div>
+          <a class="btn btn-primary">Generate 4 concepts →</a>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card" style="padding:18px;border:2px dashed #cfc6b3;box-shadow:none;background:transparent;text-align:center">
+          <div style="height:170px;border-radius:12px;overflow:hidden;margin-bottom:12px"><img class="art" src="/landscape-painting.png"></div>
+          <b>Reference photo</b><div class="muted" style="font-size:12px;margin-top:4px">Optional · we'll keep its composition</div>
+          <div style="display:flex;gap:6px;justify-content:center;margin-top:10px"><span class="chip btn-sm on">Keep composition</span><span class="chip btn-sm">Style only</span></div>
+        </div>
+        <div class="card" style="padding:16px">
+          <div class="kicker" style="margin-bottom:8px">Canvas</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip btn-sm">Square</span><span class="chip btn-sm on">A4 landscape</span><span class="chip btn-sm">9×12 in</span><span class="chip btn-sm">Custom</span></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ======================================================= 4 GENERATING -->
+<section class="mock" id="m4">
+  <div class="mock-head"><div class="mock-num">04</div><div>
+    <h2 class="mock-title">Generating — show the stages</h2>
+    <p class="mock-note">The paint-splat loader stays, but now tells the user what's happening. Concepts stream in one by one as each job finishes, so the first result appears in seconds instead of after one long spinner. Users can leave and come back — it's a background job.</p>
+    <div class="inspo"><span>Midjourney job queue</span><span>Vercel deploy log</span><span>Current splat loader</span></div>
+  </div></div>
+  <div class="frame"><div class="browser"><i></i><i></i><i></i><div class="url">inkloom.app/create/generating</div></div>
+  <div class="screen" style="display:grid;grid-template-columns:360px 1fr">
+    <div style="padding:40px;border-right:1px solid var(--line);position:relative">
+      <div class="logo" style="margin-bottom:40px">Inkloom</div>
+      <div class="kicker">Working on it</div>
+      <h2 class="display" style="font-size:30px;margin:8px 0 28px">Mountain valley at golden hour</h2>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;gap:12px;align-items:center"><span style="width:26px;height:26px;border-radius:50%;background:var(--teal-strong);color:white;display:grid;place-items:center;font-weight:800;font-size:12px">✓</span><div><b>Enhancing your idea</b><div class="muted" style="font-size:12px">Added lighting, composition, palette hints</div></div></div>
+        <div style="display:flex;gap:12px;align-items:center"><span style="width:26px;height:26px;border-radius:50%;background:var(--teal-strong);color:white;display:grid;place-items:center;font-weight:800;font-size:12px">✓</span><div><b>Painting concepts</b><div class="muted" style="font-size:12px">2 of 4 ready</div></div></div>
+        <div style="display:flex;gap:12px;align-items:center"><span style="width:26px;height:26px;border-radius:50%;border:3px solid var(--teal-strong);border-right-color:transparent"></span><div><b>Checking quality</b><div class="muted" style="font-size:12px">No text, clean edges, matches your idea</div></div></div>
+        <div style="display:flex;gap:12px;align-items:center;opacity:.45"><span style="width:26px;height:26px;border-radius:50%;border:2px solid var(--line)"></span><div><b>Ready to choose</b></div></div>
+      </div>
+      <div class="card" style="padding:12px 14px;margin-top:40px;font-size:12px;box-shadow:none"><b>You can leave this page.</b> <span class="muted">We'll keep it in My projects and notify you.</span></div>
+    </div>
+    <div style="padding:40px;display:grid;grid-template-columns:1fr 1fr;gap:16px;position:relative">
+      <div class="card" style="overflow:hidden"><img class="art" src="/landscape-painting.png"></div>
+      <div class="card" style="overflow:hidden"><img class="art" src="/landscape-painting.png" style="filter:hue-rotate(-18deg) saturate(1.2)"></div>
+      <div class="card" style="overflow:hidden;display:grid;place-items:center;background:#f6f1e6"><div class="splat" style="position:static;background:var(--coral);opacity:.8;width:120px;height:120px;animation:pulse 1.6s infinite"></div></div>
+      <div class="card" style="overflow:hidden;display:grid;place-items:center;background:#f6f1e6"><div class="splat" style="position:static;background:var(--mint);opacity:.5;width:90px;height:90px"></div></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ======================================================= 5 CONCEPTS -->
+<section class="mock" id="m5">
+  <div class="mock-head"><div class="mock-num">05</div><div>
+    <h2 class="mock-title">Pick a concept — then refine</h2>
+    <p class="mock-note">Four colour concepts to choose from, each with quick refinements ("simpler", "more like this", "different angle"). A side-by-side preview shows the derived line art, so the user picks based on how good the template will be, not just the pretty picture.</p>
+    <div class="inspo"><span>Midjourney U/V buttons</span><span>Adobe Firefly</span><span>Gemini image editing</span></div>
+  </div></div>
+  <div class="frame"><div class="browser"><i></i><i></i><i></i><div class="url">inkloom.app/create/concepts</div></div>
+  <div class="screen" style="display:grid;grid-template-columns:1fr 380px">
+    <div style="padding:24px 28px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px"><div class="logo">Inkloom</div><div class="spacer"></div><span class="chip">↺ Regenerate all</span><span class="chip">✎ Edit prompt</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="card" style="overflow:hidden;outline:3px solid var(--teal-strong);position:relative"><img class="art" src="/landscape-painting.png" style="height:220px"><span class="chip on" style="position:absolute;top:10px;left:10px">✓ Selected</span></div>
+        <div class="card" style="overflow:hidden"><img class="art" src="/landscape-painting.png" style="height:220px;filter:hue-rotate(-20deg) saturate(1.25)"></div>
+        <div class="card" style="overflow:hidden"><img class="art" src="/landscape-painting.png" style="height:220px;filter:sepia(.4) contrast(1.1)"></div>
+        <div class="card" style="overflow:hidden"><img class="art" src="/landscape-painting.png" style="height:220px;filter:hue-rotate(25deg) brightness(1.05)"></div>
+      </div>
+    </div>
+    <div style="background:var(--paper);border-left:1px solid var(--line);padding:24px">
+      <div class="kicker">Concept 1</div>
+      <h3 class="display" style="font-size:22px;margin:6px 0 14px">Template preview</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+        <div style="border-radius:12px;overflow:hidden;height:110px;background:white;border:1px solid var(--line)"><img class="art" src="/meadow.png"></div>
+        <div style="border-radius:12px;overflow:hidden;height:110px;border:1px solid var(--line)"><img class="art f-values" src="/landscape-painting.png"></div>
+      </div>
+      <div class="muted" style="font-size:11.5px;display:flex;justify-content:space-between;margin-bottom:18px"><span>Line art</span><span>Value study</span></div>
+      <div class="kicker" style="color:var(--ink-soft);margin-bottom:8px">Refine this concept</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a class="btn btn-ghost" style="justify-content:flex-start">◌ Simpler shapes</a>
+        <a class="btn btn-ghost" style="justify-content:flex-start">✦ More like this (4 variations)</a>
+        <a class="btn btn-ghost" style="justify-content:flex-start">⟲ Different viewpoint</a>
+        <div class="card" style="box-shadow:none;padding:10px 12px;color:var(--ink-soft);font-size:13px">Or tell it: "remove the tree on the right"…</div>
+      </div>
+      <a class="btn btn-primary" style="width:100%;justify-content:center;margin-top:22px">Use this concept →</a>
+    </div>
+  </div></div>
+</section>
+
+<!-- ======================================================= 6 WORKSPACE -->
+<section class="mock" id="m6">
+  <div class="mock-head"><div class="mock-num">06</div><div>
+    <h2 class="mock-title">The workspace — layers and live sliders</h2>
+    <p class="mock-note">The core screen. The template is computed in the browser from the chosen concept, so every slider updates instantly with no regeneration. Layers stack like Procreate/Figma (lines, values, grid, numbers, colour reference). Difficulty is now a real control: it changes region count and line simplification.</p>
+    <div class="inspo"><span>Procreate layers</span><span>Figma right panel</span><span>Lightroom sliders</span></div>
+  </div></div>
+  <div class="frame"><div class="browser"><i></i><i></i><i></i><div class="url">inkloom.app/t/mountain-valley</div></div>
+  <div class="screen" style="display:grid;grid-template-columns:220px 1fr 300px;min-height:680px;background:#f1ede3">
+    <div style="background:var(--paper);border-right:1px solid var(--line);padding:18px 14px">
+      <div class="logo" style="font-size:20px;margin-bottom:18px">Inkloom</div>
+      <div class="kicker" style="margin-bottom:10px">Layers</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="card" style="box-shadow:none;padding:8px;display:flex;gap:10px;align-items:center;border-color:var(--teal-strong)"><div style="width:42px;height:32px;border-radius:6px;overflow:hidden;background:#fff"><img class="art" src="/meadow.png"></div><b style="font-size:12.5px;flex:1">Line art</b><span class="toggle on"></span></div>
+        <div class="card" style="box-shadow:none;padding:8px;display:flex;gap:10px;align-items:center"><div style="width:42px;height:32px;border-radius:6px;overflow:hidden"><img class="art f-values" src="/landscape-painting.png"></div><b style="font-size:12.5px;flex:1">Values</b><span class="toggle"></span></div>
+        <div class="card" style="box-shadow:none;padding:8px;display:flex;gap:10px;align-items:center"><div style="width:42px;height:32px;border-radius:6px;background:repeating-linear-gradient(0deg,#ddd 0 1px,#fff 1px 8px),repeating-linear-gradient(90deg,#ddd 0 1px,transparent 1px 8px)"></div><b style="font-size:12.5px;flex:1">Grid</b><span class="toggle on"></span></div>
+        <div class="card" style="box-shadow:none;padding:8px;display:flex;gap:10px;align-items:center"><div style="width:42px;height:32px;border-radius:6px;overflow:hidden"><img class="art f-poster" src="/landscape-painting.png"></div><b style="font-size:12.5px;flex:1">Regions</b><span class="toggle"></span></div>
+        <div class="card" style="box-shadow:none;padding:8px;display:flex;gap:10px;align-items:center"><div style="width:42px;height:32px;border-radius:6px;overflow:hidden"><img class="art" src="/landscape-painting.png"></div><b style="font-size:12.5px;flex:1">Colour ref</b><span class="toggle"></span></div>
+      </div>
+      <div class="kicker" style="margin:22px 0 10px">Views</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:13px">
+        <a style="padding:7px 10px;border-radius:8px;background:var(--mint-soft);color:var(--teal)">Template</a>
+        <a class="muted" style="padding:7px 10px">Palette &amp; values</a>
+        <a class="muted" style="padding:7px 10px">Plan</a>
+        <a class="muted" style="padding:7px 10px">Journal</a>
+      </div>
+    </div>
+    <div style="padding:22px;display:flex;flex-direction:column">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">
+        <b class="display" style="font-size:20px">Mountain valley</b><span class="chip btn-sm">Watercolor</span><span class="chip btn-sm">A4</span>
+        <div class="spacer"></div>
+        <span class="chip btn-sm">⇆ Compare</span><span class="chip btn-sm">− 100% +</span><a class="btn btn-dark btn-sm">Export</a>
+      </div>
+      <div style="flex:1;background:white;border-radius:8px;box-shadow:var(--shadow);position:relative;overflow:hidden;min-height:480px">
+        <img class="art" src="/meadow.png" style="position:absolute;inset:0">
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(56,184,170,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(56,184,170,.35) 1px,transparent 1px);background-size:25% 25%"></div>
+      </div>
+    </div>
+    <div style="background:var(--paper);border-left:1px solid var(--line);padding:20px">
+      <div class="kicker" style="margin-bottom:4px">Adjust</div>
+      <div class="muted" style="font-size:12px;margin-bottom:6px">Updates instantly — no regeneration</div>
+      <div class="slider"><label>Difficulty <span>Intermediate</span></label><div class="track"><b style="width:52%"></b></div></div>
+      <div class="slider"><label>Line detail <span>Medium</span></label><div class="track"><b style="width:45%"></b></div></div>
+      <div class="slider"><label>Line weight <span>0.6 mm</span></label><div class="track"><b style="width:35%"></b></div></div>
+      <div class="slider"><label>Value steps <span>5</span></label><div class="track"><b style="width:50%"></b></div></div>
+      <div class="slider"><label>Palette size <span>8 colours</span></label><div class="track"><b style="width:40%"></b></div></div>
+      <div class="slider"><label>Grid <span>4 × 4</span></label><div class="track"><b style="width:30%"></b></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;font-weight:700;font-size:12.5px">Remove background <span class="toggle"></span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-weight:700;font-size:12.5px">Mirror for transfer <span class="toggle"></span></div>
+      <div class="card" style="box-shadow:none;margin-top:22px;padding:12px;background:var(--mint-soft);border-color:#bfe8df;font-size:12px"><b>Est. time: 3–4 hours</b><div class="muted" style="margin-top:2px">Based on 46 regions and 5 value steps</div></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ======================================================= 7 PALETTE -->
+<section class="mock" id="m7">
+  <div class="mock-head"><div class="mock-num">07</div><div>
+    <h2 class="mock-title">Palette &amp; values — the painter's prep sheet</h2>
+    <p class="mock-note">Extracted from the concept by colour clustering: named swatches with simple paint mixes, coverage percentages, and a value scale that matches the value study. Users can swap in their own paint set (e.g. "Winsor &amp; Newton Cotman 12") and the mixes recalculate.</p>
+    <div class="inspo"><span>Coolors</span><span>Adobe Color</span><span>Artist value-study practice</span></div>
+  </div></div>
+  <div class="frame"><div class="browser"><i></i><i></i><i></i><div class="url">inkloom.app/t/mountain-valley/palette</div></div>
+  <div class="screen" style="padding:28px 36px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px"><div class="logo">Inkloom</div><div class="spacer"></div><span class="chip">My paints: Cotman 12 ▾</span><span class="chip">⇩ Print prep sheet</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+      <div class="card" style="padding:20px">
+        <b class="display" style="font-size:20px">Palette · 8 colours</b>
+        <div style="display:flex;height:64px;border-radius:12px;overflow:hidden;margin:14px 0 18px">
+          <div style="flex:22;background:#e7b45c"></div><div style="flex:18;background:#7a9a5a"></div><div style="flex:15;background:#3e5f45"></div><div style="flex:12;background:#9db7c9"></div><div style="flex:10;background:#d97b4a"></div><div style="flex:9;background:#5b5470"></div><div style="flex:8;background:#f4e3c1"></div><div style="flex:6;background:#2b2f3a"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:28px 1fr auto;gap:10px 12px;align-items:center;font-size:13px">
+          <span style="width:28px;height:28px;border-radius:8px;background:#e7b45c"></span><div><b>Golden ochre</b><div class="muted" style="font-size:12px">Yellow ochre + touch of cadmium orange</div></div><span class="muted">22%</span>
+          <span style="width:28px;height:28px;border-radius:8px;background:#7a9a5a"></span><div><b>Meadow green</b><div class="muted" style="font-size:12px">Sap green + yellow ochre</div></div><span class="muted">18%</span>
+          <span style="width:28px;height:28px;border-radius:8px;background:#3e5f45"></span><div><b>Shadow pine</b><div class="muted" style="font-size:12px">Sap green + burnt umber</div></div><span class="muted">15%</span>
+          <span style="width:28px;height:28px;border-radius:8px;background:#9db7c9"></span><div><b>Distant blue</b><div class="muted" style="font-size:12px">Ultramarine + lots of water</div></div><span class="muted">12%</span>
+          <span style="width:28px;height:28px;border-radius:8px;background:#d97b4a"></span><div><b>Sunset orange</b><div class="muted" style="font-size:12px">Cadmium orange + burnt sienna</div></div><span class="muted">10%</span>
+        </div>
+      </div>
+      <div class="card" style="padding:20px">
+        <b class="display" style="font-size:20px">Value study · 5 steps</b>
+        <div style="height:220px;border-radius:12px;overflow:hidden;margin:14px 0"><img class="art f-values" src="/landscape-painting.png"></div>
+        <div style="display:flex;gap:6px">
+          <div style="flex:1;text-align:center"><div style="height:36px;border-radius:8px;background:#212121"></div><div class="muted" style="font-size:11px;margin-top:4px">1 · darkest</div></div>
+          <div style="flex:1;text-align:center"><div style="height:36px;border-radius:8px;background:#616161"></div><div class="muted" style="font-size:11px;margin-top:4px">2</div></div>
+          <div style="flex:1;text-align:center"><div style="height:36px;border-radius:8px;background:#9e9e9e"></div><div class="muted" style="font-size:11px;margin-top:4px">3</div></div>
+          <div style="flex:1;text-align:center"><div style="height:36px;border-radius:8px;background:#dbdbdb"></div><div class="muted" style="font-size:11px;margin-top:4px">4</div></div>
+          <div style="flex:1;text-align:center"><div style="height:36px;border-radius:8px;background:#fafafa;border:1px solid var(--line)"></div><div class="muted" style="font-size:11px;margin-top:4px">5 · paper</div></div>
+        </div>
+        <div class="card" style="box-shadow:none;margin-top:14px;padding:10px 12px;font-size:12.5px;background:var(--coral-soft);border-color:#f6cdbd"><b>Watercolor tip:</b> paint value 4 first as one wash, then work darker. Leave value 5 as bare paper.</div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ======================================================= 8 PLAN -->
+<section class="mock" id="m8">
+  <div class="mock-head"><div class="mock-num">08</div><div>
+    <h2 class="mock-title">Project plan &amp; journal</h2>
+    <p class="mock-note">The template becomes a project: materials from the actual palette, numbered steps that reference the layers ("paint value 4"), time estimates, and a journal where users check off steps and add progress photos. This is what brings people back after the first visit.</p>
+    <div class="inspo"><span>Domestika lessons</span><span>Ravelry project pages</span><span>Strava activity feed</span></div>
+  </div></div>
+  <div class="frame"><div class="browser"><i></i><i></i><i></i><div class="url">inkloom.app/t/mountain-valley/plan</div></div>
+  <div class="screen" style="display:grid;grid-template-columns:300px 1fr 320px;gap:0">
+    <div style="padding:24px;border-right:1px solid var(--line)">
+      <div class="logo" style="margin-bottom:22px">Inkloom</div>
+      <div style="height:160px;border-radius:14px;overflow:hidden;margin-bottom:14px"><img class="art" src="/landscape-painting.png"></div>
+      <b class="display" style="font-size:22px">Mountain valley</b>
+      <div class="muted" style="font-size:12.5px;margin:4px 0 14px">Watercolor · Intermediate · ~3.5 h</div>
+      <div style="height:8px;border-radius:999px;background:var(--line);overflow:hidden"><div style="width:40%;height:100%;background:var(--teal-strong)"></div></div>
+      <div class="muted" style="font-size:12px;margin-top:6px">2 of 5 steps · 1 h 20 m logged</div>
+      <div class="kicker" style="margin:22px 0 10px">Materials</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+        <label>☑ Cold-press paper, 300 gsm, A4</label><label>☑ Round brush #8, #4</label><label>☐ Yellow ochre, sap green, ultramarine</label><label>☐ Burnt umber, cadmium orange</label><label>☐ Masking fluid (flowers)</label>
+      </div>
+    </div>
+    <div style="padding:24px 28px">
+      <div class="kicker" style="margin-bottom:14px">Steps</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card" style="box-shadow:none;padding:14px 16px;display:flex;gap:14px;opacity:.6"><span style="width:28px;height:28px;border-radius:50%;background:var(--teal-strong);color:#fff;display:grid;place-items:center;font-weight:800;flex:none">✓</span><div><b>Transfer the line art</b><div class="muted" style="font-size:12.5px">Use the 4×4 grid layer · 20 min</div></div></div>
+        <div class="card" style="box-shadow:none;padding:14px 16px;display:flex;gap:14px;opacity:.6"><span style="width:28px;height:28px;border-radius:50%;background:var(--teal-strong);color:#fff;display:grid;place-items:center;font-weight:800;flex:none">✓</span><div><b>Mask the foreground flowers</b><div class="muted" style="font-size:12.5px">Let dry fully · 15 min</div></div></div>
+        <div class="card" style="padding:14px 16px;display:flex;gap:14px;border-color:var(--teal-strong)"><span style="width:28px;height:28px;border-radius:50%;border:2px solid var(--teal-strong);color:var(--teal);display:grid;place-items:center;font-weight:800;flex:none">3</span><div style="flex:1"><b>First wash: value 4 everywhere</b><div class="muted" style="font-size:12.5px">Golden ochre sky → distant blue mountains, wet-in-wet · 30 min</div>
+          <div style="display:flex;gap:6px;margin-top:10px"><span class="chip btn-sm">◐ Show value 4 only</span><span class="chip btn-sm">▶ 1-min technique video</span></div></div></div>
+        <div class="card" style="box-shadow:none;padding:14px 16px;display:flex;gap:14px"><span style="width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:800;flex:none;color:var(--ink-soft)">4</span><div><b>Mid values: hills and meadow</b><div class="muted" style="font-size:12.5px">Meadow green, shadow pine · 45 min</div></div></div>
+        <div class="card" style="box-shadow:none;padding:14px 16px;display:flex;gap:14px"><span style="width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:800;flex:none;color:var(--ink-soft)">5</span><div><b>Darks and details</b><div class="muted" style="font-size:12.5px">Remove masking, add flower centres · 40 min</div></div></div>
+      </div>
+    </div>
+    <div style="padding:24px;background:var(--paper);border-left:1px solid var(--line)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="kicker">Journal</div><a class="btn btn-primary btn-sm">+ Add progress</a></div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div><div class="muted" style="font-size:11.5px;font-weight:700">TODAY · STEP 2</div><div style="height:120px;border-radius:12px;overflow:hidden;margin:6px 0"><img class="art f-values" src="/landscape-painting.png" style="filter:url(#values) contrast(.7) brightness(1.2)"></div><div style="font-size:12.5px">Masking went on smoothly. Sky wash next.</div></div>
+        <div><div class="muted" style="font-size:11.5px;font-weight:700">YESTERDAY · STEP 1</div><div style="height:120px;border-radius:12px;overflow:hidden;margin:6px 0;background:#fff"><img class="art" src="/meadow.png" style="opacity:.5"></div><div style="font-size:12.5px">Transferred with the grid — 20 min.</div></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ======================================================= 9 EXPORT -->
+<section class="mock" id="m9">
+  <div class="mock-head"><div class="mock-num">09</div><div>
+    <h2 class="mock-title">Export &amp; print</h2>
+    <p class="mock-note">Real print sizes with tiling across pages (for large canvases), a choice of which layers to include, and formats beyond PNG: a print-ready PDF pack (template + palette sheet + steps), SVG for Cricut/laser, and mirrored stencils.</p>
+    <div class="inspo"><span>Canva download dialog</span><span>Printful mockups</span><span>Pattern-maker PDF packs</span></div>
+  </div></div>
+  <div class="frame"><div class="browser"><i></i><i></i><i></i><div class="url">inkloom.app/t/mountain-valley/export</div></div>
+  <div class="screen" style="display:grid;grid-template-columns:1fr 380px;background:rgba(23,32,51,.45)">
+    <div style="padding:40px;display:grid;place-items:center">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;width:min(100%,560px);aspect-ratio:1.414;background:#d9d3c6;padding:6px;border-radius:6px;box-shadow:var(--shadow)">
+        <div style="background:#fff;overflow:hidden;position:relative"><img class="art" src="/meadow.png" style="width:200%;height:200%;object-fit:cover;object-position:0 0"><span style="position:absolute;bottom:6px;right:8px;font-size:10px;color:#999">1/4</span></div>
+        <div style="background:#fff;overflow:hidden;position:relative"><img class="art" src="/meadow.png" style="width:200%;height:200%;object-fit:cover;margin-left:-100%"><span style="position:absolute;bottom:6px;right:8px;font-size:10px;color:#999">2/4</span></div>
+        <div style="background:#fff;overflow:hidden;position:relative"><img class="art" src="/meadow.png" style="width:200%;height:200%;object-fit:cover;margin-top:-50%"><span style="position:absolute;bottom:6px;right:8px;font-size:10px;color:#999">3/4</span></div>
+        <div style="background:#fff;overflow:hidden;position:relative"><img class="art" src="/meadow.png" style="width:200%;height:200%;object-fit:cover;margin:-50% 0 0 -100%"><span style="position:absolute;bottom:6px;right:8px;font-size:10px;color:#999">4/4</span></div>
+      </div>
+    </div>
+    <div style="background:var(--paper);padding:26px;display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;justify-content:space-between"><b class="display" style="font-size:24px">Export</b><span class="muted" style="font-size:20px">×</span></div>
+      <div><div class="kicker" style="margin-bottom:8px">Format</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="card" style="box-shadow:none;padding:12px;border:2px solid var(--teal-strong)"><b>PDF pack</b><div class="muted" style="font-size:11.5px">Template + palette + steps</div></div>
+          <div class="card" style="box-shadow:none;padding:12px"><b>SVG</b><div class="muted" style="font-size:11.5px">Cricut, laser, Inkscape</div></div>
+          <div class="card" style="box-shadow:none;padding:12px"><b>PNG layers</b><div class="muted" style="font-size:11.5px">For Procreate</div></div>
+          <div class="card" style="box-shadow:none;padding:12px"><b>Stencil</b><div class="muted" style="font-size:11.5px">Mirrored, bold lines</div></div>
+        </div></div>
+      <div><div class="kicker" style="margin-bottom:8px">Print size</div><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip btn-sm">A4</span><span class="chip btn-sm on">A3 on 4 × A4</span><span class="chip btn-sm">16 × 20 in</span><span class="chip btn-sm">Custom</span></div></div>
+      <div><div class="kicker" style="margin-bottom:8px">Include</div>
+        <div style="display:flex;flex-direction:column;gap:9px;font-size:13px;font-weight:600">
+          <div style="display:flex;justify-content:space-between">Line art <span class="toggle on"></span></div>
+          <div style="display:flex;justify-content:space-between">Grid overlay <span class="toggle on"></span></div>
+          <div style="display:flex;justify-content:space-between">Value study page <span class="toggle on"></span></div>
+          <div style="display:flex;justify-content:space-between">Palette &amp; mixes page <span class="toggle on"></span></div>
+          <div style="display:flex;justify-content:space-between">Alignment marks <span class="toggle on"></span></div>
+        </div></div>
+      <div class="spacer"></div>
+      <a class="btn btn-primary" style="justify-content:center">⇩ Download PDF · 7 pages</a>
+    </div>
+  </div></div>
+</section>
+
+<!-- ======================================================= 10 GALLERY -->
+<section class="mock" id="m10">
+  <div class="mock-head"><div class="mock-num">10</div><div>
+    <h2 class="mock-title">Gallery — browse, filter, remix</h2>
+    <p class="mock-note">A masonry gallery with filters for medium and difficulty. Hovering shows the finished piece next to its template (from journal photos). "Remix" starts a new project from someone's concept and settings, which is the community loop that keeps the gallery growing.</p>
+    <div class="inspo"><span>Pinterest masonry</span><span>Behance</span><span>Civitai remix</span><span>Ravelry patterns</span></div>
+  </div></div>
+  <div class="frame"><div class="browser"><i></i><i></i><i></i><div class="url">inkloom.app/gallery</div></div>
+  <div class="screen">
+    <div class="splat" style="background:var(--lilac);left:40%;top:-50px"></div>
+    <div class="topbar"><div class="logo">Inkloom</div><div class="nav"><a>Create</a><a class="on">Gallery</a><a>My projects</a></div><div class="spacer"></div>
+      <div class="card" style="box-shadow:none;padding:8px 14px;width:280px;color:var(--ink-soft)">⌕ Search "mountains", "cats"…</div><div class="avatar">A</div></div>
+    <div style="display:flex;gap:8px;padding:0 28px 18px;position:relative;z-index:1;flex-wrap:wrap">
+      <span class="chip on">All</span><span class="chip">Watercolor</span><span class="chip">Pencil</span><span class="chip">Paint by number</span><span class="chip">Embroidery</span>
+      <span class="muted" style="margin:0 6px;align-self:center">|</span><span class="chip">Beginner</span><span class="chip">Intermediate</span><span class="chip">Advanced</span>
+      <div class="spacer"></div><span class="chip">Trending ▾</span>
+    </div>
+    <div style="columns:4 220px;column-gap:14px;padding:0 28px 28px;position:relative;z-index:1">
+      <div class="card" style="break-inside:avoid;margin-bottom:14px;overflow:hidden;position:relative">
+        <div style="display:grid;grid-template-columns:1fr 1fr;height:180px"><img class="art" src="/meadow.png" style="background:#fff"><img class="art" src="/landscape-painting.png"></div>
+        <div style="position:absolute;top:10px;right:10px;display:flex;gap:6px"><span class="chip btn-sm" style="background:rgba(255,255,255,.92)">♡ 214</span><span class="chip btn-sm on">⟲ Remix</span></div>
+        <div style="padding:10px 12px"><b style="font-size:13px">Mountain valley</b><div class="muted" style="font-size:11.5px">@maya · Watercolor · finished ✓</div></div>
+      </div>
+      <div class="card" style="break-inside:avoid;margin-bottom:14px;overflow:hidden"><img class="art" src="/cat.png" style="height:230px;object-fit:contain;background:#fff"><div style="padding:10px 12px"><b style="font-size:13px">Sleepy calico</b><div class="muted" style="font-size:11.5px">@ink.jo · Pencil · ♡ 98</div></div></div>
+      <div class="card" style="break-inside:avoid;margin-bottom:14px;overflow:hidden"><img class="art f-poster" src="/landscape-painting.png" style="height:150px"><div style="padding:10px 12px"><b style="font-size:13px">Valley, by numbers</b><div class="muted" style="font-size:11.5px">@lee · Paint by number · 24 colours</div></div></div>
+      <div class="card" style="break-inside:avoid;margin-bottom:14px;overflow:hidden"><img class="art" src="/meadow.png" style="height:170px"><div style="padding:10px 12px"><b style="font-size:13px">Wildflower path</b><div class="muted" style="font-size:11.5px">@sam · Pencil · Beginner</div></div></div>
+      <div class="card" style="break-inside:avoid;margin-bottom:14px;overflow:hidden"><img class="art" src="/dog.png" style="height:200px;object-fit:cover;background:#fff"><div style="padding:10px 12px"><b style="font-size:13px">Good boy portrait</b><div class="muted" style="font-size:11.5px">@ari · Embroidery · ♡ 61</div></div></div>
+      <div class="card" style="break-inside:avoid;margin-bottom:14px;overflow:hidden"><img class="art f-values" src="/landscape-painting.png" style="height:160px"><div style="padding:10px 12px"><b style="font-size:13px">Value practice #3</b><div class="muted" style="font-size:11.5px">@maya · Acrylic · 5 values</div></div></div>
+      <div class="card" style="break-inside:avoid;margin-bottom:14px;overflow:hidden"><img class="art" src="/meadow.png" style="height:150px;background:#fff"><div style="padding:10px 12px"><b style="font-size:13px">Stencil peaks</b><div class="muted" style="font-size:11.5px">@tatt.r · Tattoo · mirrored</div></div></div>
+    </div>
+  </div></div>
+</section>
+
+<style>@keyframes pulse { 50% { transform: scale(.85); opacity: .5; } }</style>
+</body>
+</html>
