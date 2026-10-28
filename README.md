@@ -1,31 +1,35 @@
 # Inkloom
 
-Inkloom is a template studio for artists. Describe an idea (or upload a reference photo), pick one of four AI colour concepts, and Inkloom turns it into a working template: line art, a value study, a paint-by-number map, a grid, a named palette, and a step-by-step plan for your medium. Everything after the concept is computed in the browser, so the sliders redraw instantly without another AI call.
+Inkloom is an AI-assisted template studio for artists. You describe an idea, pick a medium, difficulty, and duration, and Inkloom generates a black-and-white line-art reference you can save, share to a public gallery, and download as a PNG.
 
 ## Features
 
-- **Create:** choose a medium (pencil & ink, watercolor, acrylic, embroidery, tattoo stencil), describe the idea, and get 4 concepts — or use your own photo as the concept.
-- **Workspace (`/t/[id]`):** pick a starting point (Simple, Balanced, or Detailed — they differ only in how much detail the sketch draws), toggle layers (line art, values, grid, colour reference), fine-tune detail, shading, palette size, and grid, and read the generated project plan. Line art is always fine single-pixel lines so there's room to draw. Settings are saved with the template.
-- **Export:** download a PNG of the visible layers, or print a pack with the template, palette sheet, value scale, and plan.
-- **Gallery:** public templates with medium and difficulty filters. **My projects:** your own templates, public or private.
-- **Accounts:** Supabase Auth with email confirmation, password reset, profile and avatar, password change, data export, and account deletion.
-- **Look:** the "Studio Table" design — paper, tape, and watercolour accents (see `public/mockups/vibes.html`).
+Inkloom is an early MVP focused on the template-generation flow and account pages. See [Known limitations](#known-limitations) before using it with real accounts.
 
-## Tech stack
+Current features:
 
-- **Framework:** Next.js 16 (App Router, Server Components, Server Actions, `proxy.ts`)
-- **UI:** React 19, CSS Modules, Studio Table design system in `src/components/studio`
-- **Database, Auth, Storage:** Supabase, with Row Level Security on every table
-- **AI image generation:** Pixazo FLUX.1-schnell and Cloudflare Workers AI FLUX, with automatic fallback
-- **Template processing:** pure TypeScript in `src/lib/processing` (edge detection thinned to 1px lines, posterization, k-means palette), run in a Web Worker
+- Text-to-template generation: a line-art sketch built from your idea, medium, difficulty, and duration
+- Saving a generated template, viewing it, and downloading it as a PNG
+- An option to share a template in the public gallery
+- A gallery of public templates (alongside three built-in example images)
+- Account sign-up, and sign-in with email or username
+- Account settings: profile editing, avatar upload, password change, data export (JSON), and account deletion
+- Responsive UI with an animated background, paint-splatter styling, and shared visual design
+
+## Tech Stack
+
+- **Framework:** Next.js 16 with the App Router (API routes in `src/app/api`)
+- **UI:** React 19, CSS Modules, shared global styles, Tailwind CSS import support
+- **Database and storage:** Supabase (Postgres tables and Storage buckets, accessed with the service-role key from API routes)
+- **AI image generation:** Pixazo FLUX.1-schnell (512×512, 4 steps)
 - **Testing:** Vitest and React Testing Library
 - **Language:** TypeScript
 
 ## Running locally
 
 ```bash
-git clone https://github.com/alisabondar/unknown-proj.git
-cd unknown-proj
+git clone https://github.com/alisabondar/inkloom.git
+cd inkloom
 npm install
 ```
 
@@ -71,23 +75,50 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Useful scripts
 
 ```bash
+npm run dev            # dev server (Turbopack)
+npm run build          # production build
 npm run lint
 npx tsc --noEmit
-npm test -- --run
-npm run build
+npm test -- --run      # run the test suite once
+npm run test:ui        # Vitest UI
+npm run test:coverage
 ```
 
-## Supabase setup
+## Supabase Setup
 
-### New project
+The app expects these to exist in your Supabase project:
 
-Run `supabase/migrations/0004_v3_schema.sql` in the SQL Editor. It creates:
+- **`user` table:** profile and account data: `id`, `email`, `password`, `first_name`, `username`, `favorite_medium`, `avatar_url`
+- **`template` table:** saved templates: `id`, `title`, `medium`, `difficulty`, `duration`, `generated_image_id`, `image_url`, `source`, `user_id`, `public`, `created_at`, `updated_at`
+- **`templates` storage bucket:** generated images. Create it yourself; the app uploads to it but doesn't create it.
+- **`avatars` storage bucket:** profile images. Created automatically (private) on the first avatar upload.
 
-- `profiles` — one per Auth user (`id` = `auth.users.id`), created automatically by a trigger on sign-up
-- `templates` — owned by a profile, with workspace `settings` (jsonb) and `is_public`
-- `generations` — background image jobs (`queued` → `running` → `succeeded` / `failed`)
-- the `avatars` and `templates` storage buckets, with policies that only let users write inside a folder named with their user id
-- Row Level Security: owners have full access to their rows; anyone can read public templates
+`supabase-schema.sql` only adds an index on `created_at`. It refers to a table named `templates`, but the app uses `template`, so adjust the name before running it.
+
+## Project Structure
+
+```
+src/
+  app/
+    page.tsx              home
+    create-template/      generation form
+    template-view/        view and download a template
+    gallery/              public templates
+    account-settings/     profile, avatar, password, export, delete
+    api/                  route handlers (sign-up/in, templates, profile, generation)
+  components/common/      header, footer, auth modal, animated background
+  hooks/                  useAuth, usePublicTemplates
+  lib/                    Supabase clients, signed storage URLs
+  constants/              DEFAULT_USER_ID
+```
+
+## Known Limitations
+
+- **Authentication is not secure yet.** Passwords are stored and compared as plain text in the `user` table, and the signed-in user is kept in `localStorage`. The API routes trust the user ID the browser sends and use the service-role key, so anyone who knows a user's ID can call profile, password, export, or delete endpoints for that user. Supabase Auth is not used.
+- **Templates are not linked to accounts.** Every saved template is stored with the placeholder owner `user_id = '1'` (`DEFAULT_USER_ID`), and there is no "my templates" page.
+- **No generation limit.** `/api/generate-template` has no rate limiting, so anyone can spend the Pixazo quota.
+- **Tests:** only `src/components/__tests__/Header.test.tsx` exists. `TEST_README.md` describes tests that are not in the repo.
+- **Unused dependencies:** `openai` and `react-router-dom` are installed but not imported anywhere.
 
 In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your production URL) to the redirect URLs. Confirmation and reset emails work with Supabase's default templates; if you switch the templates to `{{ .TokenHash }}` links pointing at `/auth/callback?token_hash={{ .TokenHash }}&type=…`, the callback verifies those too.
 
@@ -102,27 +133,12 @@ Apply in this order:
 
 ## Project structure
 
-```
-src/
-  app/
-    actions/           Server Actions (auth, profile, templates, generations, uploads)
-    api/generations/   generation status endpoint, polled by the concepts page
-    auth/callback/     email-link handler
-    create/            medium → idea → concepts flow
-    t/[id]/            workspace (processing runs in a Web Worker)
-    gallery/ projects/ settings/ signin/ signup/ reset/
-  components/studio/   design system
-  components/site/     header, footer, template grid, forms
-  lib/
-    supabase/          session-bound server client, admin client (the only reader of the service-role key)
-    ai/                providers, prompt builder, background jobs, quota
-    processing/        deterministic template processing
-    plan.ts            mediums and project plans
-    validation.ts      Server Action input validators
-  proxy.ts             refreshes expired sessions before pages render
-```
-
-## Roadmap
+- Move accounts to Supabase Auth with Row Level Security, and link templates to their owners
+- Rate limiting for generation
+- Image-to-image support for turning reference uploads into generated templates
+- More artistic mediums such as embroidery, watercolor, ink, and digital art
+- Template iterations and refinement controls
+- Full project plans with materials, steps, and timelines
 
 See also [BACKLOG.md](BACKLOG.md) for features that were taken out until they can be done properly (paint by number).
 
