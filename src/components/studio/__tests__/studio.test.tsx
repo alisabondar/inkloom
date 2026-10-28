@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { PencilSlider, Chip, LayerCard, PaintTin, Button, Tape } from '@/components/studio';
+import { PencilSlider, Chip, LayerCard, PaintTin, Button, Tape, Stepper, SnapSlider, nearestStop } from '@/components/studio';
 
 describe('studio components', () => {
   it('PencilSlider renders a labelled range and calls onChange', () => {
@@ -54,5 +54,30 @@ describe('studio components', () => {
     const tape = container.querySelector('span')!;
     expect(tape.style.getPropertyValue('--studio-tape-color')).toBe('#e7b45c');
     expect(tape.className).toMatch(/tapeSm/);
+  });
+
+  it('Stepper moves through its options, stops at the ends, and supports arrow keys', () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<Stepper label="Grid" options={[0, 2, 4]} value={0} onChange={onChange} format={(v) => (v ? `${v}×${v}` : 'Off')} />);
+    expect(screen.getByRole('group', { name: 'Grid' })).toHaveTextContent('Off');
+    expect(screen.getByRole('button', { name: 'Decrease grid' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Increase grid' }));
+    expect(onChange).toHaveBeenLastCalledWith(2);
+
+    rerender(<Stepper label="Grid" options={[0, 2, 4]} value={4} onChange={onChange} />);
+    expect(screen.getByRole('button', { name: 'Increase grid' })).toBeDisabled();
+    fireEvent.keyDown(screen.getByRole('group', { name: 'Grid' }), { key: 'ArrowLeft' });
+    expect(onChange).toHaveBeenLastCalledWith(2);
+  });
+
+  it('SnapSlider reports stop values and shows the nearest stop for in-between values', () => {
+    const stops = [{ value: 0.2, label: 'Few' }, { value: 0.5, label: 'Some' }, { value: 0.9, label: 'Many' }];
+    expect(nearestStop(stops, 0.62)).toBe(1);
+    const onChange = vi.fn();
+    render(<SnapSlider label="Line detail" stops={stops} value={0.62} onChange={onChange} />);
+    const input = screen.getByLabelText('Line detail');
+    expect(input).toHaveAttribute('aria-valuetext', 'Some');
+    fireEvent.change(input, { target: { value: '2' } });
+    expect(onChange).toHaveBeenCalledWith(0.9);
   });
 });

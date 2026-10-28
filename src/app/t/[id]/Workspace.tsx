@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, PencilSlider, Tape } from '@/components/studio';
-import { settingsForDifficulty, type Difficulty, type RasterImage } from '@/lib/processing';
+import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, SnapSlider, Stepper, Tape, type SnapStop } from '@/components/studio';
+import { lineArt, settingsForDifficulty, type Difficulty, type RasterImage } from '@/lib/processing';
 import { buildProjectPlan, MEDIUMS } from '@/lib/plan';
 import type { TemplateCard } from '@/lib/db/queries';
 import type { WorkspaceLayer } from '@/lib/db/types';
@@ -15,8 +15,43 @@ import styles from './Workspace.module.css';
 const MAX_SIDE = 1024;
 const SAVE_DELAY = 800;
 const PROCESS_DELAY = 120;
-const DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced'];
 const SINGLE_TOOL_MEDIUMS = ['pencil', 'tattoo'];
+
+// Presets are the difficulty levels, named by how the template looks.
+const PRESETS: { id: Difficulty; label: string; hint: string }[] = [
+  { id: 'beginner', label: 'Simple', hint: 'main shapes' },
+  { id: 'intermediate', label: 'Balanced', hint: 'shapes + key details' },
+  { id: 'advanced', label: 'Detailed', hint: 'fine detail' },
+];
+const DETAIL_STOPS: SnapStop[] = [
+  { value: 0.15, label: 'Very few' },
+  { value: 0.3, label: 'Few' },
+  { value: 0.55, label: 'Some' },
+  { value: 0.8, label: 'Many' },
+  { value: 0.95, label: 'All' },
+];
+const WEIGHT_STOPS: SnapStop[] = [
+  { value: 1, label: 'Fine' },
+  { value: 2, label: 'Medium' },
+  { value: 3, label: 'Bold' },
+  { value: 4, label: 'Marker' },
+];
+const VALUE_OPTIONS = [2, 3, 4, 5, 6, 7, 8, 9];
+const PALETTE_OPTIONS = [3, 4, 5, 6, 8, 10, 12, 14, 16];
+const GRID_OPTIONS = [0, 2, 3, 4, 5, 6, 8, 10, 12];
+const THUMB_SIZE = 220;
+
+function downscale(img: RasterImage, maxSide: number): RasterImage {
+  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(img.width * scale));
+  canvas.height = Math.max(1, Math.round(img.height * scale));
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return img;
+  ctx.drawImage(rasterToCanvas(img), 0, 0, canvas.width, canvas.height);
+  const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  return { width: data.width, height: data.height, data: data.data };
+}
 const LAYER_ORDER: { id: WorkspaceLayer; label: string }[] = [
   { id: 'lines', label: 'Line art' },
   { id: 'values', label: 'Values' },
@@ -161,12 +196,6 @@ function useProcessor() {
   }, []);
 }
 
-// The first palette colour dark enough to show on the paper (light colours vanish), else coral.
-function visibleOnPaper(palette: { hex: string; rgb: [number, number, number] }[]) {
-  const match = palette.find(({ rgb: [r, g, b] }) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 < 0.72);
-  return match?.hex ?? 'var(--studio-coral)';
-}
-
 export interface WorkspaceProps { template: TemplateCard; isOwner: boolean }
 
 export function Workspace({ template, isOwner }: WorkspaceProps) {
@@ -180,6 +209,7 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
   const [saveNote, setSaveNote] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(template.is_public);
   const [view, setView] = useState<'sheet' | 'plan'>('sheet');
+  const [fineTune, setFineTune] = useState(false);
   const [printUrl, setPrintUrl] = useState<string>('');
   const process = useProcessor();
   const dirty = useRef(false);
@@ -251,6 +281,24 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
   };
 
   const palette = useMemo(() => result?.palette ?? [], [result]);
+
+  // Live line-art previews of this template for each preset card.
+  const presetThumbs = useMemo(() => {
+    if (!source) return {} as Partial<Record<Difficulty, string>>;
+    const small = downscale(source.raster, THUMB_SIZE);
+    const ratio = small.width / source.raster.width;
+    return Object.fromEntries(PRESETS.map(({ id }) => {
+      const preset = settingsForDifficulty(id);
+      return [id, rasterToUrl(lineArt(small, { detail: preset.detail, weight: Math.max(1, Math.round(preset.weight * ratio * 2)) }))];
+    })) as Partial<Record<Difficulty, string>>;
+  }, [source]);
+
+  const activePreset = settingsForDifficulty(difficulty);
+  const isCustom = settings.detail !== activePreset.detail
+    || settings.weight !== activePreset.weight
+    || settings.valueSteps !== activePreset.valueSteps
+    || (usesPaints && settings.paletteSize !== activePreset.paletteSize);
+  const presetLabel = PRESETS.find((p) => p.id === difficulty)?.label ?? difficulty;
   const plan = useMemo(
     () => buildProjectPlan({ medium: template.medium, palette, valueSteps: settings.valueSteps, difficulty, regions: result?.regions }),
     [template.medium, palette, settings.valueSteps, difficulty, result?.regions],
@@ -305,7 +353,7 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
         <header className={styles.top}>
           <div className={styles.crumbs}>
             <Link href={isOwner ? '/projects' : '/gallery'}>{isOwner ? 'My projects' : 'Gallery'}</Link> / <b>{template.title}</b>{' '}
-            <em>{mediumLabel} · {difficulty}</em>
+            <em>{mediumLabel} · {isCustom ? 'custom' : presetLabel.toLowerCase()}</em>
             {!isOwner && template.makerUsername && <span className={styles.maker}> by @{template.makerUsername}</span>}
           </div>
           <div className={styles.views} role="tablist" aria-label="Workspace view">
@@ -317,7 +365,7 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
         <aside className={styles.left} aria-label="Layers and palette">
           <h2 className={styles.lbl}>Layers</h2>
           <div className={styles.layers}>
-            {LAYER_ORDER.map((l, i) => (
+            {LAYER_ORDER.map((l) => (
               <LayerCard
                 key={l.id}
                 label={l.label}
@@ -375,12 +423,46 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
         <aside className={styles.right} aria-label="Settings and export">
           <div className={styles.clip} aria-hidden="true" />
           <Paper className={styles.clipboard} tooth>
-            <PencilSlider id="ws-difficulty" label="Difficulty" min={0} max={2} step={1} value={DIFFICULTIES.indexOf(difficulty)} valueLabel={difficulty} onChange={(v) => applyDifficulty(DIFFICULTIES[v])} color="var(--studio-coral)" />
-            <PencilSlider id="ws-detail" label="Line detail" min={0} max={1} step={0.05} value={settings.detail} valueLabel={`${Math.round(settings.detail * 100)}%`} onChange={(v) => update({ detail: v })} />
-            <PencilSlider id="ws-weight" label="Line weight" min={1} max={4} step={1} value={settings.weight} onChange={(v) => update({ weight: v })} color="var(--studio-ink)" />
-            <PencilSlider id="ws-values" label="Value steps" min={2} max={9} value={settings.valueSteps} onChange={(v) => update({ valueSteps: v })} color="var(--studio-pencil)" />
-            {usesPaints && <PencilSlider id="ws-palette" label="Palette size" min={3} max={16} value={settings.paletteSize} onChange={(v) => update({ paletteSize: v })} color={visibleOnPaper(palette)} />}
-            <PencilSlider id="ws-grid" label="Grid" min={0} max={12} value={settings.gridSize} valueLabel={settings.gridSize ? `${settings.gridSize}×${settings.gridSize}` : 'off'} onChange={(v) => update({ gridSize: v, layers: { ...settings.layers, grid: v > 0 } })} color="var(--studio-teal)" />
+            <h2 className={styles.lbl}>Starting point</h2>
+            <div className={styles.presets} role="group" aria-label="Starting point">
+              {PRESETS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={`${styles.preset} ${difficulty === p.id && !isCustom ? styles.presetActive : ''}`}
+                  aria-pressed={difficulty === p.id && !isCustom}
+                  onClick={() => applyDifficulty(p.id)}
+                >
+                  <span className={styles.presetThumb}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    {presetThumbs[p.id] ? <img src={presetThumbs[p.id]} alt="" /> : null}
+                  </span>
+                  <span className={styles.presetLabel}>{p.label}</span>
+                  <span className={styles.presetHint}>{p.hint}</span>
+                </button>
+              ))}
+            </div>
+            {isCustom && <p className={styles.customNote}>Custom · based on {presetLabel}. Pick a card to reset.</p>}
+
+            <button
+              type="button"
+              className={styles.fineToggle}
+              aria-expanded={fineTune}
+              aria-controls="ws-fine-tune"
+              onClick={() => setFineTune((open) => !open)}
+            >
+              <span>Fine-tune <small className={styles.fineHint}>lines, shading{usesPaints ? ', paints' : ''}, grid</small></span>
+              <span aria-hidden="true">{fineTune ? '▴' : '▾'}</span>
+            </button>
+            {fineTune && (
+              <div id="ws-fine-tune" className={styles.fine}>
+                <SnapSlider id="ws-detail" label="Line detail" stops={DETAIL_STOPS} value={settings.detail} onChange={(v) => update({ detail: v })} />
+                <SnapSlider id="ws-weight" label="Line weight" stops={WEIGHT_STOPS} value={settings.weight} onChange={(v) => update({ weight: v })} color="var(--studio-ink)" />
+                <Stepper label="Shading" options={VALUE_OPTIONS} value={settings.valueSteps} format={(v) => `${v} tones`} onChange={(v) => update({ valueSteps: v })} />
+                {usesPaints && <Stepper label="Paints" options={PALETTE_OPTIONS} value={settings.paletteSize} format={(v) => `${v} colours`} onChange={(v) => update({ paletteSize: v })} />}
+                <Stepper label="Grid" options={GRID_OPTIONS} value={settings.gridSize} format={(v) => (v ? `${v}×${v}` : 'Off')} onChange={(v) => update({ gridSize: v, layers: { ...settings.layers, grid: v > 0 } })} />
+              </div>
+            )}
             <p className={styles.time}>About <b>{timeLabel}</b> of {mediumLabel.toLowerCase()} work</p>
             {saveNote && isOwner && <HandNote className={styles.saved}><span role="status">{saveNote}</span></HandNote>}
             {!isOwner && <HandNote className={styles.saved}>tweak away · changes stay with you</HandNote>}
