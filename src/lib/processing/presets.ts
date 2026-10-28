@@ -9,10 +9,14 @@ export interface ProcessingSettings {
   paletteSize: number;
 }
 
+// Sketches stay light (fine 1px lines) so there's room for the artist; presets differ only in
+// how much detail they draw. Shading and palette start the same and are tuned separately.
+export const SKETCH_WEIGHT = 1;
+
 export const DIFFICULTY_PRESETS: Record<Difficulty, ProcessingSettings> = {
-  beginner: { detail: 0.3, weight: 3, valueSteps: 3, paletteSize: 6 },
-  intermediate: { detail: 0.55, weight: 2, valueSteps: 5, paletteSize: 10 },
-  advanced: { detail: 0.8, weight: 1, valueSteps: 7, paletteSize: 16 },
+  beginner: { detail: 0.3, weight: SKETCH_WEIGHT, valueSteps: 5, paletteSize: 10 },
+  intermediate: { detail: 0.55, weight: SKETCH_WEIGHT, valueSteps: 5, paletteSize: 10 },
+  advanced: { detail: 0.8, weight: SKETCH_WEIGHT, valueSteps: 5, paletteSize: 10 },
 };
 
 export function settingsForDifficulty(d: Difficulty): ProcessingSettings {

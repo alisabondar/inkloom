@@ -4,8 +4,8 @@ Inkloom is a template studio for artists. Describe an idea (or upload a referenc
 
 ## Features
 
-- **Create:** choose a medium (pencil & ink, watercolor, acrylic, paint by number, embroidery, tattoo stencil), describe the idea, and get 4 concepts — or use your own photo as the concept.
-- **Workspace (`/t/[id]`):** toggle layers (line art, values, paint by number, grid, colour reference), tune detail, line weight, value steps, palette size, and grid, switch difficulty presets, and read the generated project plan. Settings are saved with the template.
+- **Create:** choose a medium (pencil & ink, watercolor, acrylic, embroidery, tattoo stencil), describe the idea, and get 4 concepts — or use your own photo as the concept.
+- **Workspace (`/t/[id]`):** pick a starting point (Simple, Balanced, or Detailed — they differ only in how much detail the sketch draws), toggle layers (line art, values, grid, colour reference), fine-tune detail, shading, palette size, and grid, and read the generated project plan. Line art is always fine single-pixel lines so there's room to draw. Settings are saved with the template.
 - **Export:** download a PNG of the visible layers, or print a pack with the template, palette sheet, value scale, and plan.
 - **Gallery:** public templates with medium and difficulty filters. **My projects:** your own templates, public or private.
 - **Accounts:** Supabase Auth with email confirmation, password reset, profile and avatar, password change, data export, and account deletion.
@@ -17,7 +17,7 @@ Inkloom is a template studio for artists. Describe an idea (or upload a referenc
 - **UI:** React 19, CSS Modules, Studio Table design system in `src/components/studio`
 - **Database, Auth, Storage:** Supabase, with Row Level Security on every table
 - **AI image generation:** Pixazo FLUX.1-schnell and Cloudflare Workers AI FLUX, with automatic fallback
-- **Template processing:** pure TypeScript in `src/lib/processing` (edge detection, posterization, k-means palette, region outlines), run in a Web Worker
+- **Template processing:** pure TypeScript in `src/lib/processing` (edge detection thinned to 1px lines, posterization, k-means palette), run in a Web Worker
 - **Testing:** Vitest and React Testing Library
 - **Language:** TypeScript
 
@@ -124,7 +124,8 @@ src/
 
 ## Roadmap
 
-- Numbers drawn inside paint-by-number regions
+See also [BACKLOG.md](BACKLOG.md) for features that were taken out until they can be done properly (paint by number).
+
 - SVG export (potrace) and tiled large-format printing
 - Refinement of a chosen concept ("simpler", "more like this")
 - Remixing gallery templates and a progress journal

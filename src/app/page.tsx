@@ -8,7 +8,7 @@ import styles from './page.module.css';
 const STEPS = [
   { title: 'Describe it', text: 'A few words or a reference photo. Pick the medium you work in.' },
   { title: 'Pick a concept', text: 'Four colour concepts to choose from — or use your own photo.' },
-  { title: 'Tune the template', text: 'Line art, values, palette and numbers that redraw as you drag.' },
+  { title: 'Tune the template', text: 'Light line art, values and a palette that redraw as you adjust.' },
   { title: 'Print & paint', text: 'A print pack with your template, colour mixes and steps.' },
 ];
 

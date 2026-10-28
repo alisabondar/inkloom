@@ -83,6 +83,20 @@ describe('lineArt', () => {
     expect(prev).toBeGreaterThan(0);
   });
 
+  it('draws single-pixel lines at weight 1', () => {
+    const out = lineArt(halfBlackWhite(), { detail: 0.5, weight: 1 });
+    for (let y = 4; y < H - 4; y++) {
+      let dark = 0;
+      for (let x = 0; x < W; x++) if (out.data[(y * W + x) * 4] < 128) dark++;
+      expect(dark).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('removes isolated specks', () => {
+    const img = fill(W, H, (x, y) => ((x === 20 && y === 20) || (x === 21 && y === 20) ? [0, 0, 0] : [255, 255, 255]));
+    expect(darkCount(lineArt(img, { detail: 0.2, weight: 1 }))).toBe(0);
+  });
+
   it('weight thickens lines', () => {
     const thin = darkCount(lineArt(halfBlackWhite(), { detail: 0.5, weight: 1 }));
     const thick = darkCount(lineArt(halfBlackWhite(), { detail: 0.5, weight: 4 }));
@@ -172,12 +186,14 @@ describe('nameColor', () => {
 });
 
 describe('difficulty presets', () => {
-  it('increase in complexity', () => {
+  it('differ only in detail, with fine lines throughout', () => {
     const { beginner, intermediate, advanced } = DIFFICULTY_PRESETS;
     expect(advanced.detail).toBeGreaterThan(intermediate.detail);
     expect(intermediate.detail).toBeGreaterThan(beginner.detail);
-    expect(advanced.paletteSize).toBeGreaterThan(beginner.paletteSize);
-    expect(advanced.valueSteps).toBeGreaterThan(beginner.valueSteps);
+    for (const preset of [beginner, intermediate, advanced]) {
+      expect(preset.weight).toBe(1);
+      expect({ valueSteps: preset.valueSteps, paletteSize: preset.paletteSize }).toEqual({ valueSteps: intermediate.valueSteps, paletteSize: intermediate.paletteSize });
+    }
     expect(settingsForDifficulty('beginner')).toEqual(beginner);
   });
 });

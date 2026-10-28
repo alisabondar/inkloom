@@ -6,6 +6,7 @@ export { regionOutlines, countRegions } from './regions';
 export { nameColor } from './colorNames';
 export {
   DIFFICULTY_PRESETS,
+  SKETCH_WEIGHT,
   settingsForDifficulty,
   type Difficulty,
   type ProcessingSettings,

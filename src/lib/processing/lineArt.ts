@@ -80,8 +80,72 @@ function quantile(values: Float32Array, max: number, q: number): number {
   return max;
 }
 
+/** Zhang–Suen thinning: shrinks every edge band to a 1px centreline without breaking it. */
+function thin(mask: Uint8Array, width: number, height: number): Uint8Array {
+  const m = mask.slice();
+  const remove: number[] = [];
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let pass = 0; pass < 2; pass++) {
+      remove.length = 0;
+      for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+          const i = y * width + x;
+          if (!m[i]) continue;
+          // Neighbours clockwise from north.
+          const p2 = m[i - width], p3 = m[i - width + 1], p4 = m[i + 1], p5 = m[i + width + 1];
+          const p6 = m[i + width], p7 = m[i + width - 1], p8 = m[i - 1], p9 = m[i - width - 1];
+          const neighbours = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+          if (neighbours < 2 || neighbours > 6) continue;
+          const ring = [p2, p3, p4, p5, p6, p7, p8, p9, p2];
+          let transitions = 0;
+          for (let k = 0; k < 8; k++) if (!ring[k] && ring[k + 1]) transitions++;
+          if (transitions !== 1) continue;
+          if (pass === 0 ? p2 * p4 * p6 || p4 * p6 * p8 : p2 * p4 * p8 || p2 * p6 * p8) continue;
+          remove.push(i);
+        }
+      }
+      for (const i of remove) m[i] = 0;
+      if (remove.length) changed = true;
+    }
+  }
+  return m;
+}
+
+/** Drops connected line fragments shorter than `minPixels` (specks from texture and noise). */
+function removeSpecks(mask: Uint8Array, width: number, height: number, minPixels: number): Uint8Array {
+  const out = mask.slice();
+  const seen = new Uint8Array(mask.length);
+  const stack: number[] = [];
+  const component: number[] = [];
+  for (let start = 0; start < mask.length; start++) {
+    if (!mask[start] || seen[start]) continue;
+    component.length = 0;
+    stack.push(start);
+    seen[start] = 1;
+    while (stack.length) {
+      const i = stack.pop()!;
+      component.push(i);
+      const x = i % width;
+      const y = (i - x) / width;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+          const j = ny * width + nx;
+          if (mask[j] && !seen[j]) { seen[j] = 1; stack.push(j); }
+        }
+      }
+    }
+    if (component.length < minPixels) for (const i of component) out[i] = 0;
+  }
+  return out;
+}
+
 /**
- * Black lines on white: gaussian blur -> sobel -> percentile threshold -> dilate.
+ * Black lines on white: gaussian blur -> sobel -> percentile threshold -> thin to 1px ->
+ * drop short specks -> optional dilate (weight > 1).
  * `detail` picks what share of the strongest edges survive, so it behaves the
  * same on low- and high-contrast images; a small absolute floor keeps flat
  * areas clean.
@@ -105,5 +169,9 @@ export function lineArt(img: RasterImage, opts: LineArtOptions): RasterImage {
   const mask = new Uint8Array(magnitude.length);
   for (let i = 0; i < magnitude.length; i++) mask[i] = magnitude[i] > threshold ? 1 : 0;
 
-  return maskToRaster(dilateMask(mask, width, height, weight - 1), width, height);
+  // A sketch should leave room for the artist: single-pixel centrelines, and no tiny fragments.
+  const minFragment = Math.round(6 + 30 * (1 - detail));
+  const lines = removeSpecks(thin(mask, width, height), width, height, minFragment);
+
+  return maskToRaster(dilateMask(lines, width, height, weight - 1), width, height);
 }
