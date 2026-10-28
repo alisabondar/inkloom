@@ -101,7 +101,7 @@ export function ConceptsStage({ ids, idea, medium, title, pollMs = POLL_MS }: Co
       <h1 className={styles.title}>{idea || 'Your concepts'}</h1>
       <StepIndicator current={3} />
       <div className={styles.stage}>
-        <Paper rotate={-0.8} style={{ padding: '22px 20px', position: 'relative' }}>
+        <Paper style={{ padding: '22px 20px', position: 'relative' }}>
           <h2 className={styles.label}>Progress</h2>
           <ol className={styles.stageList} aria-live="polite">
             {stages.map((s) => (

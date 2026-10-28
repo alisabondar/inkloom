@@ -7,17 +7,15 @@ export interface LayerCardProps {
   thumbnail?: string | ReactNode;
   active: boolean;
   onToggle: () => void;
-  rotate?: number;
 }
 
-export function LayerCard({ label, thumbnail, active, onToggle, rotate = 0 }: LayerCardProps) {
+export function LayerCard({ label, thumbnail, active, onToggle }: LayerCardProps) {
   return (
     <button
       type="button"
       aria-pressed={active}
       onClick={onToggle}
       className={[styles.layer, active && styles.layerActive].filter(Boolean).join(' ')}
-      style={{ ['--studio-r' as string]: `${rotate}deg` }}
     >
       <span className={styles.tick} aria-hidden="true">{active ? '✓' : ''}</span>
       <span className={styles.layerLabel}>{label}</span>

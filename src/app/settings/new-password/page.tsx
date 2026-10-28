@@ -14,7 +14,7 @@ export default async function NewPasswordPage() {
 
   return (
     <div className={styles.narrow}>
-      <Paper tape rotate={-0.6}>
+      <Paper tape>
         <h1 className={styles.cardTitle}>Choose a new password</h1>
         <p className={styles.sub}>For {user.email}.</p>
         <NewPasswordForm />

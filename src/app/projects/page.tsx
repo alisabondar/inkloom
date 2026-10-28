@@ -27,7 +27,7 @@ export default async function ProjectsPage() {
       {templates.length ? (
         <TemplateGrid templates={templates} showPrivacy />
       ) : (
-        <Paper rotate={-1} style={{ maxWidth: 460, margin: '30px auto', textAlign: 'center' }}>
+        <Paper style={{ maxWidth: 460, margin: '30px auto', textAlign: 'center' }}>
           <h2 className={styles.cardTitle}>Your table is clear</h2>
           <p className={styles.sub}>Describe an idea and your first template will land here.</p>
           <Button href="/create" variant="mint">Create a template</Button>

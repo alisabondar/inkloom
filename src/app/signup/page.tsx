@@ -16,7 +16,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className={styles.narrow}>
-      <Paper tape rotate={0.8}>
+      <Paper tape>
         <h1 className={styles.cardTitle}>Pull up a chair</h1>
         <p className={styles.sub}>Free account — save templates, share to the gallery, track your projects.</p>
         <SignUpForm next={next} />

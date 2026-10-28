@@ -17,8 +17,8 @@
 
 /* template cards (masonry) */
 .grid { columns: 4 230px; column-gap: 18px; }
-.card { break-inside: avoid; display: block; margin: 0 0 22px; text-decoration: none; color: inherit; background: var(--studio-paper); padding: 9px 9px 12px; box-shadow: var(--studio-shadow-card); transform: rotate(var(--r, 0deg)); transition: transform 0.3s var(--studio-ease); }
-@media (prefers-reduced-motion: no-preference) { .card:hover { transform: rotate(0deg) translateY(-3px); } }
+.card { break-inside: avoid; display: block; margin: 0 0 22px; text-decoration: none; color: inherit; background: var(--studio-paper); padding: 9px 9px 12px; box-shadow: var(--studio-shadow-card); transition: transform 0.3s var(--studio-ease); }
+@media (prefers-reduced-motion: no-preference) { .card:hover { transform: translateY(-3px); } }
 .cardImage { display: block; width: 100%; height: auto; background: #fff; }
 .cardPlaceholder { aspect-ratio: 4 / 3; display: grid; place-items: center; background: #f6f1e6; color: var(--studio-muted); font-family: var(--studio-font-hand); font-size: 20px; }
 .cardTitle { font-family: var(--studio-font-display); font-weight: 700; font-size: 16px; margin: 10px 4px 2px; font-variation-settings: 'SOFT' 100; }

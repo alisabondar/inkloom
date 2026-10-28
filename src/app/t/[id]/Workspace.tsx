@@ -321,7 +321,6 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
               <LayerCard
                 key={l.id}
                 label={l.label}
-                rotate={[-1.2, 0.8, -0.5, 1.1, -0.7][i]}
                 active={settings.layers[l.id]}
                 onToggle={() => toggleLayer(l.id)}
                 thumbnail={l.id === 'grid' ? <span className={styles.gridThumb} /> : thumbs[l.id] ?? <span className={styles.blankThumb} />}
@@ -349,7 +348,7 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
         <main className={styles.desk}>
           {view === 'sheet' ? (
             <div className={styles.sheetWrap}>
-              <Paper className={styles.sheet} rotate={-0.6}>
+              <Paper className={styles.sheet}>
                 <Tape className={styles.tapeTL} angle={-36} size="sm" color={tapeColors[0]} />
                 <Tape className={styles.tapeTR} angle={36} size="sm" color={tapeColors[1]} />
                 <Tape className={styles.tapeBL} angle={36} size="sm" color={tapeColors[2]} />
@@ -366,7 +365,7 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
                   {loadError && <p className={styles.error} role="alert">{loadError}</p>}
                 </div>
               </Paper>
-              {busy && <HandNote className={styles.busy} rotate={3}>redrawing…</HandNote>}
+              {busy && <HandNote className={styles.busy}>redrawing…</HandNote>}
             </div>
           ) : (
             <PlanSheet plan={plan} />
@@ -383,8 +382,8 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
             {usesPaints && <PencilSlider id="ws-palette" label="Palette size" min={3} max={16} value={settings.paletteSize} onChange={(v) => update({ paletteSize: v })} color={visibleOnPaper(palette)} />}
             <PencilSlider id="ws-grid" label="Grid" min={0} max={12} value={settings.gridSize} valueLabel={settings.gridSize ? `${settings.gridSize}×${settings.gridSize}` : 'off'} onChange={(v) => update({ gridSize: v, layers: { ...settings.layers, grid: v > 0 } })} color="var(--studio-teal)" />
             <p className={styles.time}>About <b>{timeLabel}</b> of {mediumLabel.toLowerCase()} work</p>
-            {saveNote && isOwner && <HandNote className={styles.saved} rotate={-3}><span role="status">{saveNote}</span></HandNote>}
-            {!isOwner && <HandNote className={styles.saved} rotate={-2}>tweak away · changes stay with you</HandNote>}
+            {saveNote && isOwner && <HandNote className={styles.saved}><span role="status">{saveNote}</span></HandNote>}
+            {!isOwner && <HandNote className={styles.saved}>tweak away · changes stay with you</HandNote>}
             <div className={styles.exports}>
               <Button onClick={downloadPng} disabled={!layerData}>Download PNG</Button>
               <Button variant="paper" onClick={() => window.print()} disabled={!layerData}>Print pack</Button>
@@ -422,7 +421,7 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
 
 function PlanSheet({ plan }: { plan: ReturnType<typeof buildProjectPlan> }) {
   return (
-    <Paper className={styles.planSheet} rotate={0.4} tape as="section">
+    <Paper className={styles.planSheet} tape as="section">
       <h2 className={styles.planTitle}>Project plan</h2>
       <h3 className={styles.lbl}>Materials</h3>
       <ul className={styles.materials}>
