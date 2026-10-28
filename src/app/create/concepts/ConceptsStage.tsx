@@ -5,7 +5,7 @@ import { useFormAction } from '@/components/site/useFormAction';
 import { saveTemplateAction } from '@/app/actions/templates';
 import type { Difficulty } from '@/lib/processing';
 import type { Medium } from '@/lib/plan';
-import { Button, Chip, HandNote, Paper, Wash } from '@/components/studio';
+import { Button, Chip, HandNote, Paper, Tape } from '@/components/studio';
 import { StepIndicator } from '../StepIndicator';
 import styles from '../create.module.css';
 
@@ -14,7 +14,7 @@ export interface Concept { id: string; status: ConceptStatus; error: string | nu
 
 const POLL_MS = 2000;
 const DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced'];
-const WASHES = ['#9be6da', '#f4b39b', '#f2d27a', '#b9c8f0'];
+const TAPE_COLORS = ['#7fb9a8', '#d97b4a', '#e7b45c', '#9db7c9'];
 const finished = (c: Concept) => c.status === 'succeeded' || c.status === 'failed';
 
 export interface ConceptsStageProps { ids: string[]; idea: string; medium: Medium | null; title: string; pollMs?: number }
@@ -102,7 +102,6 @@ export function ConceptsStage({ ids, idea, medium, title, pollMs = POLL_MS }: Co
       <StepIndicator current={3} />
       <div className={styles.stage}>
         <Paper rotate={-0.8} style={{ padding: '22px 20px', position: 'relative' }}>
-          {!allDone && <Wash color="#9be6da" opacity={0.4} style={{ inset: '-12% auto auto -12%', width: 160, height: 110 }} />}
           <h2 className={styles.label}>Progress</h2>
           <ol className={styles.stageList} aria-live="polite">
             {stages.map((s) => (
@@ -176,8 +175,10 @@ function ConceptSlot({ concept, index, selected, onSelect }: { concept: Concept;
   }
   return (
     <div className={styles.slot} role="group" aria-label={`${label} ${concept.status === 'running' ? 'painting' : 'waiting'}`} aria-busy="true">
-      <Wash color={WASHES[index % WASHES.length]} seed={index * 5 + 3} className={styles.splat} />
-      <Wash color={WASHES[(index + 1) % WASHES.length]} seed={index * 5 + 9} opacity={0.5} className={styles.splat} />
+      <span className={styles.tapes} aria-hidden="true">
+        <Tape size="sm" color={TAPE_COLORS[index % TAPE_COLORS.length]} angle={-8} />
+        <Tape size="sm" color={TAPE_COLORS[(index + 1) % TAPE_COLORS.length]} angle={6} />
+      </span>
       <span className={styles.waiting}>{concept.status === 'running' ? 'painting…' : 'in the queue…'}</span>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, PencilSlider, Tape, Wash } from '@/components/studio';
+import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, PencilSlider, Tape } from '@/components/studio';
 import { settingsForDifficulty, type Difficulty, type RasterImage } from '@/lib/processing';
 import { buildProjectPlan, MEDIUMS } from '@/lib/plan';
 import type { TemplateCard } from '@/lib/db/queries';
@@ -291,7 +291,8 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
     numbers: result?.urls.numbers,
     colour: source?.url,
   };
-  const washes = (palette.length ? palette.map((p) => p.hex) : ['#e7b45c', '#7fb9a8', '#d97b4a', '#9db7c9']).slice(0, 4);
+  // Washi tape holding the sheet is tinted with the template's own palette.
+  const tapeColors = [...(palette.length ? palette.map((p) => p.hex) : []), '#e7b45c', '#7fb9a8', '#d97b4a', '#9db7c9'].slice(0, 4);
   const aspect = source ? `${source.raster.width} / ${source.raster.height}` : '4 / 3';
   const grid = settings.layers.grid && settings.gridSize > 0 ? settings.gridSize : 0;
   const hours = Math.floor(plan.totalMinutes / 60);
@@ -346,18 +347,13 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
         </aside>
 
         <main className={styles.desk}>
-          <div className={styles.bleed} aria-hidden="true">
-            {washes.map((hex, i) => (
-              <Wash key={hex + i} color={hex} seed={i + 3} className={styles[`wash${i}`]} />
-            ))}
-          </div>
           {view === 'sheet' ? (
             <div className={styles.sheetWrap}>
               <Paper className={styles.sheet} rotate={-0.6}>
-                <Tape className={styles.tapeTL} angle={-36} />
-                <Tape className={styles.tapeTR} angle={36} />
-                <Tape className={styles.tapeBL} angle={36} />
-                <Tape className={styles.tapeBR} angle={-36} />
+                <Tape className={styles.tapeTL} angle={-36} size="sm" color={tapeColors[0]} />
+                <Tape className={styles.tapeTR} angle={36} size="sm" color={tapeColors[1]} />
+                <Tape className={styles.tapeBL} angle={36} size="sm" color={tapeColors[2]} />
+                <Tape className={styles.tapeBR} angle={-36} size="sm" color={tapeColors[3]} />
                 <div className={styles.stack} style={{ aspectRatio: aspect }} role="img" aria-label={`${template.title}: ${LAYER_ORDER.filter((l) => settings.layers[l.id]).map((l) => l.label).join(', ') || 'no layers'} visible`}>
                   {/* eslint-disable @next/next/no-img-element */}
                   {source && settings.layers.colour && <img src={source.url} alt="" className={styles.layerImg} />}
