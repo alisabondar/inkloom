@@ -1,0 +1,89 @@
+# Spec Audit — Source: V3_PLAN.md (Stages 1–9)
+
+Earlier audits: AUDIT-README.md, AUDIT-PHASE0.md
+
+## Checklist
+1. S1.1: "A migration `supabase/migrations/0004_v3_schema.sql` creates `profiles`, `templates`, and `generations` tables."
+2. S1.2: "`profiles.id` is a uuid primary key that references `auth.users(id)`."
+3. S1.3: "`templates.owner_id` and `generations.owner_id` are uuids that reference `profiles(id)` and default to `auth.uid()`."
+4. S1.4: "`templates` stores title, medium, difficulty, prompt, concept image path, workspace settings (jsonb), visibility, and timestamps."
+5. S1.5: "`generations` stores status (`queued`, `running`, `succeeded`, `failed`), provider, prompt, result image path, error, and timestamps."
+6. S1.6: "A trigger creates a `profiles` row when a Supabase Auth user is created."
+7. S1.7: "Row Level Security is enabled on all three tables: owners have full access to their own rows, and anyone can read templates where `is_public` is true."
+8. S1.8: "Storage policies limit writes in the `avatars` and `templates` buckets to paths starting with the user's id."
+9. S1.9: "The migration copies existing data from the legacy `user` and `template` tables into the new tables."
+10. S1.10: "Migration `0003_template_user_id_uuid.sql` is removed, because 0004 supersedes it."
+11. S2.1: "`src/lib/supabase/server.ts` creates a Supabase client bound to the request's session cookies, for Server Components, Server Actions, and route handlers."
+12. S2.2: "`src/lib/supabase/admin.ts` is the only module that reads `SUPABASE_SERVICE_ROLE_KEY`."
+13. S2.3: "`src/proxy.ts` refreshes an expired session on page requests and updates the cookies."
+14. S2.4: "`src/lib/db/types.ts` defines TypeScript types for the `profiles`, `templates`, and `generations` rows."
+15. S3.1: "`src/lib/validation.ts` provides typed validators for every Server Action input."
+16. S3.2: "Every Server Action validates its input before using it and returns field errors on failure."
+17. S4.1: "Auth actions: sign up, sign in (email or username), sign out, and request a password reset."
+18. S4.2: "`src/app/auth/callback/route.ts` completes email confirmation and password-reset links and signs the user in."
+19. S4.3: "Profile actions: update profile, upload avatar, change password, export data, and delete account."
+20. S4.4: "Template actions: save a template, update its workspace settings, set its visibility, and delete it."
+21. S4.5: "Server Actions take the user's identity from the session only."
+22. S4.6: "The old routes in `src/app/api/` are removed, except the generation status route (5.5)."
+23. S5.1: "Image providers implement one interface in `src/lib/ai/providers/`: Pixazo and Cloudflare Workers AI."
+24. S5.2: "`IMAGE_PROVIDER` selects the primary provider, and the other configured provider is used as a fallback when the primary fails."
+25. S5.3: "A prompt builder turns the idea, medium, and options into a colour concept prompt."
+26. S5.4: "Starting a generation inserts a `generations` row, returns its id immediately, and runs the provider after the response."
+27. S5.5: "`GET /api/generations/[id]` returns the status and, when finished, a signed URL for the result."
+28. S5.6: "Generation is rate limited per user by counting the user's `generations` rows from the last hour (`GENERATE_RATE_LIMIT_PER_HOUR`, default 10)."
+29. S5.7: "Creating concepts starts 4 generations for one idea."
+30. S6.1: "`src/lib/processing/` contains pure functions that work on RGBA image data."
+31. S6.2: "Line art: edge detection with adjustable detail and line weight, producing black lines on white."
+32. S6.3: "Value study: posterized greyscale with an adjustable number of steps."
+33. S6.4: "Palette: k-means colour extraction with an adjustable colour count, giving hex, share, and a colour name for each colour."
+34. S6.5: "Paint by number: pixels quantized to the palette, with region outlines."
+35. S6.6: "Difficulty presets map beginner, intermediate, and advanced to detail, value steps, and palette size."
+36. S6.7: "`src/lib/plan.ts` builds a project plan (materials, ordered steps, time estimate) from the medium, palette, value steps, and difficulty."
+37. S7.1: "Design tokens for the Studio Table direction are defined in `src/styles/globals.css`."
+38. S7.2: "`src/components/studio/` provides Paper, Tape, Button, Chip, PencilSlider, Wash (SVG watercolour), HandNote, StudioBackground, LayerCard, and PaintTin components."
+39. S7.3: "The Caveat handwriting font is loaded alongside Fraunces and Inter."
+40. S7.4: "Motion respects `prefers-reduced-motion`."
+41. S8.1: "Home: a prompt bar with medium shortcuts and a strip of recent public templates."
+42. S8.2: "Create: choose a medium, describe the idea (with an optional reference photo), see the generation stages, then pick one of the concepts."
+43. S8.3: "Workspace `/t/[id]`: layer toggles (line art, values, paint by number, grid, colour reference), live sliders for the processing settings, the palette, and the project plan."
+44. S8.4: "Workspace settings are saved to the template."
+45. S8.5: "Export from the workspace: PNG of the visible layers, and a printable pack (template, palette, and plan) using print styles."
+46. S8.6: "Gallery: a masonry grid of public templates with medium and difficulty filters."
+47. S8.7: "My projects: the signed-in user's templates."
+48. S8.8: "Settings: profile, avatar, password, data export, and account deletion."
+49. S8.9: "Private templates return 404 to anyone who is not the owner."
+50. S9.1: "Unit tests cover validation, the processing functions, the plan builder, provider selection and fallback, and the rate limit."
+51. S9.2: "`npm run lint`, `npx tsc --noEmit`, and `npm test -- --run` pass."
+52. S9.3: "The README documents V3 setup: environment variables, migration 0004, and the providers."
+
+## Round 1 (2026-10-21, fresh auditor subagent)
+Result: 49 MET, 3 PARTIAL, 0 MISSING. New items: 3.
+
+Commands: lint clean; `tsc --noEmit` clean; `npm test -- --run` 64/64 pass.
+
+### Findings
+- S1.9 PARTIAL — legacy templates were copied only when `legacy_owner_email` was edited in; as shipped, none were copied.
+- S3.1 PARTIAL — avatar and reference-photo files were validated inline in the actions, not by validators in `src/lib/validation.ts`.
+- S3.2 PARTIAL — `deleteTemplateAction` returned nothing on invalid input instead of field errors.
+
+### Out-of-scope
+- Extras beyond the plan: `public_profiles` view, `batch_id`/`options`/`finished_at` columns, email-change trigger, `setNewPasswordAction`.
+
+### Fixes
+- 0004 now copies legacy templates by default (to `legacy_owner_email` if set, else the earliest-created legacy account) and skips rows already copied.
+- Added `imageFile`, `avatarSchema`, and `referencePhotoSchema` to `src/lib/validation.ts`; both actions use them (with tests).
+- `deleteTemplateAction` returns `{ fieldErrors }` / `{ error }`; the workspace uses it through `useActionState` and shows the error.
+
+## Round 2 (2026-10-21, fresh auditor subagent)
+Result: 52 MET, 0 PARTIAL, 0 MISSING. New items: 0.
+
+Commands: lint clean; `tsc --noEmit` exit 0; `npm test -- --run` 66/66 pass.
+
+### Findings
+None.
+
+### Out-of-scope
+- Extra columns (`batch_id`, `options`, `finished_at`, `templates.generation_id`), email-change trigger, `setNewPasswordAction` + new-password page, `public_profiles` view.
+
+## Outcome
+Done after Round 2: zero PARTIAL/MISSING. Scope-creep breaker did not fire (new items per round: 3, 0).

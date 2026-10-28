@@ -1,96 +1,68 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --header-text-color: #172033;
-  --header-border-color: rgba(255, 255, 255, 0.1);
-  --display-font: 'Fraunces', Georgia, serif;
-  --header-font-family: var(--display-font);
-  --transition-opacity: opacity 0.2s ease;
-  --hover-opacity: 0.8;
-  --surface-glass: rgba(11, 18, 32, 0.68);
-  --surface-glass-strong: rgba(13, 20, 34, 0.82);
-  --surface-line: rgba(255, 255, 255, 0.09);
-  --inkloom-mint: #77d7c8;
-  --inkloom-teal: rgb(18, 119, 111);
-  --inkloom-teal-strong: #38b8aa;
-  --inkloom-teal-ink: #12776f;
-  --inkloom-coral: #ffb199;
-  --inkloom-ease: cubic-bezier(0.2, 0.9, 0.2, 1);
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html {
-  font-size: 1.25rem;
-}
+/* The Studio Table look is a light paper theme, so the page stays light in dark mode too. */
+:root { color-scheme: light; }
 
 html,
 body {
-  height: 100%;
   margin: 0;
   padding: 0;
+  min-height: 100%;
 }
 
 body {
-  background: #faf8f2;
-  color: var(--foreground);
+  background: #ece2cd;
+  color: #172033;
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
   box-sizing: border-box;
 }
 
-@keyframes pageEnter {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.995);
-    filter: blur(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
+/* ===== Studio Table design tokens (V3 Stage 7) ===== */
+:root {
+  --studio-desk: #ece2cd;
+  --studio-desk-grain: rgba(110, 80, 35, 0.08);
+  --studio-desk-grain-soft: rgba(110, 80, 35, 0.05);
+  --studio-paper: #fffdf8;
+  --studio-ink: #172033;
+  --studio-ink-soft: #5d5446;
+  --studio-muted: #8a7a5c;
+  --studio-pencil: #6b6355;
+  --studio-mint: #77d7c8;
+  --studio-teal: #12776f;
+  --studio-coral: #c2553a;
+  --studio-butter: #f6d77a;
+  --studio-tape: rgba(246, 222, 150, 0.72);
+  --studio-rule: #d8ccb1;
+  --studio-shadow-sheet: 0 1px 2px rgba(60, 40, 10, 0.18), 0 26px 40px -20px rgba(60, 40, 10, 0.55), 0 50px 70px -40px rgba(60, 40, 10, 0.35);
+  --studio-shadow-card: 0 1px 2px rgba(60, 40, 10, 0.15), 0 22px 30px -18px rgba(60, 40, 10, 0.5);
+  --studio-font-display: 'Fraunces', Georgia, serif;
+  --studio-font-hand: 'Caveat', 'Comic Sans MS', cursive;
+  --studio-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --studio-radius-sm: 3px;
+  --studio-radius-md: 6px;
+  --studio-radius-lg: 12px;
+  --studio-ease: cubic-bezier(0.2, 0.9, 0.2, 1);
 }
 
-/* User inputs use system font for readability, match placeholder size */
-input,
-textarea,
-select {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 0.8rem;
+/* Cold-press paper tooth (same filter as mockup #tooth), used by <Paper>. */
+.studio-tooth {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='11'/%3E%3CfeDiffuseLighting lighting-color='%23fffdf8' surfaceScale='0.5'%3E%3CfeDistantLight azimuth='235' elevation='58'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23t)'/%3E%3C/svg%3E");
 }
 
-/* Placeholders and dropdown placeholder text use system font, smaller size */
-::placeholder,
-select:invalid,
-select option[value=""] {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 0.8rem;
+@media (prefers-reduced-motion: reduce) {
+  .studio-motion, .studio-motion * { animation: none !important; transition: none !important; }
 }
 
-/* Body text, errors, and non-header/non-label content use system font */
-p:not(.heroSubtitle):not(.beauFont),
-.error,
-.infoMessage,
-.switch,
-.switchButton,
-.errorMessage,
-.errorText {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }

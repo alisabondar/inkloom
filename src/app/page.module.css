@@ -1,120 +1,42 @@
-.container {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  animation: pageEnter 420ms var(--inkloom-ease) both;
+.hero { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 32px; align-items: center; max-width: 1200px; margin: 0 auto; padding: 40px clamp(16px, 4vw, 40px) 56px; min-height: 560px; }
+.kicker { font-family: var(--studio-font-hand); font-size: 24px; color: var(--studio-coral); margin: 0 0 6px; }
+.title { font-family: var(--studio-font-display); font-weight: 800; font-size: clamp(52px, 7.4vw, 96px); line-height: 0.92; letter-spacing: -0.03em; margin: 0; font-variation-settings: 'SOFT' 100, 'WONK' 1; color: var(--studio-ink); }
+.title em { font-style: italic; font-weight: 500; color: var(--studio-teal); }
+.lede { font-size: 17px; line-height: 1.6; color: var(--studio-ink-soft); max-width: 470px; margin: 22px 0 26px; }
+
+.prompt { display: flex; gap: 10px; align-items: center; background: var(--studio-paper); padding: 8px 8px 8px 18px; box-shadow: var(--studio-shadow-card); max-width: 560px; }
+.promptInput { flex: 1; min-width: 0; border: 0; background: transparent; font: 16px var(--studio-font-body); color: var(--studio-ink); padding: 10px 0; }
+.promptInput:focus { outline: none; }
+.prompt:focus-within { box-shadow: var(--studio-shadow-card), 0 0 0 2px var(--studio-teal); }
+.mediums { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; max-width: 560px; }
+.medium { font: 600 12.5px var(--studio-font-body); color: var(--studio-ink-soft); padding: 7px 11px; background: rgba(255, 253, 248, 0.7); box-shadow: 0 1px 0 rgba(60, 40, 10, 0.12); border-radius: var(--studio-radius-sm); text-decoration: none; }
+.medium:hover { color: var(--studio-ink); background: var(--studio-paper); }
+
+.table { position: relative; height: 470px; }
+.sheet { position: absolute; background: var(--studio-paper); padding: 10px 10px 36px; box-shadow: var(--studio-shadow-sheet); transform: rotate(var(--r)); }
+@media (prefers-reduced-motion: no-preference) {
+  .sheet { animation: drop 0.9s var(--studio-ease) both; animation-delay: var(--d, 0s); }
 }
+@keyframes drop { from { opacity: 0; transform: translateY(-36px) rotate(calc(var(--r) * 2.4)); } to { opacity: 1; transform: rotate(var(--r)); } }
+.sheet img { display: block; width: 100%; height: 100%; object-fit: cover; background: #fff; }
+.caption { position: absolute; left: 12px; bottom: 6px; transform: rotate(calc(-1 * var(--r))); font-family: var(--studio-font-hand); font-size: 19px; color: var(--studio-ink-soft); }
+.swatches { display: flex; gap: 4px; height: 46px; }
+.swatches span { flex: 1; }
+.tape { top: -7px; left: 50%; margin-left: -27px; }
 
-.main {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  padding: 2rem;
-}
+.section { max-width: 1200px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
+.sectionHead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 18px 0 22px; }
+.sectionTitle { font-family: var(--studio-font-display); font-size: 30px; margin: 0; font-variation-settings: 'SOFT' 100; }
+.sectionLink { font-weight: 600; color: var(--studio-teal); }
 
-.heroSection {
-  width: min(100%, 1200px);
-  margin: 0 auto;
-}
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin: 30px 0 56px; }
+.step { background: var(--studio-paper); padding: 18px; box-shadow: var(--studio-shadow-card); }
+.stepNum { font-family: var(--studio-font-hand); font-size: 30px; color: var(--studio-teal); line-height: 1; }
+.stepTitle { font-family: var(--studio-font-display); font-weight: 700; font-size: 18px; margin: 6px 0 4px; }
+.stepText { font-size: 13.5px; line-height: 1.5; color: var(--studio-ink-soft); margin: 0; }
 
-.heroContent {
-  position: relative;
-  z-index: 1;
-  max-width: min(44vw, 560px);
-  color: #172033;
-}
-
-.kicker {
-  color: rgb(18, 119, 111);
-  font-size: 0.78rem;
-  font-weight: 850;
-  letter-spacing: 0.09em;
-  margin: 0 0 0.5rem;
-  text-transform: uppercase;
-}
-
-.heroTitle {
-  color: #050505;
-  font-family: var(--display-font);
-  font-size: clamp(4rem, 10vw, 7.4rem);
-  font-weight: 700;
-  line-height: 0.88;
-  margin: 0;
-  text-shadow: 0 16px 48px rgba(255, 255, 255, 0.52);
-}
-
-.heroSubtitle {
-  color: rgba(23, 32, 51, 0.78);
-  font-size: clamp(1rem, 2.2vw, 1.25rem);
-  line-height: 1.6;
-  margin: 1rem 0 1.4rem;
-  max-width: 720px;
-  text-shadow: 0 1px 18px rgba(255, 255, 255, 0.5);
-}
-
-.homeButtons {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.templateButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.8rem;
-  padding: 0.35rem 1.1rem;
-  border: 0;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(119, 215, 200, 0.68), rgba(146, 236, 221, 0.42));
-  color: #073f3b;
-  font-family: var(--display-font);
-  font-size: 1.05rem;
-  font-weight: 750;
-  line-height: 1;
-  text-decoration: none;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 14px 34px rgba(31, 138, 125, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.68);
-  transition: transform 0.2s var(--inkloom-ease), box-shadow 0.2s var(--inkloom-ease), filter 0.2s var(--inkloom-ease);
-}
-
-.templateButton:hover {
-  filter: saturate(1.08);
-  transform: translateY(-1px);
-  box-shadow: 0 18px 42px rgba(31, 138, 125, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.78);
-}
-
-.templateButtonSecondary {
-  background: rgba(255, 255, 255, 0.48);
-  color: var(--inkloom-teal-ink);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.74), 0 14px 34px rgba(54, 72, 92, 0.1);
-  border: 0;
-  backdrop-filter: blur(12px);
-}
-
-.templateButtonSecondary:hover {
-  background: rgba(255, 255, 255, 0.72);
-}
-
-@media (max-width: 720px) {
-  .main {
-    align-items: flex-start;
-    padding: 4rem 1rem 1rem;
-  }
-
-  .homeButtons {
-    align-items: stretch;
-  }
-
-  .templateButton {
-    flex: 1 1 100%;
-  }
-}
-
-@media (max-width: 980px) {
-  .heroContent {
-    max-width: 640px;
-  }
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; }
+  .table { height: 380px; }
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
