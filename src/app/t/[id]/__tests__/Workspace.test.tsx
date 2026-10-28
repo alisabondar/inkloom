@@ -52,11 +52,11 @@ describe('Workspace', () => {
     expect(value('Grid')).toBe('4');
   });
 
-  it('difficulty chips reset sliders to the preset, and owner changes are saved', async () => {
+  it('the difficulty slider resets sliders to the preset, and owner changes are saved', async () => {
     vi.useFakeTimers();
     render(<Workspace template={template} isOwner />);
     expect(value('Value steps')).toBe(String(DIFFICULTY_PRESETS.beginner.valueSteps));
-    fireEvent.click(screen.getByRole('button', { name: 'advanced' }));
+    fireEvent.change(screen.getByLabelText('Difficulty'), { target: { value: '2' } });
     expect(value('Value steps')).toBe(String(DIFFICULTY_PRESETS.advanced.valueSteps));
     expect(value('Palette size')).toBe(String(DIFFICULTY_PRESETS.advanced.paletteSize));
     expect(value('Line weight')).toBe(String(DIFFICULTY_PRESETS.advanced.weight));
@@ -65,6 +65,13 @@ describe('Workspace', () => {
       expect.objectContaining({ id: template.id, valueSteps: DIFFICULTY_PRESETS.advanced.valueSteps, layers: expect.any(String) }),
     );
     vi.useRealTimers();
+  });
+
+  it('hides the palette for single-tool mediums like pencil', () => {
+    render(<Workspace template={{ ...template, medium: 'pencil' }} isOwner />);
+    expect(screen.queryByLabelText('Palette size')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Paints' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Difficulty')).toBeInTheDocument();
   });
 
   it('non-owners get a read-only view without owner controls or saves', async () => {

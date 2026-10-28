@@ -16,6 +16,7 @@ const MAX_SIDE = 1024;
 const SAVE_DELAY = 800;
 const PROCESS_DELAY = 120;
 const DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced'];
+const SINGLE_TOOL_MEDIUMS = ['pencil', 'tattoo'];
 const LAYER_ORDER: { id: WorkspaceLayer; label: string }[] = [
   { id: 'lines', label: 'Line art' },
   { id: 'values', label: 'Values' },
@@ -184,6 +185,8 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
   const dirty = useRef(false);
 
   const mediumLabel = MEDIUMS.find((m) => m.id === template.medium)?.label ?? template.medium;
+  // Pencil and tattoo stencils use a single tool, so a colour palette doesn't apply.
+  const usesPaints = !SINGLE_TOOL_MEDIUMS.includes(template.medium);
   const slug = slugify(template.title);
 
   useEffect(() => {
@@ -324,8 +327,8 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
               />
             ))}
           </div>
-          <h2 className={styles.lbl}>Paints</h2>
-          {palette.length ? (
+          {usesPaints && <h2 className={styles.lbl}>Paints</h2>}
+          {!usesPaints ? null : palette.length ? (
             <>
               <PaintTin colors={palette} label={`${palette.length} colours · matched`} />
               <ul className={styles.shares}>
@@ -377,16 +380,11 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
         <aside className={styles.right} aria-label="Settings and export">
           <div className={styles.clip} aria-hidden="true" />
           <Paper className={styles.clipboard} tooth>
-            <h2 className={styles.lbl}>Difficulty</h2>
-            <div className={styles.chips}>
-              {DIFFICULTIES.map((d) => (
-                <Chip key={d} active={difficulty === d} aria-pressed={difficulty === d} onClick={() => applyDifficulty(d)}>{d}</Chip>
-              ))}
-            </div>
+            <PencilSlider id="ws-difficulty" label="Difficulty" min={0} max={2} step={1} value={DIFFICULTIES.indexOf(difficulty)} valueLabel={difficulty} onChange={(v) => applyDifficulty(DIFFICULTIES[v])} color="var(--studio-coral)" />
             <PencilSlider id="ws-detail" label="Line detail" min={0} max={1} step={0.05} value={settings.detail} valueLabel={`${Math.round(settings.detail * 100)}%`} onChange={(v) => update({ detail: v })} />
             <PencilSlider id="ws-weight" label="Line weight" min={1} max={4} step={1} value={settings.weight} onChange={(v) => update({ weight: v })} color="var(--studio-ink)" />
             <PencilSlider id="ws-values" label="Value steps" min={2} max={9} value={settings.valueSteps} onChange={(v) => update({ valueSteps: v })} color="var(--studio-pencil)" />
-            <PencilSlider id="ws-palette" label="Palette size" min={3} max={16} value={settings.paletteSize} onChange={(v) => update({ paletteSize: v })} color={visibleOnPaper(palette)} />
+            {usesPaints && <PencilSlider id="ws-palette" label="Palette size" min={3} max={16} value={settings.paletteSize} onChange={(v) => update({ paletteSize: v })} color={visibleOnPaper(palette)} />}
             <PencilSlider id="ws-grid" label="Grid" min={0} max={12} value={settings.gridSize} valueLabel={settings.gridSize ? `${settings.gridSize}×${settings.gridSize}` : 'off'} onChange={(v) => update({ gridSize: v, layers: { ...settings.layers, grid: v > 0 } })} color="var(--studio-teal)" />
             <p className={styles.time}>About <b>{timeLabel}</b> of {mediumLabel.toLowerCase()} work</p>
             {saveNote && isOwner && <HandNote className={styles.saved} rotate={-3}><span role="status">{saveNote}</span></HandNote>}
