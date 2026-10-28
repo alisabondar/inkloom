@@ -1,0 +1,57 @@
+# Spec Audit — Source: V2_PLAN.md, Phase 0
+
+Previous README audit: AUDIT-README.md
+
+## Checklist
+1. S0.1.1: "Passwords are managed by Supabase Auth; the app never stores, reads, or compares passwords itself."
+2. S0.1.2: "Sessions are carried in httpOnly cookies set by the server."
+3. S0.1.3: "Server code resolves the current user from the session cookie, verified with Supabase Auth."
+4. S0.1.4: "An expired access token is refreshed with the refresh token and the cookies are updated."
+5. S0.2.1: "`/api/signup` creates the account with Supabase Auth and creates the matching `user` profile row."
+6. S0.2.2: "`/api/signin` signs in with Supabase Auth using an email or a username (a username is resolved to its email on the server)."
+7. S0.2.3: "A new `/api/signout` route ends the session and clears the session cookies."
+8. S0.2.4: "Sign in, sign up, and sign out responses never include a password."
+9. S0.3.1: "These routes take the user identity from the session only: `get-user`, `update-user`, `upload-avatar`, `change-password`, `export-user-data`, `delete-account`, `save-template`, `get-templates`, `generate-template`."
+10. S0.3.2: "Those routes return 401 when there is no valid session."
+11. S0.3.3: "User IDs sent by the client in the body, query string, or form data are ignored."
+12. S0.3.4: "`save-template` stores the template under the signed-in user's id; `get-templates` and `export-user-data` return only the signed-in user's templates."
+13. S0.3.5: "`DEFAULT_USER_ID` is removed."
+14. S0.4.1: "`change-password` verifies the current password with Supabase Auth and sets the new password with Supabase Auth."
+15. S0.4.2: "`delete-account` deletes the user's avatar files, templates, profile row, and Supabase Auth user, then clears the session cookies."
+16. S0.5.1: "`useAuth` no longer uses `localStorage` as the source of identity; it loads the current user from the server session."
+17. S0.5.2: "`signOut` calls `/api/signout`."
+18. S0.5.3: "Client pages no longer send user IDs to the API."
+19. S0.6.1: "SQL migrations in `supabase/migrations/` enable Row Level Security on the `user` and `template` tables."
+20. S0.6.2: "The `user` table links to Supabase Auth through an `auth_id uuid` column."
+21. S0.6.3: "Policies let a user read and update only their own `user` row."
+22. S0.6.4: "Policies let a user read, insert, update, and delete only their own `template` rows."
+23. S0.6.5: "Policies let anyone read `template` rows where `public` is true."
+24. S0.6.6: "The migration drops the `password` column from `user`."
+25. S0.7.1: "A one-off script in `scripts/` creates a Supabase Auth user for each existing `user` row and sets its `auth_id`."
+26. S0.7.2: "The README documents the order: apply the migration that adds `auth_id`, run the script, then apply the Row Level Security migration."
+27. S0.8.1: "Reads and writes of the `user` and `template` tables in user-scoped routes go through a client bound to the user's session, so RLS applies."
+28. S0.8.2: "The service-role client is used only for Storage operations, Supabase Auth admin operations, and the pre-session routes `signup`, `signin`, `check-user`, and `check-username`."
+29. S0.8.3: "`get-template` and `get-public-templates` read tables with the session client (or the anon client when signed out), so private templates are visible only to their owner."
+30. S0.9.1: "`generate-template` limits each user to a number of generations per hour, configurable with `GENERATE_RATE_LIMIT_PER_HOUR` (default 10)."
+31. S0.9.2: "Requests over the limit get a 429 response with a `Retry-After` header."
+32. S0.10.1: "Unit tests cover session resolution (401 without a session) and the rate limiter."
+33. S0.10.2: "`npm run lint`, `npx tsc --noEmit`, and `npm test -- --run` pass."
+
+## Round 1 (2026-10-20, fresh auditor subagent)
+Result: 33 MET, 0 PARTIAL, 0 MISSING. New items: 0.
+
+Commands: `npm run lint` clean; `npx tsc --noEmit` exit 0; `npm test -- --run` 20/20 pass (session 4, user-routes-auth 9, rate-limit 3, Header 4).
+
+Evidence highlights: session cookies `src/lib/auth/session.ts:11-22`, verify/refresh `:37-59`; 401 guard `:76-108`; Auth signup/signin `signup/route.ts:42`, `signin/route.ts:36`; change-password `change-password/route.ts:30-39`; delete-account `delete-account/route.ts:18-50`; useAuth server session `src/hooks/useAuth.ts:30-42`; RLS `supabase/migrations/0002_enable_rls.sql`; account migration `scripts/migrate-users-to-auth.mjs`; rate limit 429 `generate-template/route.ts:12-16`.
+
+### Findings
+None.
+
+### Out-of-scope
+- Migration script reads the legacy plaintext `password` column (one-off migration, not runtime)
+- Extra `user_delete_own` RLS policy beyond read/update
+- `check-user` returns email for a username lookup (account enumeration)
+- Rate limiter is in-memory per server instance
+
+## Outcome
+Done after Round 1: zero PARTIAL/MISSING. Scope-creep breaker did not fire.

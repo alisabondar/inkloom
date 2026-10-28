@@ -2,7 +2,7 @@
 
 Inkloom is an AI-assisted template studio for artists. You describe an idea, pick a medium, difficulty, and duration, and Inkloom generates a black-and-white line-art reference you can save, share to a public gallery, and download as a PNG.
 
-## Status
+## Features
 
 Inkloom is an early MVP focused on the template-generation flow and account pages. See [Known limitations](#known-limitations) before using it with real accounts.
 
@@ -25,9 +25,7 @@ Current features:
 - **Testing:** Vitest and React Testing Library
 - **Language:** TypeScript
 
-## Running Locally
-
-Clone the repository and install dependencies:
+## Running locally
 
 ```bash
 git clone https://github.com/alisabondar/inkloom.git
@@ -35,23 +33,38 @@ cd inkloom
 npm install
 ```
 
-Create a `.env.local` file:
+Create `.env.local`:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+
+# At least one image provider
 PIXAZO_API_KEY=your-pixazo-api-key
+CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
+CLOUDFLARE_API_TOKEN=your-workers-ai-token
 ```
 
-Optional Pixazo overrides:
+Optional:
 
 ```bash
+IMAGE_PROVIDER=cloudflare            # primary provider: pixazo or cloudflare (the other is the fallback)
+GENERATE_RATE_LIMIT_PER_HOUR=10      # concepts per user per hour (each idea uses 4)
+CLOUDFLARE_IMAGE_MODEL=@cf/black-forest-labs/flux-1-schnell
 PIXAZO_FLUX_SCHNELL_REQUEST_URL=https://gateway.pixazo.ai/flux-1-schnell/v1/getData
 PIXAZO_FLUX_SCHNELL_RESULT_URL=https://gateway.pixazo.ai/flux-1-schnell/v1/getData-result
 ```
 
-Start the development server:
+Local testing without signing in (ignored when `NODE_ENV=production`): every request is signed in as a confirmed dev account (`dev@inkloom.test`, created on first use). It is a real Supabase user, so Row Level Security still applies.
+
+```bash
+DEV_AUTH_BYPASS=true
+DEV_USER_EMAIL=dev@inkloom.test        # optional
+DEV_USER_PASSWORD=choose-a-local-one   # optional
+```
+
+Then:
 
 ```bash
 npm run dev
@@ -59,7 +72,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Useful Scripts
+## Useful scripts
 
 ```bash
 npm run dev            # dev server (Turbopack)
@@ -107,9 +120,18 @@ src/
 - **Tests:** only `src/components/__tests__/Header.test.tsx` exists. `TEST_README.md` describes tests that are not in the repo.
 - **Unused dependencies:** `openai` and `react-router-dom` are installed but not imported anywhere.
 
-## Roadmap
+In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your production URL) to the redirect URLs. Confirmation and reset emails work with Supabase's default templates; if you switch the templates to `{{ .TokenHash }}` links pointing at `/auth/callback?token_hash={{ .TokenHash }}&type=…`, the callback verifies those too.
 
-Near-term ideas:
+### Upgrading a V1/V2 database
+
+Apply in this order:
+
+1. `supabase/migrations/0001_link_user_to_auth.sql`
+2. `node --env-file=.env.local scripts/migrate-users-to-auth.mjs --dry-run`, then without `--dry-run` (creates or links a Supabase Auth user for each legacy `user` row)
+3. `supabase/migrations/0002_enable_rls.sql`
+4. Run `0004_v3_schema.sql`. It copies legacy profiles and templates into the new tables; the legacy tables are left in place and are no longer used. V2 saved every template under a placeholder owner, so legacy templates go to the earliest-created account — set `legacy_owner_email` near the bottom of the file first to choose a different owner.
+
+## Project structure
 
 - Move accounts to Supabase Auth with Row Level Security, and link templates to their owners
 - Rate limiting for generation
@@ -118,11 +140,8 @@ Near-term ideas:
 - Template iterations and refinement controls
 - Full project plans with materials, steps, and timelines
 
-Future ideas:
+See also [BACKLOG.md](BACKLOG.md) for features that were taken out until they can be done properly (paint by number).
 
-- Collaborative projects and shared works in progress
-- Saved style presets
-- PDF/SVG export formats
-- Progress tracking with notes and photos
-- Community remixing
-- Personalized custom styles
+- SVG export (potrace) and tiled large-format printing
+- Refinement of a chosen concept ("simpler", "more like this")
+- Remixing gallery templates and a progress journal
