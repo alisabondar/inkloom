@@ -87,7 +87,7 @@
 .range:focus-visible + .dab, .sliderTrack:focus-within .dab { outline: 2px solid var(--studio-teal); outline-offset: 2px; border-radius: 50%; }
 
 
-.hand { font-family: var(--studio-font-hand); font-size: 21px; line-height: 1.1; color: var(--studio-coral); display: inline-block; transform: rotate(var(--studio-r, 0deg)); }
+.hand { font-family: var(--studio-font-hand); font-size: 21px; line-height: 1.1; color: var(--studio-coral); display: inline-block; }
 
 .layer {
   display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
@@ -95,7 +95,6 @@
   background: rgba(255,255,255,.55); backdrop-filter: blur(1.5px);
   box-shadow: 0 1px 2px rgba(60,40,10,.14);
   font-family: var(--studio-font-body); font-size: 12.5px; color: var(--studio-ink-soft); cursor: pointer;
-  transform: rotate(var(--studio-r, 0deg));
 }
 .layerActive { background: rgba(255,255,255,.85); color: var(--studio-ink); }
 .layerLabel { font-weight: 700; flex: 1; }

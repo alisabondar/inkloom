@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Reset password' };
 export default function ResetPage() {
   return (
     <div className={styles.narrow}>
-      <Paper tape rotate={-0.6}>
+      <Paper tape>
         <h1 className={styles.cardTitle}>Forgot your password?</h1>
         <p className={styles.sub}>We&apos;ll email you a link to choose a new one.</p>
         <ResetRequestForm />

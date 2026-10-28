@@ -117,12 +117,12 @@ export function CreateFlow({ initialMedium = null, initialIdea = '', initialTitl
           </div>
           <div className={styles.actions}>
             <Button disabled={!medium} onClick={() => setStep(2)}>Next: describe it →</Button>
-            {!medium && <HandNote rotate={-1}>choose one first</HandNote>}
+            {!medium && <HandNote>choose one first</HandNote>}
           </div>
         </section>
       ) : (
         <section aria-label="Describe your idea" className={styles.composer}>
-          <Paper tape rotate={-0.4} style={{ padding: '26px 24px', position: 'relative' }}>
+          <Paper tape style={{ padding: '26px 24px', position: 'relative' }}>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="create-idea">Your idea</label>
               <textarea
@@ -169,10 +169,10 @@ export function CreateFlow({ initialMedium = null, initialIdea = '', initialTitl
             </div>
           </Paper>
 
-          <Paper rotate={0.8} style={{ padding: '22px 20px', position: 'relative' }}>
+          <Paper style={{ padding: '22px 20px', position: 'relative' }}>
             <div className={styles.photoBox}>
               <label className={styles.label} htmlFor="create-photo">Reference photo <small>(optional)</small></label>
-              <HandNote rotate={-1.5}>use your own photo, or let us paint it</HandNote>
+              <HandNote>use your own photo, or let us paint it</HandNote>
               {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
               {preview && <img src={preview} alt="Selected reference photo" className={styles.photoPreview} />}
               <input

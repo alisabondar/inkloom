@@ -16,21 +16,21 @@ export default async function SettingsPage() {
       <h1 className={styles.title}>Settings</h1>
       <p className={styles.sub}>Your profile, sign-in, and data.</p>
       <div className={styles.settings}>
-        <Paper rotate={-0.6}>
+        <Paper>
           <h2 className={styles.cardTitle}>Profile</h2>
           <ProfileForm profile={profile} />
         </Paper>
         <div style={{ display: 'grid', gap: 26 }}>
-          <Paper rotate={0.5}>
+          <Paper>
             <h2 className={styles.cardTitle}>Avatar</h2>
             <AvatarForm profile={profile} />
           </Paper>
-          <Paper rotate={-0.4}>
+          <Paper>
             <h2 className={styles.cardTitle}>Password</h2>
             <PasswordForm />
           </Paper>
         </div>
-        <Paper rotate={0.7}>
+        <Paper>
           <h2 className={styles.cardTitle}>Your data</h2>
           <DataControls />
         </Paper>

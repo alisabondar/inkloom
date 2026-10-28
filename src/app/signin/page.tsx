@@ -17,7 +17,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className={styles.narrow}>
-      <Paper tape rotate={-0.8}>
+      <Paper tape>
         <h1 className={styles.cardTitle}>Welcome back</h1>
         <p className={styles.sub}>Pick up where you left off.</p>
         {params.error === 'link' && <p className={styles.formError}>That link has expired or was already used. Sign in, or request a new one.</p>}
@@ -26,7 +26,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
           New here? <Link href={`/signup?next=${encodeURIComponent(next)}`} className={styles.link}>Create an account</Link>
         </p>
       </Paper>
-      <HandNote rotate={-2} style={{ display: 'block', marginTop: 18, textAlign: 'center' }}>your table is right where you left it</HandNote>
+      <HandNote style={{ display: 'block', marginTop: 18, textAlign: 'center' }}>your table is right where you left it</HandNote>
     </div>
   );
 }

@@ -11,7 +11,7 @@
 
 .mediums { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; margin: 0; padding: 0; border: 0; }
 .medium { position: relative; text-align: left; background: var(--studio-paper); border: 0; border-radius: var(--studio-radius-sm); padding: 18px 16px 16px; box-shadow: var(--studio-shadow-card); cursor: pointer; font: inherit; color: inherit; transition: transform .2s var(--studio-ease); }
-.medium:hover { transform: translateY(-2px) rotate(-.4deg); }
+.medium:hover { transform: translateY(-2px); }
 .medium:focus-visible { outline: 2px solid var(--studio-teal); outline-offset: 3px; }
 .mediumSelected { box-shadow: 0 0 0 3px var(--studio-teal), var(--studio-shadow-card); }
 .mediumLabel { font-family: var(--studio-font-display); font-weight: 750; font-size: 21px; margin: 0 0 4px; }
