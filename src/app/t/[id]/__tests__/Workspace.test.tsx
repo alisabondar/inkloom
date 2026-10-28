@@ -29,7 +29,8 @@ const template: TemplateCard = {
   makerUsername: 'maker',
 };
 
-const value = (label: string) => (screen.getByLabelText(label) as HTMLInputElement).value;
+const stepperValue = (label: string) => screen.getByRole('group', { name: label }).querySelector('output')?.textContent;
+const openFineTune = () => fireEvent.click(screen.getByRole('button', { name: /fine-tune/i }));
 
 describe('Workspace', () => {
   beforeEach(() => { vi.clearAllMocks(); });
@@ -49,29 +50,57 @@ describe('Workspace', () => {
     expect(screen.queryByTestId('grid-overlay')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /^grid$/i }));
     expect(screen.getByTestId('grid-overlay')).toBeInTheDocument();
-    expect(value('Grid')).toBe('4');
+    openFineTune();
+    expect(stepperValue('Grid')).toBe('4×4');
   });
 
-  it('the difficulty slider resets sliders to the preset, and owner changes are saved', async () => {
+  it('keeps fine-tune collapsed until opened', () => {
+    render(<Workspace template={template} isOwner />);
+    const toggle = screen.getByRole('button', { name: /fine-tune/i });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByLabelText('Line detail')).toBeNull();
+    openFineTune();
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByLabelText('Line detail')).toBeInTheDocument();
+  });
+
+  it('preset cards set every setting, fine-tuning marks it custom, and owner changes are saved', async () => {
     vi.useFakeTimers();
     render(<Workspace template={template} isOwner />);
-    expect(value('Value steps')).toBe(String(DIFFICULTY_PRESETS.beginner.valueSteps));
-    fireEvent.change(screen.getByLabelText('Difficulty'), { target: { value: '2' } });
-    expect(value('Value steps')).toBe(String(DIFFICULTY_PRESETS.advanced.valueSteps));
-    expect(value('Palette size')).toBe(String(DIFFICULTY_PRESETS.advanced.paletteSize));
-    expect(value('Line weight')).toBe(String(DIFFICULTY_PRESETS.advanced.weight));
+    expect(screen.getByRole('button', { name: /simple/i })).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: /detailed/i }));
+    expect(screen.getByRole('button', { name: /detailed/i })).toHaveAttribute('aria-pressed', 'true');
+    openFineTune();
+    expect(stepperValue('Shading')).toBe(`${DIFFICULTY_PRESETS.advanced.valueSteps} tones`);
+    expect(stepperValue('Paints')).toBe(`${DIFFICULTY_PRESETS.advanced.paletteSize} colours`);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Increase shading' }));
+    expect(stepperValue('Shading')).toBe(`${DIFFICULTY_PRESETS.advanced.valueSteps + 1} tones`);
+    expect(screen.getByText(/custom · based on detailed/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /detailed/i })).toHaveAttribute('aria-pressed', 'false');
+
     await act(async () => { vi.advanceTimersByTime(900); });
-    expect(actions.updateWorkspaceSettingsAction).toHaveBeenCalledWith(
-      expect.objectContaining({ id: template.id, valueSteps: DIFFICULTY_PRESETS.advanced.valueSteps, layers: expect.any(String) }),
+    expect(actions.updateWorkspaceSettingsAction).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: template.id, valueSteps: DIFFICULTY_PRESETS.advanced.valueSteps + 1, layers: expect.any(String) }),
     );
     vi.useRealTimers();
   });
 
+  it('snaps line detail to its named stops', () => {
+    render(<Workspace template={template} isOwner />);
+    openFineTune();
+    const detail = screen.getByLabelText('Line detail') as HTMLInputElement;
+    fireEvent.change(detail, { target: { value: '4' } });
+    expect(detail).toHaveAttribute('aria-valuetext', 'All');
+  });
+
   it('hides the palette for single-tool mediums like pencil', () => {
     render(<Workspace template={{ ...template, medium: 'pencil' }} isOwner />);
-    expect(screen.queryByLabelText('Palette size')).not.toBeInTheDocument();
+    openFineTune();
+    expect(screen.queryByRole('group', { name: 'Paints' })).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Paints' })).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Difficulty')).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Shading' })).toBeInTheDocument();
   });
 
   it('non-owners get a read-only view without owner controls or saves', async () => {
@@ -80,8 +109,8 @@ describe('Workspace', () => {
     expect(screen.queryByTestId('owner-controls')).toBeNull();
     expect(screen.queryByRole('button', { name: /delete/i })).toBeNull();
     expect(screen.getByText(/@maker/)).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Value steps'), { target: { value: '7' } });
-    expect(value('Value steps')).toBe('7');
+    openFineTune();
+    fireEvent.click(screen.getByRole('button', { name: 'Increase shading' }));
     await act(async () => { vi.advanceTimersByTime(900); });
     expect(actions.updateWorkspaceSettingsAction).not.toHaveBeenCalled();
     vi.useRealTimers();

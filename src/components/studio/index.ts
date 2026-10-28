@@ -7,3 +7,5 @@ export { HandNote, type HandNoteProps } from './HandNote';
 export { StudioBackground, type StudioBackgroundProps } from './StudioBackground';
 export { LayerCard, type LayerCardProps } from './LayerCard';
 export { PaintTin, type PaintTinProps } from './PaintTin';
+export { SnapSlider, nearestStop, type SnapSliderProps, type SnapStop } from './SnapSlider';
+export { Stepper, type StepperProps } from './Stepper';

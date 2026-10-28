@@ -129,3 +129,21 @@
   from { transform: translateY(-24px) rotate(var(--studio-r, 0deg)); opacity: 0; }
   to { transform: rotate(var(--studio-r, 0deg)); opacity: 1; }
 }
+
+/* SnapSlider: stop names under the pencil track */
+.snap .slider { margin-bottom: 4px; }
+.snapStops { display: flex; justify-content: space-between; margin: 0 0 16px; font-size: 11px; color: var(--studio-muted); }
+.snapStops span { flex: 1; text-align: center; }
+.snapStops span:first-child { text-align: left; }
+.snapStops span:last-child { text-align: right; }
+.snapStopActive { color: var(--studio-teal); font-weight: 700; }
+
+/* Stepper */
+.stepperRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 14px; }
+.stepperLabel { font-weight: 700; font-size: 12.5px; color: var(--studio-ink); }
+.stepper { display: inline-flex; align-items: stretch; border: 1px solid var(--studio-rule); border-radius: var(--studio-radius-md); overflow: hidden; background: var(--studio-paper); }
+.stepper button { width: 44px; min-height: 44px; border: 0; background: #f6f0e3; color: var(--studio-ink); font: 600 20px var(--studio-font-body); cursor: pointer; }
+.stepper button:hover:not(:disabled) { background: #efe5d2; }
+.stepper button:disabled { color: var(--studio-rule); cursor: not-allowed; }
+.stepper button:focus-visible { outline: 2px solid var(--studio-teal); outline-offset: -2px; }
+.stepper output { min-width: 64px; display: grid; place-items: center; font-weight: 700; font-size: 13.5px; color: var(--studio-ink); font-variant-numeric: tabular-nums; }
