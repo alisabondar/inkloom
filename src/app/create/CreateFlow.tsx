@@ -117,7 +117,6 @@ export function CreateFlow({ initialMedium = null, initialIdea = '', initialTitl
           </div>
           <div className={styles.actions}>
             <Button disabled={!medium} onClick={() => setStep(2)}>Next: describe it →</Button>
-            {!medium && <HandNote>choose one first</HandNote>}
           </div>
         </section>
       ) : (

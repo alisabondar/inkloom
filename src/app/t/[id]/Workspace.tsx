@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, SnapSlider, Stepper, Tape, type SnapStop } from '@/components/studio';
-import { lineArt, settingsForDifficulty, type Difficulty, type RasterImage } from '@/lib/processing';
+import { lineArt, settingsForDifficulty, SKETCH_WEIGHT, type Difficulty, type RasterImage } from '@/lib/processing';
 import { buildProjectPlan, MEDIUMS } from '@/lib/plan';
 import type { TemplateCard } from '@/lib/db/queries';
 import type { WorkspaceLayer } from '@/lib/db/types';
@@ -30,12 +30,6 @@ const DETAIL_STOPS: SnapStop[] = [
   { value: 0.8, label: 'Many' },
   { value: 0.95, label: 'All' },
 ];
-const WEIGHT_STOPS: SnapStop[] = [
-  { value: 1, label: 'Fine' },
-  { value: 2, label: 'Medium' },
-  { value: 3, label: 'Bold' },
-  { value: 4, label: 'Marker' },
-];
 const VALUE_OPTIONS = [2, 3, 4, 5, 6, 7, 8, 9];
 const PALETTE_OPTIONS = [3, 4, 5, 6, 8, 10, 12, 14, 16];
 const GRID_OPTIONS = [0, 2, 3, 4, 5, 6, 8, 10, 12];
@@ -55,7 +49,6 @@ function downscale(img: RasterImage, maxSide: number): RasterImage {
 const LAYER_ORDER: { id: WorkspaceLayer; label: string }[] = [
   { id: 'lines', label: 'Line art' },
   { id: 'values', label: 'Values' },
-  { id: 'numbers', label: 'Paint by number' },
   { id: 'grid', label: 'Grid' },
   { id: 'colour', label: 'Colour ref' },
 ];
@@ -71,7 +64,8 @@ export function initialSettings(template: Pick<TemplateCard, 'settings' | 'diffi
   const preset = settingsForDifficulty(template.difficulty);
   return {
     detail: saved.detail ?? preset.detail,
-    weight: saved.weight ?? preset.weight,
+    // Sketch lines are always fine, whatever an older saved template says.
+    weight: SKETCH_WEIGHT,
     valueSteps: saved.valueSteps ?? preset.valueSteps,
     paletteSize: saved.paletteSize ?? preset.paletteSize,
     gridSize: saved.gridSize ?? 0,
@@ -128,7 +122,7 @@ async function composite(layers: Layers, visible: Record<WorkspaceLayer, boolean
   if (!ctx) return '';
   ctx.fillStyle = '#fffdf8';
   ctx.fillRect(0, 0, width, height);
-  const order: (keyof Layers & WorkspaceLayer)[] = ['colour', 'values', 'numbers', 'lines'];
+  const order: (keyof Layers & WorkspaceLayer)[] = ['colour', 'values', 'lines'];
   for (const id of order) {
     if (!visible[id]) continue;
     const img = new Image();
@@ -286,16 +280,14 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
   const presetThumbs = useMemo(() => {
     if (!source) return {} as Partial<Record<Difficulty, string>>;
     const small = downscale(source.raster, THUMB_SIZE);
-    const ratio = small.width / source.raster.width;
     return Object.fromEntries(PRESETS.map(({ id }) => {
       const preset = settingsForDifficulty(id);
-      return [id, rasterToUrl(lineArt(small, { detail: preset.detail, weight: Math.max(1, Math.round(preset.weight * ratio * 2)) }))];
+      return [id, rasterToUrl(lineArt(small, { detail: preset.detail, weight: SKETCH_WEIGHT }))];
     })) as Partial<Record<Difficulty, string>>;
   }, [source]);
 
   const activePreset = settingsForDifficulty(difficulty);
   const isCustom = settings.detail !== activePreset.detail
-    || settings.weight !== activePreset.weight
     || settings.valueSteps !== activePreset.valueSteps
     || (usesPaints && settings.paletteSize !== activePreset.paletteSize);
   const presetLabel = PRESETS.find((p) => p.id === difficulty)?.label ?? difficulty;
@@ -405,7 +397,6 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
                   {/* eslint-disable @next/next/no-img-element */}
                   {source && settings.layers.colour && <img src={source.url} alt="" className={styles.layerImg} />}
                   {result && settings.layers.values && <img src={result.urls.values} alt="" className={`${styles.layerImg} ${styles.multiply}`} style={{ opacity: settings.layers.colour ? 0.6 : 1 }} />}
-                  {result && settings.layers.numbers && <img src={result.urls.numbers} alt="" className={`${styles.layerImg} ${styles.multiply}`} />}
                   {result && settings.layers.lines && <img src={result.urls.lines} alt="" className={`${styles.layerImg} ${styles.multiply}`} />}
                   {/* eslint-enable @next/next/no-img-element */}
                   {grid > 0 && <div className={styles.gridOverlay} data-testid="grid-overlay" style={{ backgroundSize: `${100 / grid}% ${100 / grid}%` }} />}
@@ -451,13 +442,12 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
               aria-controls="ws-fine-tune"
               onClick={() => setFineTune((open) => !open)}
             >
-              <span>Fine-tune <small className={styles.fineHint}>lines, shading{usesPaints ? ', paints' : ''}, grid</small></span>
+              <span>Fine-tune <small className={styles.fineHint}>detail, shading{usesPaints ? ', paints' : ''}, grid</small></span>
               <span aria-hidden="true">{fineTune ? '▴' : '▾'}</span>
             </button>
             {fineTune && (
               <div id="ws-fine-tune" className={styles.fine}>
                 <SnapSlider id="ws-detail" label="Line detail" stops={DETAIL_STOPS} value={settings.detail} onChange={(v) => update({ detail: v })} />
-                <SnapSlider id="ws-weight" label="Line weight" stops={WEIGHT_STOPS} value={settings.weight} onChange={(v) => update({ weight: v })} color="var(--studio-ink)" />
                 <Stepper label="Shading" options={VALUE_OPTIONS} value={settings.valueSteps} format={(v) => `${v} tones`} onChange={(v) => update({ valueSteps: v })} />
                 {usesPaints && <Stepper label="Paints" options={PALETTE_OPTIONS} value={settings.paletteSize} format={(v) => `${v} colours`} onChange={(v) => update({ paletteSize: v })} />}
                 <Stepper label="Grid" options={GRID_OPTIONS} value={settings.gridSize} format={(v) => (v ? `${v}×${v}` : 'Off')} onChange={(v) => update({ gridSize: v, layers: { ...settings.layers, grid: v > 0 } })} />

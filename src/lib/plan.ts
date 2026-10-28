@@ -1,5 +1,7 @@
 import type { Difficulty, PaletteColor } from '@/lib/processing';
 
+// 'paint-by-number' is on the backlog (see BACKLOG.md): it stays in the type so existing templates
+// still open, but it is no longer offered in MEDIUMS.
 export type Medium = 'pencil' | 'watercolor' | 'acrylic' | 'paint-by-number' | 'embroidery' | 'tattoo';
 
 export const MEDIUMS: { id: Medium; label: string; outputs: string[]; description: string }[] = [
@@ -20,12 +22,6 @@ export const MEDIUMS: { id: Medium; label: string; outputs: string[]; descriptio
     label: 'Acrylic',
     outputs: ['line-art', 'value-study', 'palette'],
     description: 'Opaque layers blocked in dark to light on a toned ground.',
-  },
-  {
-    id: 'paint-by-number',
-    label: 'Paint by number',
-    outputs: ['paint-by-number', 'palette'],
-    description: 'Numbered regions quantized to a fixed palette of mixed colours.',
   },
   {
     id: 'embroidery',
