@@ -51,8 +51,10 @@ button.slot:focus-visible { outline: 2px solid var(--studio-teal); outline-offse
 .slotSelected { box-shadow: 0 0 0 3px var(--studio-teal), var(--studio-shadow-card); }
 .slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .slotLabel { position: absolute; left: 10px; bottom: 8px; font-family: var(--studio-font-hand); font-size: 20px; color: var(--studio-ink); background: rgba(255,253,247,.85); padding: 0 8px; border-radius: 4px; }
-.splat { position: absolute; inset: 15%; animation: bloom 2.4s var(--studio-ease, ease) infinite alternate; }
-.splat:nth-child(2) { animation-delay: .8s; inset: 25%; }
+.tapes { position: absolute; inset: 0; display: flex; gap: 6px; align-items: center; justify-content: center; }
+.tapes > * { position: static; animation: tapePulse 1.6s var(--studio-ease, ease) infinite alternate; }
+.tapes > *:nth-child(2) { animation-delay: .5s; }
+@keyframes tapePulse { from { opacity: .35; } to { opacity: .85; } }
 .waiting { position: relative; font-family: var(--studio-font-hand); font-size: 20px; color: var(--studio-ink-soft); }
 .failed { padding: 18px; text-align: center; font-size: 13px; color: var(--studio-ink-soft); }
 .failed strong { display: block; font-family: var(--studio-font-display); font-size: 18px; color: #b3261e; margin-bottom: 4px; }
@@ -60,10 +62,9 @@ button.slot:focus-visible { outline: 2px solid var(--studio-teal); outline-offse
 .panelGrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: end; }
 .notice { margin-top: 14px; font-size: 13px; color: var(--studio-ink-soft); }
 
-@keyframes bloom { from { transform: scale(.85) rotate(-6deg); opacity: .55; } to { transform: scale(1.08) rotate(4deg); opacity: .95; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .splat { animation: none; }
+  .tapes > * { animation: none; }
   .medium { transition: none; }
   .medium:hover { transform: none; }
 }

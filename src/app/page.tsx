@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Button, HandNote, Tape, Wash } from '@/components/studio';
+import { Button, HandNote, Tape } from '@/components/studio';
 import { TemplateGrid } from '@/components/site/TemplateGrid';
 import { listPublicTemplates } from '@/lib/db/queries';
 import { MEDIUMS } from '@/lib/plan';
@@ -37,16 +37,14 @@ export default async function Home() {
         </div>
 
         <div className={styles.table} aria-hidden="true">
-          <Wash color="#e7b45c" style={{ position: 'absolute', left: '-6%', top: '2%', width: 260, height: 190 }} seed={3} />
-          <Wash color="#7fb9a8" style={{ position: 'absolute', right: '-4%', bottom: '0%', width: 300, height: 210 }} seed={9} />
           <div className={styles.sheet} style={{ '--r': '-5deg', '--d': '0.1s', left: '0%', top: '6%', width: '58%', height: 280 } as React.CSSProperties}>
-            <Tape className={styles.tape} />
+            <Tape className={styles.tape} size="sm" color="#e7b45c" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/meadow.png" alt="" />
             <span className={styles.caption}>line art · v2</span>
           </div>
           <div className={styles.sheet} style={{ '--r': '4deg', '--d': '0.3s', right: '0%', top: '14%', width: '50%', height: 250 } as React.CSSProperties}>
-            <Tape className={styles.tape} angle={5} />
+            <Tape className={styles.tape} angle={5} size="sm" color="#7fb9a8" />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/landscape-painting.png" alt="" />
             <span className={styles.caption}>concept ✓</span>

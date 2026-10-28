@@ -3,7 +3,6 @@ export { Tape, type TapeProps } from './Tape';
 export { Button, type ButtonProps } from './Button';
 export { Chip, type ChipProps } from './Chip';
 export { PencilSlider, type PencilSliderProps } from './PencilSlider';
-export { Wash, type WashProps } from './Wash';
 export { HandNote, type HandNoteProps } from './HandNote';
 export { StudioBackground, type StudioBackgroundProps } from './StudioBackground';
 export { LayerCard, type LayerCardProps } from './LayerCard';

@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { PencilSlider, Chip, LayerCard, PaintTin, Button, Wash } from '@/components/studio';
+import { PencilSlider, Chip, LayerCard, PaintTin, Button, Tape } from '@/components/studio';
 
 describe('studio components', () => {
   it('PencilSlider renders a labelled range and calls onChange', () => {
@@ -49,9 +49,10 @@ describe('studio components', () => {
     expect(screen.getByRole('link', { name: 'Start' })).toHaveAttribute('href', '/create');
   });
 
-  it('Wash instances use unique filter ids', () => {
-    const { container } = render(<><Wash color="#f00" /><Wash color="#00f" /></>);
-    const ids = Array.from(container.querySelectorAll('filter')).map((f) => f.id);
-    expect(new Set(ids).size).toBe(2);
+  it('Tape can be tinted and made small', () => {
+    const { container } = render(<Tape color="#e7b45c" size="sm" />);
+    const tape = container.querySelector('span')!;
+    expect(tape.style.getPropertyValue('--studio-tape-color')).toBe('#e7b45c');
+    expect(tape.className).toMatch(/tapeSm/);
   });
 });

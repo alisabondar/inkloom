@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { MEDIUMS, type Medium } from '@/lib/plan';
 import { startConceptsAction, type StartConceptsState } from '@/app/actions/generations';
 import { useReferencePhotoAction } from '@/app/actions/uploads';
-import { Button, Chip, HandNote, Paper, Wash } from '@/components/studio';
+import { Button, Chip, HandNote, Paper } from '@/components/studio';
 import { StepIndicator } from './StepIndicator';
 import styles from './create.module.css';
 
@@ -170,7 +170,6 @@ export function CreateFlow({ initialMedium = null, initialIdea = '', initialTitl
           </Paper>
 
           <Paper rotate={0.8} style={{ padding: '22px 20px', position: 'relative' }}>
-            <Wash color="#9be6da" style={{ inset: '-10% -10% auto auto', width: 140, height: 100 }} opacity={0.45} />
             <div className={styles.photoBox}>
               <label className={styles.label} htmlFor="create-photo">Reference photo <small>(optional)</small></label>
               <HandNote rotate={-1.5}>use your own photo, or let us paint it</HandNote>

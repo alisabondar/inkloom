@@ -22,7 +22,7 @@
 .caption { position: absolute; left: 12px; bottom: 6px; font-family: var(--studio-font-hand); font-size: 19px; color: var(--studio-ink-soft); }
 .swatches { display: flex; gap: 4px; height: 46px; }
 .swatches span { flex: 1; }
-.tape { top: -11px; left: 50%; margin-left: -48px; }
+.tape { top: -7px; left: 50%; margin-left: -27px; }
 
 .section { max-width: 1200px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
 .sectionHead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 18px 0 22px; }
