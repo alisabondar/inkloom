@@ -1,30 +1,76 @@
 # Inkloom
 
+[![CI](https://github.com/alisabondar/inkloom/actions/workflows/ci.yml/badge.svg)](https://github.com/alisabondar/inkloom/actions/workflows/ci.yml)
+
 ![Inkloom demo: an idea becomes four concepts, then a tunable template with layers, presets and a project plan](docs/demo.gif)
 
-Inkloom is an AI-assisted template studio for artists. You describe an idea, pick a medium, difficulty, and duration, and Inkloom generates a black-and-white line-art reference you can save, share to a public gallery, and download as a PNG.
+Inkloom is a template studio for artists. Describe an idea (or upload a reference photo), pick one of four AI colour concepts, and Inkloom turns it into a working template: fine line art to draw over, a value study, a grid, a named paint palette, and a step-by-step plan for your medium. Everything after the concept is computed in the browser, so every slider redraws instantly without another AI call.
 
 ## Features
 
-Inkloom is an early MVP focused on the template-generation flow and account pages. See [Known limitations](#known-limitations) before using it with real accounts.
+- **Create:** choose a medium (pencil, watercolor, acrylic, embroidery, tattoo flash), describe the idea with one-tap detail chips, and get four concepts painted in the background. Or use your own photo as the concept.
+- **Workspace (`/t/[id]`):**
+  - **Starting points:** pick Simple, Balanced or Detailed. Each card shows a live preview of this template's line art at that level.
+  - **Layers:** toggle line art, values, grid and the colour reference.
+  - **Fine-tune:** adjust line detail, shading tones, paint count and grid size.
+  - **Plan:** read a generated project plan with materials, steps and time estimates.
+  - **Autosave:** every change is saved to the template as you go.
+- **Export:** download a PNG of the visible layers, or print a pack with the template, palette sheet, value scale and plan.
+- **Gallery and My projects:** browse public templates by medium and difficulty, and keep your own public or private.
+- **Accounts:** Supabase Auth with email confirmation, password reset, profile and avatar, password change, JSON data export, and account deletion.
+- **Look:** a "Studio Table" design system of paper, washi tape and hand-written notes, in `src/components/studio`.
 
-Current features:
+## How it works
 
-- Text-to-template generation: a line-art sketch built from your idea, medium, difficulty, and duration
-- Saving a generated template, viewing it, and downloading it as a PNG
-- An option to share a template in the public gallery
-- A gallery of public templates (alongside three built-in example images)
-- Account sign-up, and sign-in with email or username
-- Account settings: profile editing, avatar upload, password change, data export (JSON), and account deletion
-- Responsive UI with an animated background, paint-splatter styling, and shared visual design
+```mermaid
+flowchart LR
+  idea[Idea + medium] --> action[Server Action<br/>validate, rate limit,<br/>insert 4 jobs]
+  action --> jobs[Background jobs<br/>Cloudflare FLUX ⇄ Pixazo FLUX]
+  jobs --> storage[(Supabase Storage<br/>+ generations table)]
+  storage -->|polled via<br/>/api/generations/id| pick[Pick a concept]
+  photo[Reference photo] --> storage
+  pick --> worker[Web Worker<br/>image processing]
+  worker --> sheet[Layers, palette, plan]
+  sheet -->|debounced| save[(templates.settings)]
+```
 
-## Tech Stack
+1. **Concepts are background jobs.** A Server Action checks the hourly limit, builds four prompt variations for the medium, inserts four `generations` rows and responds straight away. The jobs run after the response (Next.js `after()`). The concepts page polls a small status endpoint, so the user can leave and come back.
+2. **Providers fail over.** Cloudflare Workers AI and Pixazo both run FLUX.1-schnell. `IMAGE_PROVIDER` picks the primary; if it errors, the other is tried, and the error names every provider that failed.
+3. **Templates are computed in the browser.** The chosen image is processed in a Web Worker (falling back to the main thread), and the newest request wins, so dragging a slider never queues stale work. All processing is pure, deterministic TypeScript in `src/lib/processing`:
+   - **Line art:** Gaussian blur, then Sobel edges, then a percentile threshold. The threshold makes "detail" mean the same thing on low- and high-contrast images. Edges are then thinned to 1px centrelines with Zhang–Suen, and short specks are dropped.
+   - **Values:** posterized greyscale with 2–9 evenly spaced tones.
+   - **Palette:** seeded k-means++ over a pixel sample, with each colour named after the nearest paint in Lab space (CIE76).
+   - **Plan:** steps and time estimates built from the medium, the palette, the number of tones and how many distinct regions the image has.
 
-- **Framework:** Next.js 16 with the App Router (API routes in `src/app/api`)
-- **UI:** React 19, CSS Modules, shared global styles, Tailwind CSS import support
-- **Database and storage:** Supabase (Postgres tables and Storage buckets, accessed with the service-role key from API routes)
-- **AI image generation:** Pixazo FLUX.1-schnell (512×512, 4 steps)
-- **Testing:** Vitest and React Testing Library
+## Engineering decisions
+
+- **Row Level Security everywhere.** Pages and actions use a client scoped to the signed-in user, so Postgres enforces ownership. The service-role key is read in exactly one module (`src/lib/supabase/admin.ts`). It is used only for work a user's own client can't do: background jobs with no request attached, signing image URLs, username lookups, and Auth admin calls (changing a password or email, deleting an account), always for the signed-in user.
+- **Storage is fenced per user.** Bucket policies only allow writes inside a folder named with the user's id. Concept images are served through short-lived signed URLs.
+- **The rate limit lives in the database.** It counts the user's generations from the last hour, so it holds across serverless instances without Redis. Reference photos make no AI call, so they don't count.
+- **Photos are stored once.** An uploaded photo is named by its SHA-256 content hash, so uploading it again reuses the stored file.
+- **Sessions are refreshed before render.** `src/proxy.ts` refreshes an expiring access token before the page renders, so Server Components always see a valid session.
+- **Local work without email loops.** `DEV_AUTH_BYPASS` signs every request in as a real, confirmed Supabase user, so Row Level Security still applies. It is ignored in production.
+
+## Quality
+
+- **Unit and component tests (Vitest, React Testing Library):** validation, every processing step, provider ordering and fallback, the rate limit, the plan builder, the create flow, the concepts page and the workspace.
+- **End-to-end smoke tests (Playwright):** run against a production build with no backend, covering the home page, the signed-out create flow, protected routes and 404s.
+- **CI (GitHub Actions):** lint, type check, unit tests, then a production build with the end-to-end tests, on every push and pull request. No secrets are needed.
+- **Lighthouse** (production build):
+
+  | Home page | Performance | Accessibility | Best practices | SEO |
+  |---|---|---|---|---|
+  | Desktop | 100 | 100 | 100 | 100 |
+  | Mobile | 97 | 100 | 100 | 100 |
+
+## Tech stack
+
+- **Framework:** Next.js 16 (App Router, Server Components, Server Actions, `after()`, `proxy.ts`)
+- **UI:** React 19, CSS Modules, the Studio Table design system
+- **Database, Auth, Storage:** Supabase, with Row Level Security on every table
+- **AI image generation:** Cloudflare Workers AI and Pixazo (FLUX.1-schnell), with automatic fallback
+- **Image processing:** TypeScript in a Web Worker
+- **Testing:** Vitest, React Testing Library, Playwright, GitHub Actions
 - **Language:** TypeScript
 
 ## Running locally
@@ -43,22 +89,22 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 
 # At least one image provider
-PIXAZO_API_KEY=your-pixazo-api-key
 CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
 CLOUDFLARE_API_TOKEN=your-workers-ai-token
+PIXAZO_API_KEY=your-pixazo-api-key
 ```
 
 Optional:
 
 ```bash
-IMAGE_PROVIDER=cloudflare            # primary provider: pixazo or cloudflare (the other is the fallback)
-GENERATE_RATE_LIMIT_PER_HOUR=10      # concepts per user per hour (each idea uses 4)
+IMAGE_PROVIDER=cloudflare            # primary provider: cloudflare or pixazo (the other is the fallback)
+GENERATE_RATE_LIMIT_PER_HOUR=10      # AI concepts per user per hour (each idea uses 4)
 CLOUDFLARE_IMAGE_MODEL=@cf/black-forest-labs/flux-1-schnell
 PIXAZO_FLUX_SCHNELL_REQUEST_URL=https://gateway.pixazo.ai/flux-1-schnell/v1/getData
 PIXAZO_FLUX_SCHNELL_RESULT_URL=https://gateway.pixazo.ai/flux-1-schnell/v1/getData-result
 ```
 
-Local testing without signing in (ignored when `NODE_ENV=production`): every request is signed in as a confirmed dev account (`dev@inkloom.test`, created on first use). It is a real Supabase user, so Row Level Security still applies.
+Local testing without signing in (ignored when `NODE_ENV=production`): every request is signed in as a confirmed dev account (`dev@inkloom.test`, created on first use).
 
 ```bash
 DEV_AUTH_BYPASS=true
@@ -66,84 +112,76 @@ DEV_USER_EMAIL=dev@inkloom.test        # optional
 DEV_USER_PASSWORD=choose-a-local-one   # optional
 ```
 
-Then:
+Then run `npm run dev` and open [http://localhost:3000](http://localhost:3000).
+
+## Scripts
 
 ```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-## Useful scripts
-
-```bash
-npm run dev            # dev server (Turbopack)
-npm run build          # production build
+npm run dev                  # dev server (Turbopack)
+npm run build && npm start   # production build
 npm run lint
 npx tsc --noEmit
-npm test -- --run      # run the test suite once
-npm run test:ui        # Vitest UI
+npm test -- --run            # unit and component tests
+npm run test:e2e             # builds, starts on :3100 and runs the Playwright smoke tests
 npm run test:coverage
+node scripts/record-demo.mjs # records docs/demo.mp4 (see the script for Screen Studio mode)
 ```
 
-## Supabase Setup
+`scripts/record-demo.mjs` clicks through the whole flow against the dev server. By default it records a headless take into `docs/demo.mp4`. With `--present`, it drives the real pointer for screen recorders such as Screen Studio. `--offline` uses a reference photo instead of AI concepts.
 
-The app expects these to exist in your Supabase project:
+## Supabase setup
 
-- **`user` table:** profile and account data: `id`, `email`, `password`, `first_name`, `username`, `favorite_medium`, `avatar_url`
-- **`template` table:** saved templates: `id`, `title`, `medium`, `difficulty`, `duration`, `generated_image_id`, `image_url`, `source`, `user_id`, `public`, `created_at`, `updated_at`
-- **`templates` storage bucket:** generated images. Create it yourself; the app uploads to it but doesn't create it.
-- **`avatars` storage bucket:** profile images. Created automatically (private) on the first avatar upload.
+### New project
 
-`supabase-schema.sql` only adds an index on `created_at`. It refers to a table named `templates`, but the app uses `template`, so adjust the name before running it.
+Run `supabase/migrations/0004_v3_schema.sql` in the SQL Editor. It creates:
 
-## Project Structure
+- `profiles`: one per Auth user, created automatically by a trigger on sign-up
+- `templates`: owned by a profile, with the workspace `settings` (jsonb) and `is_public`
+- `generations`: background image jobs (`queued` → `running` → `succeeded` / `failed`)
+- the `avatars` and `templates` storage buckets, with policies that only let users write inside their own folder
+- Row Level Security: owners have full access to their rows, and anyone can read public templates
 
-```
-src/
-  app/
-    page.tsx              home
-    create-template/      generation form
-    template-view/        view and download a template
-    gallery/              public templates
-    account-settings/     profile, avatar, password, export, delete
-    api/                  route handlers (sign-up/in, templates, profile, generation)
-  components/common/      header, footer, auth modal, animated background
-  hooks/                  useAuth, usePublicTemplates
-  lib/                    Supabase clients, signed storage URLs
-  constants/              DEFAULT_USER_ID
-```
-
-## Known Limitations
-
-- **Authentication is not secure yet.** Passwords are stored and compared as plain text in the `user` table, and the signed-in user is kept in `localStorage`. The API routes trust the user ID the browser sends and use the service-role key, so anyone who knows a user's ID can call profile, password, export, or delete endpoints for that user. Supabase Auth is not used.
-- **Templates are not linked to accounts.** Every saved template is stored with the placeholder owner `user_id = '1'` (`DEFAULT_USER_ID`), and there is no "my templates" page.
-- **No generation limit.** `/api/generate-template` has no rate limiting, so anyone can spend the Pixazo quota.
-- **Tests:** only `src/components/__tests__/Header.test.tsx` exists. `TEST_README.md` describes tests that are not in the repo.
-- **Unused dependencies:** `openai` and `react-router-dom` are installed but not imported anywhere.
-
-In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your production URL) to the redirect URLs. Confirmation and reset emails work with Supabase's default templates; if you switch the templates to `{{ .TokenHash }}` links pointing at `/auth/callback?token_hash={{ .TokenHash }}&type=…`, the callback verifies those too.
+In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your production URL) to the redirect URLs. Confirmation and reset emails work with Supabase's default templates. If you switch the templates to `{{ .TokenHash }}` links pointing at `/auth/callback?token_hash={{ .TokenHash }}&type=…`, the callback verifies those too.
 
 ### Upgrading a V1/V2 database
 
 Apply in this order:
 
 1. `supabase/migrations/0001_link_user_to_auth.sql`
-2. `node --env-file=.env.local scripts/migrate-users-to-auth.mjs --dry-run`, then without `--dry-run` (creates or links a Supabase Auth user for each legacy `user` row)
+2. `node --env-file=.env.local scripts/migrate-users-to-auth.mjs --dry-run`, then without `--dry-run`. This creates or links a Supabase Auth user for each legacy `user` row.
 3. `supabase/migrations/0002_enable_rls.sql`
-4. Run `0004_v3_schema.sql`. It copies legacy profiles and templates into the new tables; the legacy tables are left in place and are no longer used. V2 saved every template under a placeholder owner, so legacy templates go to the earliest-created account — set `legacy_owner_email` near the bottom of the file first to choose a different owner.
+4. `supabase/migrations/0004_v3_schema.sql`. It copies legacy profiles and templates into the new tables and leaves the legacy tables in place, unused. V2 saved every template under a placeholder owner, so legacy templates go to the earliest-created account; set `legacy_owner_email` near the bottom of the file first to choose a different owner.
 
 ## Project structure
 
-- Move accounts to Supabase Auth with Row Level Security, and link templates to their owners
-- Rate limiting for generation
-- Image-to-image support for turning reference uploads into generated templates
-- More artistic mediums such as embroidery, watercolor, ink, and digital art
-- Template iterations and refinement controls
-- Full project plans with materials, steps, and timelines
+```
+src/
+  app/
+    actions/           Server Actions (auth, profile, templates, generations, uploads)
+    api/generations/   generation status endpoint, polled by the concepts page
+    auth/callback/     email-link handler
+    create/            medium → idea → concepts flow
+    t/[id]/            workspace (processing runs in a Web Worker)
+    gallery/ projects/ settings/ signin/ signup/ reset/
+  components/studio/   design system
+  components/site/     header, footer, template grid, forms
+  lib/
+    supabase/          session-bound server client, admin client (the only reader of the service-role key)
+    ai/                providers, prompt builder, background jobs, rate limit
+    processing/        deterministic image processing
+    plan.ts            mediums and project plans
+    validation.ts      Server Action input validators
+  proxy.ts             refreshes expired sessions before pages render
+e2e/                   Playwright smoke tests
+scripts/               demo recorder, V2 user migration
+supabase/migrations/   schema and Row Level Security
+docs/history/          design plans and audits from earlier versions
+```
 
-See also [BACKLOG.md](BACKLOG.md) for features that were taken out until they can be done properly (paint by number).
+## Roadmap
+
+See [BACKLOG.md](BACKLOG.md) for features taken out until they can be done properly (paint by number).
 
 - SVG export (potrace) and tiled large-format printing
-- Refinement of a chosen concept ("simpler", "more like this")
+- Refining a chosen concept ("simpler", "more like this")
 - Remixing gallery templates and a progress journal
