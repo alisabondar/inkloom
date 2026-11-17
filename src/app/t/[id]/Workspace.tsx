@@ -433,7 +433,6 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
                 </button>
               ))}
             </div>
-            {isCustom && <p className={styles.customNote}>Custom · based on {presetLabel}. Pick a card to reset.</p>}
 
             <button
               type="button"

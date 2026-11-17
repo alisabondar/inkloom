@@ -34,9 +34,11 @@
 .shares i { margin-left: auto; color: var(--studio-muted); font-style: normal; }
 .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12); }
 
-.desk { grid-area: desk; position: relative; display: grid; place-items: center; min-height: 480px; }
+/* The sheet sits at the top of the desk and stays in view while the side columns scroll,
+   instead of centring against them (they grow with the palette and fine-tune). */
+.desk { grid-area: desk; position: relative; display: grid; place-items: start center; min-height: 480px; }
 
-.sheetWrap { position: relative; z-index: 1; width: min(100%, 760px); }
+.sheetWrap { position: sticky; top: 18px; z-index: 1; width: min(100%, 760px); }
 .sheet { position: relative; width: 100%; padding: 22px; box-shadow: var(--studio-shadow-sheet); }
 .tapeTL, .tapeTR, .tapeBL, .tapeBR { position: absolute; z-index: 3; }
 .tapeTL { left: -14px; top: 2px; }
@@ -80,6 +82,7 @@
 @media (max-width: 900px) {
   .screen { grid-template-columns: 1fr; grid-template-areas: 'top' 'desk' 'right' 'left'; padding: 14px; }
   .desk { min-height: 0; padding: 24px 8px; }
+  .sheetWrap { position: relative; top: auto; }
   .layers { flex-direction: row; overflow-x: auto; }
 }
 
@@ -114,7 +117,6 @@
 .presetThumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .presetLabel { font-weight: 700; font-size: 12.5px; color: var(--studio-ink); }
 .presetHint { font-size: 10.5px; color: var(--studio-muted); line-height: 1.2; }
-.customNote { font-size: 12px; color: var(--studio-coral); margin: 0 0 8px; }
 .fineToggle { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 44px; padding: 10px 0; margin: 4px 0 6px; border: 0; border-top: 1px dashed var(--studio-rule); background: none; font: 600 13px var(--studio-font-body); color: var(--studio-teal); cursor: pointer; text-align: left; }
 .fineToggle:focus-visible { outline: 2px solid var(--studio-teal); outline-offset: 2px; }
 .fineHint { display: block; font-weight: 500; font-size: 11.5px; color: var(--studio-muted); margin-top: 2px; }

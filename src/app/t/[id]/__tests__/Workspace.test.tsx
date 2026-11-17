@@ -77,7 +77,7 @@ describe('Workspace', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Increase shading' }));
     expect(stepperValue('Shading')).toBe(`${DIFFICULTY_PRESETS.advanced.valueSteps + 1} tones`);
-    expect(screen.getByText(/custom · based on detailed/i)).toBeInTheDocument();
+    expect(screen.getByText(/· custom$/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /detailed/i })).toHaveAttribute('aria-pressed', 'false');
 
     await act(async () => { vi.advanceTimersByTime(900); });
