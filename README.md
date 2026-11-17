@@ -1,5 +1,7 @@
 # Inkloom
 
+![Inkloom demo: an idea becomes four concepts, then a tunable template with layers, presets and a project plan](docs/demo.gif)
+
 Inkloom is an AI-assisted template studio for artists. You describe an idea, pick a medium, difficulty, and duration, and Inkloom generates a black-and-white line-art reference you can save, share to a public gallery, and download as a PNG.
 
 ## Features
