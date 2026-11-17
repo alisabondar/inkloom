@@ -1,6 +1,6 @@
 'use client';
 
-import { startTransition, useActionState, useEffect, useState } from 'react';
+import { startTransition, useActionState, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MEDIUMS, type Medium } from '@/lib/plan';
 import { startConceptsAction, type StartConceptsState } from '@/app/actions/generations';
@@ -38,12 +38,16 @@ export function CreateFlow({ initialMedium = null, initialIdea = '', initialTitl
     if (done?.batchId) router.push(conceptsUrl(done));
   }, [conceptsState, photoState, router]);
 
-  useEffect(() => {
-    if (!photo) return;
-    const url = URL.createObjectURL(photo);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [photo]);
+  // The preview is an object URL for the picked file; each new pick revokes the previous one.
+  const previewUrl = useRef<string | null>(null);
+  function showPreview(file: File | null) {
+    if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+    previewUrl.current = file ? URL.createObjectURL(file) : null;
+    setPreview(previewUrl.current);
+  }
+  useEffect(() => () => {
+    if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+  }, []);
 
   const serverState = photoState.error || photoState.fieldErrors ? photoState : conceptsState;
   const errors = { ...(serverState.fieldErrors ?? {}), ...localErrors };
@@ -54,8 +58,9 @@ export function CreateFlow({ initialMedium = null, initialIdea = '', initialTitl
     if (file && !PHOTO_TYPES.includes(file.type)) next.photo = 'Use a JPG, PNG, WebP or GIF image';
     else if (file && file.size > MAX_PHOTO_BYTES) next.photo = 'Photos must be 8 MB or smaller';
     setLocalErrors(next);
-    setPhoto(next.photo ? null : file);
-    if (!file || next.photo) setPreview(null);
+    const accepted = next.photo ? null : file;
+    setPhoto(accepted);
+    showPreview(accepted);
   }
 
   function baseForm() {

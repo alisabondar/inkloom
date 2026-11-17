@@ -197,9 +197,11 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
   const [settings, setSettings] = useState<Settings>(() => initialSettings(template));
   const [difficulty, setDifficulty] = useState<Difficulty>(template.difficulty);
   const [source, setSource] = useState<{ raster: RasterImage; url: string } | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const loadError = template.conceptUrl ? imageError : 'This template has no concept image.';
   const [result, setResult] = useState<(ProcessResult & { urls: Omit<Layers, 'colour' | 'width' | 'height'> }) | null>(null);
-  const [busy, setBusy] = useState(false);
+  // Which settings the shown result was drawn with; the sheet is busy until it matches the current ones.
+  const [drawnKey, setDrawnKey] = useState<string | null>(null);
   const [saveNote, setSaveNote] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(template.is_public);
   const [view, setView] = useState<'sheet' | 'plan'>('sheet');
@@ -214,29 +216,31 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
   const slug = slugify(template.title);
 
   useEffect(() => {
-    if (!template.conceptUrl) { setLoadError('This template has no concept image.'); return; }
+    if (!template.conceptUrl) return;
     let live = true;
     loadRaster(template.conceptUrl).then(
       (s) => live && setSource(s),
-      (e: Error) => live && setLoadError(e.message),
+      (e: Error) => live && setImageError(e.message),
     );
     return () => { live = false; };
   }, [template.conceptUrl]);
 
   const { detail, weight, valueSteps, paletteSize } = settings;
+  const paramsKey = `${detail}|${weight}|${valueSteps}|${paletteSize}`;
+  const busy = Boolean(source) && drawnKey !== paramsKey;
   useEffect(() => {
     if (!source) return;
-    setBusy(true);
     const timer = window.setTimeout(() => {
       const job = process(source.raster, { detail, weight, valueSteps, paletteSize });
+      const finish = () => { if (job.id === job.latest()) setDrawnKey(paramsKey); };
       job.done.then(({ id, result: r }) => {
         if (id !== job.latest()) return;
         setResult({ ...r, urls: { lines: rasterToUrl(r.lines), values: rasterToUrl(r.values), numbers: rasterToUrl(r.numbers) } });
-        setBusy(false);
-      }, () => setBusy(false));
+        finish();
+      }, finish);
     }, PROCESS_DELAY);
     return () => window.clearTimeout(timer);
-  }, [source, detail, weight, valueSteps, paletteSize, process]);
+  }, [source, detail, weight, valueSteps, paletteSize, paramsKey, process]);
 
   // 8.4: debounce saving to the template (owner only).
   useEffect(() => {
