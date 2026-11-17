@@ -29,7 +29,8 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Type check
-        run: npx tsc --noEmit
+        # next-env.d.ts (image and route types) is generated, not committed.
+        run: npm run typecheck
       - name: Unit and component tests
         run: npm test -- --run
       - name: Install Playwright Chromium

@@ -120,7 +120,7 @@ Then run `npm run dev` and open [http://localhost:3000](http://localhost:3000).
 npm run dev                  # dev server (Turbopack)
 npm run build && npm start   # production build
 npm run lint
-npx tsc --noEmit
+npm run typecheck            # generates Next's route and image types, then tsc
 npm test -- --run            # unit and component tests
 npm run test:e2e             # builds, starts on :3100 and runs the Playwright smoke tests
 npm run test:coverage
