@@ -1,9 +1,12 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Button, HandNote, Tape } from '@/components/studio';
 import { TemplateGrid } from '@/components/site/TemplateGrid';
 import { listPublicTemplates } from '@/lib/db/queries';
 import { MEDIUMS } from '@/lib/plan';
 import styles from './page.module.css';
+import meadow from '../../public/meadow.png';
+import landscape from '../../public/landscape-painting.png';
 
 const STEPS = [
   { title: 'Describe it', text: 'A few words or a reference photo. Pick the medium you work in.' },
@@ -39,14 +42,12 @@ export default async function Home() {
         <div className={styles.table} aria-hidden="true">
           <div className={styles.sheet} style={{ '--r': '-5deg', '--d': '0.1s', left: '0%', top: '6%', width: '58%', height: 280 } as React.CSSProperties}>
             <Tape className={styles.tape} size="sm" color="#e7b45c" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/meadow.png" alt="" />
+            <Image src={meadow} alt="" preload sizes="(max-width: 900px) 60vw, 420px" />
             <span className={styles.caption}>line art · v2</span>
           </div>
           <div className={styles.sheet} style={{ '--r': '4deg', '--d': '0.3s', right: '0%', top: '14%', width: '50%', height: 250 } as React.CSSProperties}>
             <Tape className={styles.tape} angle={5} size="sm" color="#7fb9a8" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/landscape-painting.png" alt="" />
+            <Image src={landscape} alt="" sizes="(max-width: 900px) 55vw, 360px" />
             <span className={styles.caption}>concept ✓</span>
           </div>
           <div className={styles.sheet} style={{ '--r': '-1.5deg', '--d': '0.5s', left: '26%', top: '66%', width: '44%', paddingBottom: 34 } as React.CSSProperties}>
