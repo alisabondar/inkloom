@@ -13,6 +13,8 @@ export default defineConfig({
     // Using jsdom for better React 19 compatibility and stability
     // jsdom is more mature and handles complex React Testing Library queries better than happy-dom
     environment: 'jsdom',
+    // Unit and component tests live in src; e2e/ is run by Playwright.
+    include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./vitest.setup.ts'],
     css: false, // Disable CSS processing to avoid PostCSS issues in tests
     coverage: {

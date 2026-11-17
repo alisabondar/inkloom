@@ -43,3 +43,10 @@ next-env.d.ts
 # IDE settings
 settings.json
 .vscode/settings.json
+
+# demo recordings (scripts/record-demo.mjs)
+/docs/demo.mp4
+
+# playwright
+/test-results/
+/playwright-report/
