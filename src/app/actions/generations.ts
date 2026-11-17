@@ -18,13 +18,16 @@ export async function startConceptsAction(_prev: StartConceptsState, formData: F
   const { supabase, user } = await requireUser();
   const { idea, medium, title } = parsed.data;
 
-  // Rate limit from the database, so it holds across server instances.
+  // Rate limit from the database, so it holds across server instances. Only AI concepts count:
+  // reference photos (provider 'upload') make no provider call. New jobs have no provider until
+  // they run, and a plain neq would drop those nulls, so they're matched explicitly.
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
   const { count } = await supabase
     .from('generations')
     .select('id', { count: 'exact', head: true })
     .eq('owner_id', user.id)
-    .gte('created_at', since);
+    .gte('created_at', since)
+    .or('provider.is.null,provider.neq.upload');
 
   const quota = checkGenerationQuota(count ?? 0, CONCEPTS_PER_IDEA);
   if (!quota.allowed) {

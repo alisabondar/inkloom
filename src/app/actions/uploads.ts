@@ -17,12 +17,16 @@ export async function useReferencePhotoAction(_prev: StartConceptsState, formDat
   const { photo: file, medium, title, idea } = parsed.data;
   const { supabase, user } = await requireUser();
 
-  // Storage policies only allow writes inside the user's own folder.
-  const path = `${user.id}/concepts/upload-${Date.now()}.${EXTENSIONS[file.type]}`;
+  // A photo is stored once per user: its name is its content hash, so uploading the same photo
+  // again reuses the stored file instead of adding a copy. Each upload still gets its own
+  // generation row, so the idea, medium and title can differ.
+  const hash = await contentHash(file);
+  const path = `${user.id}/concepts/upload-${hash}.${EXTENSIONS[file.type]}`;
   const { error: uploadError } = await supabase.storage
     .from('templates')
     .upload(path, file, { contentType: file.type, upsert: false });
-  if (uploadError) return { error: 'Could not upload the photo' };
+  const alreadyStored = Boolean(uploadError && isDuplicate(uploadError));
+  if (uploadError && !alreadyStored) return { error: 'Could not upload the photo' };
 
   const text = idea || 'Reference photo';
   const batchId = crypto.randomUUID();
@@ -41,8 +45,20 @@ export async function useReferencePhotoAction(_prev: StartConceptsState, formDat
     .single<{ id: string }>();
 
   if (error || !data) {
-    await supabase.storage.from('templates').remove([path]);
+    // Only clean up a file this call added; an earlier upload may still use the stored one.
+    if (!alreadyStored) await supabase.storage.from('templates').remove([path]);
     return { error: 'Could not save the photo' };
   }
   return { ok: true, batchId, generationIds: [data.id] };
+}
+
+// SHA-256 of the file's bytes, as hex (the first 32 characters are plenty to tell photos apart).
+async function contentHash(file: File) {
+  const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+}
+
+// Supabase Storage answers 409 "The resource already exists" when the path is taken and upsert is off.
+function isDuplicate(error: { message?: string; statusCode?: string | number }) {
+  return String(error.statusCode) === '409' || /already exists|duplicate/i.test(error.message ?? '');
 }
