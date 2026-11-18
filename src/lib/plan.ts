@@ -72,6 +72,17 @@ export function scaleMinutes(base: number, scale: StepScale, sizeRatio: number):
   return base;
 }
 
+/**
+ * The colour that is really the background fabric: the largest one, when it covers most of the
+ * picture. Embroidery leaves it unstitched, so it's bought as fabric, not thread.
+ */
+export function fabricColour(palette: PaletteColor[]): PaletteColor | undefined {
+  const largest = palette.reduce<PaletteColor | undefined>((best, c) => (!best || c.share > best.share ? c : best), undefined);
+  return largest && largest.share >= FABRIC_SHARE ? largest : undefined;
+}
+
+const FABRIC_SHARE = 0.4;
+
 const DIFFICULTY_FACTOR: Record<Difficulty, number> = { beginner: 1, intermediate: 1.6, advanced: 2.4 };
 
 const list = (names: string[]) =>
@@ -146,19 +157,32 @@ export function buildProjectPlan(input: {
         { title: 'Touch up outlines', detail: 'Fix any missed spots and cover visible numbers with a second coat.', minutes: m(15, 'edge') },
       ];
       break;
-    case 'embroidery':
-      materials = ['Cotton or linen fabric', 'Embroidery hoop', 'Water-soluble transfer pen', 'Embroidery needles', ...uniqueNames.map((n) => `${n} stranded thread`)];
+    case 'embroidery': {
+      const fabric = fabricColour(palette);
+      const threads = byShare.filter((c) => c !== fabric);
+      const threadNames = [...new Set(threads.map((c) => c.name))];
+      // Outline in the darkest thread, never the fabric.
+      const outline = threads.reduce<PaletteColor | undefined>((d, c) => (!d || lightness(c) < lightness(d) ? c : d), undefined)?.name ?? darkest;
+      materials = [
+        fabric ? `Cotton or linen fabric close to ${fabric.name}` : 'Cotton or linen fabric',
+        'Embroidery hoop',
+        'Water-soluble transfer pen',
+        'Embroidery needles',
+        ...threadNames.map((n) => `${n} stranded thread`),
+      ];
       steps = [
         { title: 'Transfer the design', detail: 'Trace the line art onto the fabric with a water-soluble pen and hoop it tight.', minutes: m(20, 'edge') },
-        { title: 'Backstitch the outlines', detail: `Backstitch every outline in ${darkest} thread.`, minutes: m(30 + regions / 4, 'edge') },
-        ...byShare.map((c) => ({
+        { title: 'Backstitch the outlines', detail: `Backstitch every outline in ${outline} thread.`, minutes: m(30 + regions / 4, 'edge') },
+        // The background is the fabric itself, so it gets no fill.
+        ...threads.map((c) => ({
           title: `Fill ${c.name}`,
-          detail: `Satin- or long-and-short-stitch the ${c.name} areas with thread matched to ${c.hex}.`,
+          detail: `Satin- or long-and-short-stitch the ${c.name} areas.`,
           minutes: m(10 + (regions * c.share) / 2, 'area'),
         })),
         { title: 'Finish', detail: 'Rinse out the transfer marks, press face-down and trim the hoop.', minutes: m(15) },
       ];
       break;
+    }
     case 'tattoo':
       materials = ['Stencil paper', 'Thermal or hand-trace stencil transfer', 'Fine liners (0.3, 0.5, 0.8)', 'Grey wash markers', 'Practice skin'];
       steps = [

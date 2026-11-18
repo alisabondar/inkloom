@@ -1,6 +1,6 @@
 .page { min-height: 100vh; padding: 32px 20px 64px; }
 .inner { max-width: 1080px; margin: 0 auto; }
-.title { font-family: var(--studio-font-display); font-weight: 800; font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 6px 0 4px; color: var(--studio-ink); }
+.title { font-family: var(--studio-font-display); font-weight: 800; font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 6px 0 14px; color: var(--studio-ink); }
 .sub { color: var(--studio-ink-soft); margin: 0 0 22px; max-width: 60ch; }
 .steps { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 0; margin: 0 0 22px; font-size: 13px; font-weight: 700; color: var(--studio-muted); }
 .steps li { display: flex; align-items: center; gap: 8px; }
@@ -31,7 +31,8 @@
 .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 20px; }
 .photoBox { display: grid; gap: 10px; }
 .photoPreview { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: var(--studio-radius-sm); background: #fff; }
-.fileInput { font-size: 13px; max-width: 100%; }
+.fileInput { font-size: 13px; max-width: 100%; color: var(--studio-ink-soft); }
+.fileInput::file-selector-button { font: 600 13px var(--studio-font-body); color: var(--studio-ink); background: var(--studio-paper); border: 1.5px solid var(--studio-ink); border-radius: 3px; padding: 6px 12px; margin-right: 10px; cursor: pointer; }
 .linkButton { background: none; border: 0; padding: 0; font: inherit; font-size: 13px; color: var(--studio-teal); text-decoration: underline; cursor: pointer; }
 
 /* concepts stage */

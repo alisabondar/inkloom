@@ -191,19 +191,37 @@ const PAINT_WORD: Partial<Record<Medium, string>> = {
 };
 
 /**
+ * Colours that match the same thread or paint become one entry, so nothing is bought twice. The
+ * entry keeps the swatch of its largest colour and adds up the shares.
+ */
+function mergeByName(colors: ShoppingColor[]): ShoppingColor[] {
+  const byName = new Map<string, ShoppingColor>();
+  for (const c of colors) {
+    const seen = byName.get(c.name);
+    if (seen) seen.share += c.share;
+    else byName.set(c.name, { ...c });
+  }
+  return [...byName.values()].sort((a, b) => b.share - a.share);
+}
+
+/**
  * Adds what to buy for each palette colour. Embroidery swaps the paint name for the closest DMC
  * thread, so the plan and materials list name real skeins. Paints keep their name and gain the
  * pigment code. Mediums without a palette (pencil, tattoo) are returned unchanged.
  */
 export function shoppingPalette(medium: Medium, palette: PaletteColor[]): ShoppingColor[] {
   if (medium === 'embroidery') {
-    return palette.map((c) => {
-      const thread = nearestDmc(c.rgb);
-      const code = `DMC ${thread.code}`;
-      return { ...c, name: `${code} ${thread.name}`, code, shopUrl: shopLink(`${code} embroidery floss`) };
-    });
+    return mergeByName(
+      palette.map((c) => {
+        const thread = nearestDmc(c.rgb);
+        const code = `DMC ${thread.code}`;
+        return { ...c, name: `${code} ${thread.name}`, code, shopUrl: shopLink(`${code} embroidery floss`) };
+      }),
+    );
   }
   const word = PAINT_WORD[medium];
   if (!word) return palette;
-  return palette.map((c) => ({ ...c, code: PIGMENTS[c.name], shopUrl: shopLink(`${c.name} ${word}`) }));
+  const withCodes = palette.map((c) => ({ ...c, code: PIGMENTS[c.name], shopUrl: shopLink(`${c.name} ${word}`) }));
+  // Paint by number keeps every colour: each one is its own numbered mix, even if two share a name.
+  return medium === 'paint-by-number' ? withCodes : mergeByName(withCodes);
 }

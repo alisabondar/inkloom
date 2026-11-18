@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, SnapSlider, Stepper, Tape, type SnapStop } from '@/components/studio';
 import { lineArt, settingsForDifficulty, SKETCH_WEIGHT, type Difficulty, type RasterImage } from '@/lib/processing';
-import { buildProjectPlan, MEDIUMS } from '@/lib/plan';
+import { buildProjectPlan, fabricColour, MEDIUMS } from '@/lib/plan';
 import { formatSize, SIZES } from '@/lib/sizes';
-import { shoppingPalette } from '@/lib/shopping';
+import { shoppingPalette, type ShoppingColor } from '@/lib/shopping';
 import type { TemplateCard } from '@/lib/db/queries';
 import type { WorkspaceLayer } from '@/lib/db/types';
 import type { ActionState } from '@/lib/validation';
@@ -298,6 +298,8 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
 
   // Thread numbers for embroidery, pigment codes for paints, and a shop link for each colour.
   const palette = useMemo(() => shoppingPalette(template.medium, result?.palette ?? []), [template.medium, result]);
+  // Embroidery leaves the background unstitched: that colour is the fabric, not a thread to buy.
+  const fabric = template.medium === 'embroidery' ? fabricColour(palette) : undefined;
 
   // Live line-art previews of this template for each preset card.
   const presetThumbs = useMemo(() => {
@@ -355,7 +357,8 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
     colour: source?.url,
   };
   // Washi tape holding the sheet is tinted with the template's own palette.
-  const tapeColors = [...(palette.length ? palette.map((p) => p.hex) : []), '#e7b45c', '#7fb9a8', '#d97b4a', '#9db7c9'].slice(0, 4);
+  // Single-tool mediums don't show a palette, so their tape keeps the studio colours.
+  const tapeColors = [...(usesPaints ? palette.map((p) => p.hex) : []), '#e7b45c', '#7fb9a8', '#d97b4a', '#9db7c9'].slice(0, 4);
   const aspect = source ? `${source.raster.width} / ${source.raster.height}` : '4 / 3';
   const grid = settings.layers.grid && settings.gridSize > 0 ? settings.gridSize : 0;
   const hours = Math.floor(plan.totalMinutes / 60);
@@ -393,14 +396,14 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
           {usesPaints && <h2 className={styles.lbl}>{colourWord}</h2>}
           {!usesPaints ? null : palette.length ? (
             <>
-              <PaintTin colors={palette} label={`${palette.length} colours · matched`} />
+              <PaintTin colors={palette} label={`${palette.length - (fabric ? 1 : 0)} ${colourWord.toLowerCase()}${fabric ? ' + fabric' : ''} · matched`} />
               <ul className={styles.shares}>
                 {palette.map((c) => (
                   <li key={c.hex + c.name}>
                     <span className={styles.dot} style={{ background: c.hex }} aria-hidden="true" />
                     {template.medium === 'embroidery' && c.code ? (
                       <span className={styles.shareName}>
-                        <ShopLink url={c.shopUrl} label={`Find ${c.code} at Michaels`}><b>{c.code}</b></ShopLink>
+                        {c === fabric ? <b>{c.code}</b> : <ShopLink url={c.shopUrl} label={`Find ${c.code} at Michaels`}><b>{c.code}</b></ShopLink>}
                         <small className={styles.code}>{c.name.slice(c.code.length + 1)}</small>
                       </span>
                     ) : (
@@ -409,7 +412,7 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
                         {c.code && <small className={styles.code} title="Pigment code printed on the tube">{c.code}</small>}
                       </span>
                     )}
-                    <i>{Math.round(c.share * 100)}%</i>
+                    <i>{c === fabric ? <span className={styles.fabricTag}>fabric</span> : null}{Math.round(c.share * 100)}%</i>
                   </li>
                 ))}
               </ul>
@@ -482,7 +485,7 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
               <div id="ws-fine-tune" className={styles.fine}>
                 <SnapSlider id="ws-detail" label="Line detail" stops={DETAIL_STOPS} value={settings.detail} onChange={(v) => update({ detail: v })} />
                 <Stepper label="Shading" options={VALUE_OPTIONS} value={settings.valueSteps} format={(v) => `${v} tones`} onChange={(v) => update({ valueSteps: v })} />
-                {usesPaints && <Stepper label={colourWord} options={PALETTE_OPTIONS} value={settings.paletteSize} format={(v) => `${v} colours`} onChange={(v) => update({ paletteSize: v })} />}
+                {usesPaints && <Stepper label={colourWord} options={PALETTE_OPTIONS} value={settings.paletteSize} format={(v) => `up to ${v}`} onChange={(v) => update({ paletteSize: v })} />}
                 <Stepper label="Grid" options={GRID_OPTIONS} value={settings.gridSize} format={(v) => (v ? `${v}×${v}` : 'Off')} onChange={(v) => update({ gridSize: v, layers: { ...settings.layers, grid: v > 0 } })} />
               </div>
             )}
@@ -527,6 +530,7 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
         mediumLabel={mediumLabel}
         imageUrl={printUrl}
         palette={palette}
+        fabric={fabric}
         valueSteps={settings.valueSteps}
         plan={plan}
       />
@@ -565,11 +569,12 @@ function PrintPack(props: {
   title: string;
   mediumLabel: string;
   imageUrl: string;
-  palette: ProcessResult['palette'];
+  palette: ShoppingColor[];
+  fabric?: ShoppingColor;
   valueSteps: number;
   plan: ReturnType<typeof buildProjectPlan>;
 }) {
-  const { title, mediumLabel, imageUrl, palette, valueSteps, plan } = props;
+  const { title, mediumLabel, imageUrl, palette, fabric, valueSteps, plan } = props;
   return (
     <div className={styles.print} aria-hidden="true">
       <section className={styles.printPage}>
@@ -582,7 +587,7 @@ function PrintPack(props: {
         <h2>Palette</h2>
         <ul className={styles.printSwatches}>
           {palette.map((c, i) => (
-            <li key={c.hex + i}><span style={{ background: c.hex }} />{i + 1}. {c.name} <small>{c.hex} · {Math.round(c.share * 100)}%</small></li>
+            <li key={c.hex + i}><span style={{ background: c.hex }} />{i + 1}. {c.name} <small>{[c === fabric ? 'fabric' : c.code && !c.name.startsWith(c.code) ? c.code : null, c.hex, `${Math.round(c.share * 100)}%`].filter(Boolean).join(' · ')}</small></li>
           ))}
         </ul>
         <h2>Value scale</h2>

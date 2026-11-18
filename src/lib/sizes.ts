@@ -10,12 +10,12 @@ export interface SizeOptions {
 }
 
 export const SIZES: Record<Medium, SizeOptions> = {
-  pencil: { options: [6, 8, 12, 16, 20], reference: 12, unit: 'long side' },
-  watercolor: { options: [6, 8, 12, 16, 20, 24], reference: 12, unit: 'long side' },
-  acrylic: { options: [8, 12, 16, 20, 24, 36], reference: 12, unit: 'long side' },
-  'paint-by-number': { options: [12, 16, 20, 24], reference: 16, unit: 'long side' },
+  pencil: { options: [6, 8, 12, 16, 20], reference: 12, unit: 'paper' },
+  watercolor: { options: [6, 8, 12, 16, 20, 24], reference: 12, unit: 'paper' },
+  acrylic: { options: [8, 12, 16, 20, 24, 36], reference: 12, unit: 'canvas' },
+  'paint-by-number': { options: [12, 16, 20, 24], reference: 16, unit: 'canvas' },
   embroidery: { options: [4, 5, 6, 8, 10, 12], reference: 6, unit: 'hoop' },
-  tattoo: { options: [2, 3, 4, 6, 8, 10], reference: 4, unit: 'long side' },
+  tattoo: { options: [2, 3, 4, 6, 8, 10], reference: 4, unit: 'design' },
 };
 
 export const formatSize = (medium: Medium, inches: number) => `${inches}″ ${SIZES[medium].unit}`;

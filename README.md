@@ -15,7 +15,8 @@ Inkloom is a template studio for artists. Describe an idea (or upload a referenc
   - **Starting points:** pick Simple, Balanced or Detailed. Each card shows a live preview of this template's line art at that level.
   - **Layers:** toggle line art, values, grid and the colour reference.
   - **Fine-tune:** adjust line detail, shading tones, paint count and grid size.
-  - **Plan:** read a generated project plan with materials, steps and time estimates.
+  - **Shopping list:** embroidery colours are matched to the closest DMC floss numbers, and paints show the pigment code printed on the tube. Each colour links to a Michaels search, and a dominant background is treated as fabric, not a thread to buy.
+  - **Plan:** read a generated project plan with materials, steps and a time estimate that scales with the finished size (hoop or canvas).
   - **Autosave:** every change is saved to the template as you go.
 - **Export:** download a PNG of the visible layers, or print a pack with the template, palette sheet, value scale and plan.
 - **Gallery and My projects:** browse public templates by medium and difficulty, and keep your own public or private.
@@ -43,7 +44,8 @@ flowchart LR
    - **Line art:** Gaussian blur, then Sobel edges, then a percentile threshold. The threshold makes "detail" mean the same thing on low- and high-contrast images. Edges are then thinned to 1px centrelines with Zhang–Suen, and short specks are dropped.
    - **Values:** posterized greyscale with 2–9 evenly spaced tones.
    - **Palette:** seeded k-means++ over a pixel sample, with each colour named after the nearest paint in Lab space (CIE76).
-   - **Plan:** steps and time estimates built from the medium, the palette, the number of tones and how many distinct regions the image has.
+   - **Threads and paints:** each colour is matched to the nearest of about 270 DMC floss colours (also CIE76), and colours that land on the same thread or paint are merged so nothing is listed twice.
+   - **Plan:** steps and time estimates built from the medium, the palette, the number of tones and how many distinct regions the image has. Each step is tagged as fixed, line or surface work, so its time grows with the finished size by 1, size or size^1.6.
 
 ## Engineering decisions
 

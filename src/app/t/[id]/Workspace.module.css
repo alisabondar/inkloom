@@ -14,7 +14,7 @@
 
 .top { grid-area: top; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .logo { font-family: var(--studio-font-display); font-size: 1.5rem; color: var(--studio-ink); text-decoration: none; }
-.crumbs { flex: 1; color: var(--studio-ink-soft); }
+.crumbs { flex: 1; min-width: 0; color: var(--studio-ink-soft); overflow-wrap: anywhere; }
 .crumbs a { color: inherit; }
 .crumbs em { font-family: var(--studio-font-hand); color: var(--studio-muted); margin-left: 6px; }
 .maker { font-family: var(--studio-font-hand); }
@@ -29,14 +29,15 @@
   background-image: linear-gradient(to right, var(--studio-teal) 1px, transparent 1px), linear-gradient(to bottom, var(--studio-teal) 1px, transparent 1px);
   background-size: 33.3% 33.3%;
 }
-.shares { list-style: none; margin: 8px 0 0; padding: 0; font-size: 0.85rem; display: grid; gap: 4px; }
+.shares { list-style: none; margin: 10px 0 0; padding: 0; font-size: 0.85rem; display: grid; gap: 9px; }
 .shares li { display: flex; align-items: center; gap: 6px; }
 .shares i { margin-left: auto; color: var(--studio-muted); font-style: normal; }
-.shareName { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.shareName { display: flex; flex-direction: column; gap: 2px; min-width: 0; line-height: 1.25; }
 .code { color: var(--studio-muted); font-size: 0.75rem; letter-spacing: 0.02em; }
-.shop { color: inherit; text-decoration: underline dotted; text-underline-offset: 3px; }
+.shop { color: inherit; text-decoration: underline dotted; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 .shop:hover { text-decoration-style: solid; }
-.dot { width: 12px; height: 12px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12); }
+.dot { width: 12px; height: 12px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.25); }
+.fabricTag { font-family: var(--studio-font-hand); font-size: 15px; color: var(--studio-coral); margin-right: 6px; }
 
 /* The sheet sits at the top of the desk and stays in view while the side columns scroll,
    instead of centring against them (they grow with the palette and fine-tune). */
@@ -68,7 +69,7 @@
 }
 .clipboard { padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--studio-shadow-card); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; text-transform: capitalize; }
-.time { margin: 4px 0 0; font-size: 0.9rem; color: var(--studio-ink-soft); }
+.time { margin: 4px 0 0; font-size: 0.9rem; color: var(--studio-ink-soft); text-wrap: pretty; }
 .saved { align-self: flex-end; font-size: 1.05rem; }
 .exports, .owner { display: flex; flex-wrap: wrap; gap: 8px; }
 .owner { padding-top: 12px; border-top: 1px dashed var(--studio-rule); }
@@ -86,7 +87,7 @@
 .print { display: none; }
 
 @media (max-width: 900px) {
-  .screen { grid-template-columns: 1fr; grid-template-areas: 'top' 'desk' 'right' 'left'; padding: 14px; }
+  .screen { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'top' 'desk' 'right' 'left'; padding: 14px; }
   .desk { min-height: 0; padding: 24px 8px; }
   .sheetWrap { position: relative; top: auto; }
   .layers { flex-direction: row; overflow-x: auto; }
@@ -124,6 +125,7 @@
 .presetLabel { font-weight: 700; font-size: 12.5px; color: var(--studio-ink); }
 .presetHint { font-size: 10.5px; color: var(--studio-muted); line-height: 1.2; }
 .fineToggle { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 44px; padding: 10px 0; margin: 4px 0 6px; border: 0; border-top: 1px dashed var(--studio-rule); background: none; font: 600 13px var(--studio-font-body); color: var(--studio-teal); cursor: pointer; text-align: left; }
+.fineToggle > span[aria-hidden] { font-size: 14px; line-height: 1; color: var(--studio-ink-soft); }
 .fineToggle:focus-visible { outline: 2px solid var(--studio-teal); outline-offset: 2px; }
 .fineHint { display: block; font-weight: 500; font-size: 11.5px; color: var(--studio-muted); margin-top: 2px; }
 .fine { padding-top: 4px; }

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { buildProjectPlan, MEDIUMS, scaleMinutes, type Medium } from '@/lib/plan';
+import { buildProjectPlan, fabricColour, MEDIUMS, scaleMinutes, type Medium } from '@/lib/plan';
 import { SIZES } from '@/lib/sizes';
 import type { PaletteColor } from '@/lib/processing';
 
@@ -86,5 +86,27 @@ describe('size', () => {
     const finish = (size: number) =>
       buildProjectPlan({ medium: 'embroidery', palette, valueSteps: 3, difficulty: 'beginner', size }).steps.find((s) => s.title === 'Finish')!.minutes;
     expect(finish(4)).toBe(finish(12));
+  });
+});
+
+describe('embroidery fabric', () => {
+  const withBackground: PaletteColor[] = [
+    { hex: '#f0f0ec', rgb: [240, 240, 236], share: 0.7, name: 'DMC 762 Pearl Gray VY LT' },
+    { hex: '#c72b3b', rgb: [199, 43, 59], share: 0.2, name: 'DMC 321 Red' },
+    { hex: '#1e1108', rgb: [30, 17, 8], share: 0.1, name: 'DMC 3371 Black Brown' },
+  ];
+
+  it('treats a dominant background as fabric: no thread, no fill step', () => {
+    const plan = buildProjectPlan({ medium: 'embroidery', palette: withBackground, valueSteps: 3, difficulty: 'beginner' });
+    expect(plan.materials[0]).toBe('Cotton or linen fabric close to DMC 762 Pearl Gray VY LT');
+    expect(plan.materials).not.toContain('DMC 762 Pearl Gray VY LT stranded thread');
+    expect(plan.steps.map((s) => s.title)).not.toContain('Fill DMC 762 Pearl Gray VY LT');
+    expect(plan.steps.map((s) => s.title)).toContain('Fill DMC 321 Red');
+  });
+
+  it('only calls a colour fabric when it covers most of the picture', () => {
+    expect(fabricColour(withBackground)?.name).toBe('DMC 762 Pearl Gray VY LT');
+    expect(fabricColour(palette)?.name).toBe('Yellow ochre');
+    expect(fabricColour(palette.map((c) => ({ ...c, share: 1 / 3 })))).toBeUndefined();
   });
 });

@@ -36,7 +36,7 @@ export function AvatarForm({ profile }: { profile: CurrentProfile }) {
       <FormStatus state={state} />
       <div className={styles.row}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {profile.avatarUrl ? <img src={profile.avatarUrl} alt="Your avatar" className={styles.avatarPreview} /> : <div className={styles.avatarPreview} />}
+        {profile.avatarUrl ? <img src={profile.avatarUrl} alt="Your avatar" className={styles.avatarPreview} /> : <div className={styles.avatarPreview} aria-hidden="true">{(profile.first_name || profile.username || '?').charAt(0).toUpperCase()}</div>}
         <Field label="New avatar" name="avatar" type="file" accept="image/*" required state={state} />
       </div>
       <Button type="submit" variant="paper" disabled={pending}>{pending ? 'Uploading…' : 'Upload avatar'}</Button>

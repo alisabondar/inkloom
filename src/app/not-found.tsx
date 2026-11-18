@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import { Button, HandNote, Paper } from '@/components/studio';
 import styles from './pages.module.css';
+
+export const metadata: Metadata = { title: 'Page not found' };
 
 export default function NotFound() {
   return (

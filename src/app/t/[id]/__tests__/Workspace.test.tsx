@@ -74,7 +74,7 @@ describe('Workspace', () => {
     expect(screen.getByRole('button', { name: /detailed/i })).toHaveAttribute('aria-pressed', 'true');
     openFineTune();
     expect(stepperValue('Shading')).toBe(`${DIFFICULTY_PRESETS.advanced.valueSteps} tones`);
-    expect(stepperValue('Paints')).toBe(`${DIFFICULTY_PRESETS.advanced.paletteSize} colours`);
+    expect(stepperValue('Paints')).toBe(`up to ${DIFFICULTY_PRESETS.advanced.paletteSize}`);
 
     fireEvent.click(screen.getByRole('button', { name: 'Increase shading' }));
     expect(stepperValue('Shading')).toBe(`${DIFFICULTY_PRESETS.advanced.valueSteps + 1} tones`);

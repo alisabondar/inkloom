@@ -5,7 +5,6 @@ import styles from './site.module.css';
 
 const mediumLabel = (id: string) => MEDIUMS.find((medium) => medium.id === id)?.label ?? id;
 
-
 export function TemplateGrid({ templates, showPrivacy = false }: { templates: TemplateCard[]; showPrivacy?: boolean }) {
   return (
     <div className={styles.grid}>
@@ -19,9 +18,7 @@ export function TemplateGrid({ templates, showPrivacy = false }: { templates: Te
           )}
           <div className={styles.cardTitle}>{template.title}</div>
           <div className={styles.cardMeta}>
-            {template.makerUsername && <span>@{template.makerUsername}</span>}
-            <span>{mediumLabel(template.medium)}</span>
-            <span>· {template.difficulty}</span>
+            <span>{[template.makerUsername && `@${template.makerUsername}`, mediumLabel(template.medium), template.difficulty].filter(Boolean).join(' · ')}</span>
             {showPrivacy && !template.is_public && <span className={styles.privateTag}>private</span>}
           </div>
         </Link>

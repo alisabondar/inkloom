@@ -45,4 +45,13 @@ describe('shoppingPalette', () => {
   it('leaves single-tool mediums alone', () => {
     expect(shoppingPalette('pencil', palette)).toEqual(palette);
   });
+
+  it('merges colours that match the same thread or paint, adding up their shares', () => {
+    const blues = [color([150, 195, 230], 'Sky blue'), color([148, 192, 228], 'Sky blue')];
+    const paints = shoppingPalette('acrylic', blues);
+    expect(paints).toHaveLength(1);
+    expect(paints[0].share).toBeCloseTo(1);
+    expect(shoppingPalette('embroidery', blues)).toHaveLength(1);
+    expect(shoppingPalette('paint-by-number', blues)).toHaveLength(2);
+  });
 });

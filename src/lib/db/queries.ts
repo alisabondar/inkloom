@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import { getServerClient } from '@/lib/supabase/server';
 import { signStoragePath } from '@/lib/supabase/admin';
@@ -41,14 +42,15 @@ export async function getCurrentProfile(): Promise<CurrentProfile | null> {
 }
 
 // A template the current viewer may see (their own, or a public one). Anything else is a 404.
-export async function getTemplateForViewer(id: string) {
+// Cached per request: the workspace page and its metadata both load the template.
+export const getTemplateForViewer = cache(async (id: string) => {
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { supabase, user } = await getServerClient();
   const { data } = await supabase.from('templates').select('*').eq('id', id).maybeSingle<TemplateRow>();
   if (!data) notFound();
   const [card] = await toCards([data]);
   return { template: card, isOwner: user?.id === data.owner_id, isGuest: isDemoUser(user) };
-}
+});
 
 export async function listPublicTemplates(filters: { medium?: Medium; difficulty?: Difficulty; limit?: number } = {}) {
   const { supabase } = await getServerClient();

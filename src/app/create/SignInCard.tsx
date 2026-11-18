@@ -8,7 +8,10 @@ export function SignInCard({ next }: { next: string }) {
       <HandNote>almost there!</HandNote>
       <h1 className={styles.title}>Sign in to start creating</h1>
       <p className={styles.sub}>Your concepts and templates are saved to your projects, so we need to know who you are first.</p>
-      <Button href={`/signin?next=${encodeURIComponent(next)}`}>Sign in</Button>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
+        <Button href={`/signup?next=${encodeURIComponent(next)}`}>Create an account</Button>
+        <Button href={`/signin?next=${encodeURIComponent(next)}`} variant="paper">Sign in</Button>
+      </div>
       <GuestSignIn next={next} />
     </Paper>
   );
