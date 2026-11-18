@@ -78,7 +78,9 @@ export async function setVisibilityAction(input: Record<string, unknown>): Promi
 export async function deleteTemplateAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = templateIdSchema(formData);
   if (!parsed.ok) return { fieldErrors: parsed.fieldErrors };
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
+  // The guest account is shared, so one visitor mustn't delete another's templates.
+  if (isDemoUser(user)) return { error: GUEST_LOCKED };
 
   const { error } = await supabase.from('templates').delete().eq('id', parsed.data.id);
   if (error) return { error: 'Could not delete the template' };

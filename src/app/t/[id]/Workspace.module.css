@@ -72,6 +72,8 @@
 
 .planSheet { position: relative; z-index: 1; width: min(100%, 720px); padding: 32px 36px; }
 .planTitle { font-family: var(--studio-font-display); margin: 0 0 16px; }
+.guestNote { margin: 0; font-size: 14px; color: var(--studio-ink); }
+.guestLink { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
 .materials { list-style: none; padding: 0; margin: 0 0 20px; display: grid; gap: 6px; }
 .steps { padding-left: 1.4em; display: grid; gap: 12px; margin: 0; }
 .steps i { font-family: var(--studio-font-hand); color: var(--studio-teal); font-style: normal; margin-left: 6px; }

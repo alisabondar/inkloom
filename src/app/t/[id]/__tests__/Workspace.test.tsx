@@ -9,6 +9,7 @@ const actions = vi.hoisted(() => ({
   deleteTemplateAction: vi.fn(),
 }));
 vi.mock('@/app/actions/templates', () => actions);
+vi.mock('@/app/actions/auth', () => ({ signOutAction: vi.fn() }));
 
 import { Workspace, initialSettings } from '../Workspace';
 
@@ -121,5 +122,12 @@ describe('Workspace', () => {
     expect(screen.getByTestId('owner-controls')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /make public/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+  });
+
+  it('the guest account sees a sign-up note instead of publish and delete', () => {
+    render(<Workspace template={template} isOwner isGuest />);
+    expect(screen.queryByTestId('owner-controls')).toBeNull();
+    expect(screen.queryByRole('button', { name: /make public|delete/i })).toBeNull();
+    expect(screen.getByRole('button', { name: /create your own account/i })).toBeInTheDocument();
   });
 });

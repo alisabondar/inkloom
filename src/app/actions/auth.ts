@@ -68,13 +68,15 @@ export async function guestSignInAction(formData: FormData) {
   redirect(safeNext(formData.get('next'), '/create'));
 }
 
-export async function signOutAction() {
+export async function signOutAction(formData?: FormData) {
   const accessToken = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
   if (accessToken) {
-    await getAdminClient().auth.admin.signOut(accessToken).catch(() => undefined);
+    // 'local' ends only this session. The default ('global') would also sign out every other
+    // device, which on the shared guest account means every other visitor.
+    await getAdminClient().auth.admin.signOut(accessToken, 'local').catch(() => undefined);
   }
   await clearSessionCookies();
-  redirect('/');
+  redirect(safeNext(formData?.get('next'), '/'));
 }
 
 export async function requestPasswordResetAction(_prev: ActionState, formData: FormData): Promise<ActionState> {

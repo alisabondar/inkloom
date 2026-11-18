@@ -11,6 +11,7 @@ import type { ActionState } from '@/lib/validation';
 import { deleteTemplateAction, setVisibilityAction, updateWorkspaceSettingsAction } from '@/app/actions/templates';
 import { processAll, type ProcessParams, type ProcessResult, type WorkerRequest, type WorkerResponse } from './processing';
 import styles from './Workspace.module.css';
+import { signOutAction } from '@/app/actions/auth';
 
 const MAX_SIDE = 1024;
 const SAVE_DELAY = 800;
@@ -190,9 +191,9 @@ function useProcessor() {
   }, []);
 }
 
-export interface WorkspaceProps { template: TemplateCard; isOwner: boolean }
+export interface WorkspaceProps { template: TemplateCard; isOwner: boolean; isGuest?: boolean }
 
-export function Workspace({ template, isOwner }: WorkspaceProps) {
+export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps) {
   const [deleteState, deleteAction] = useActionState(deleteTemplateAction, {} as ActionState);
   const [settings, setSettings] = useState<Settings>(() => initialSettings(template));
   const [difficulty, setDifficulty] = useState<Difficulty>(template.difficulty);
@@ -463,7 +464,16 @@ export function Workspace({ template, isOwner }: WorkspaceProps) {
               <Button onClick={downloadPng} disabled={!layerData}>Download PNG</Button>
               <Button variant="paper" onClick={() => window.print()} disabled={!layerData}>Print pack</Button>
             </div>
-            {isOwner && (
+            {isOwner && isGuest && (
+              <form action={signOutAction} className={styles.owner} data-testid="guest-note">
+                <input type="hidden" name="next" value="/signup" />
+                <p className={styles.guestNote}>
+                  Guest templates stay private. To publish or delete them,{' '}
+                  <button type="submit" className={styles.guestLink}>create your own account</button>.
+                </p>
+              </form>
+            )}
+            {isOwner && !isGuest && (
               <div className={styles.owner} data-testid="owner-controls">
                 <Button variant="mint" size="sm" aria-pressed={isPublic} onClick={toggleVisibility}>
                   {isPublic ? 'Public · make private' : 'Private · make public'}
