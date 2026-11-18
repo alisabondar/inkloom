@@ -228,6 +228,8 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
   const mediumLabel = MEDIUMS.find((m) => m.id === template.medium)?.label ?? template.medium;
   // Pencil and tattoo stencils use a single tool, so a colour palette doesn't apply.
   const usesPaints = !SINGLE_TOOL_MEDIUMS.includes(template.medium);
+  // Embroidery is stitched in thread, so its palette is threads, not paints.
+  const colourWord = template.medium === 'embroidery' ? 'Threads' : 'Paints';
   const slug = slugify(template.title);
 
   useEffect(() => {
@@ -388,7 +390,7 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
               />
             ))}
           </div>
-          {usesPaints && <h2 className={styles.lbl}>Paints</h2>}
+          {usesPaints && <h2 className={styles.lbl}>{colourWord}</h2>}
           {!usesPaints ? null : palette.length ? (
             <>
               <PaintTin colors={palette} label={`${palette.length} colours · matched`} />
@@ -413,7 +415,7 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
               </ul>
             </>
           ) : (
-            <HandNote>mixing the paints…</HandNote>
+            <HandNote>{template.medium === 'embroidery' ? 'matching the threads…' : 'mixing the paints…'}</HandNote>
           )}
         </aside>
 
@@ -473,14 +475,14 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
               aria-controls="ws-fine-tune"
               onClick={() => setFineTune((open) => !open)}
             >
-              <span>Fine-tune <small className={styles.fineHint}>detail, shading{usesPaints ? ', paints' : ''}, grid</small></span>
+              <span>Fine-tune <small className={styles.fineHint}>detail, shading{usesPaints ? `, ${colourWord.toLowerCase()}` : ''}, grid</small></span>
               <span aria-hidden="true">{fineTune ? '▴' : '▾'}</span>
             </button>
             {fineTune && (
               <div id="ws-fine-tune" className={styles.fine}>
                 <SnapSlider id="ws-detail" label="Line detail" stops={DETAIL_STOPS} value={settings.detail} onChange={(v) => update({ detail: v })} />
                 <Stepper label="Shading" options={VALUE_OPTIONS} value={settings.valueSteps} format={(v) => `${v} tones`} onChange={(v) => update({ valueSteps: v })} />
-                {usesPaints && <Stepper label="Paints" options={PALETTE_OPTIONS} value={settings.paletteSize} format={(v) => `${v} colours`} onChange={(v) => update({ paletteSize: v })} />}
+                {usesPaints && <Stepper label={colourWord} options={PALETTE_OPTIONS} value={settings.paletteSize} format={(v) => `${v} colours`} onChange={(v) => update({ paletteSize: v })} />}
                 <Stepper label="Grid" options={GRID_OPTIONS} value={settings.gridSize} format={(v) => (v ? `${v}×${v}` : 'Off')} onChange={(v) => update({ gridSize: v, layers: { ...settings.layers, grid: v > 0 } })} />
               </div>
             )}

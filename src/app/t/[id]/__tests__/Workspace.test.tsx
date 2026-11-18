@@ -130,4 +130,10 @@ describe('Workspace', () => {
     expect(screen.queryByRole('button', { name: /make public|delete/i })).toBeNull();
     expect(screen.getByRole('button', { name: /create your own account/i })).toBeInTheDocument();
   });
+
+  it('calls the palette threads for embroidery', () => {
+    render(<Workspace template={{ ...template, medium: 'embroidery' }} isOwner />);
+    expect(screen.getByRole('heading', { name: 'Threads' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Paints' })).toBeNull();
+  });
 });
