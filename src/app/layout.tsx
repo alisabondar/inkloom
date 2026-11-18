@@ -8,6 +8,15 @@ import '@/styles/globals.css';
 export const metadata: Metadata = {
   title: { default: 'Inkloom — templates for your next piece', template: '%s · Inkloom' },
   description: 'Turn an idea into line art, a value study, a palette, and a step-by-step plan.',
+  // Absolute base for the link-preview image (src/app/opengraph-image.png).
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://inkloom.vercel.app'),
+  openGraph: {
+    title: 'Inkloom — templates for your next piece',
+    description: 'Describe an idea, pick an AI concept, and get line art, values, a paint palette and a plan for your medium.',
+    siteName: 'Inkloom',
+    type: 'website',
+  },
+  twitter: { card: 'summary_large_image' },
   icons: {
     icon: '/favicon.png',
     shortcut: '/favicon.png',
