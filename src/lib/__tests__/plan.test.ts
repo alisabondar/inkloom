@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { buildProjectPlan, fabricColour, MEDIUMS, scaleMinutes, type Medium } from '@/lib/plan';
+import { buildProjectPlan, fabricColour, formatMinutes, MEDIUMS, planAsText, scaleMinutes, type Medium } from '@/lib/plan';
 import { SIZES } from '@/lib/sizes';
 import type { PaletteColor } from '@/lib/processing';
 
@@ -110,3 +110,21 @@ describe('embroidery fabric', () => {
     expect(fabricColour(palette.map((c) => ({ ...c, share: 1 / 3 })))).toBeUndefined();
   });
 });
+
+describe('plan as text', () => {
+  it('formats minutes for people', () => {
+    expect(formatMinutes(45)).toBe('45 min');
+    expect(formatMinutes(120)).toBe('2 h');
+    expect(formatMinutes(135)).toBe('2 h 15 min');
+  });
+
+  it('lists materials as checkboxes and numbers the steps', () => {
+    const plan = buildProjectPlan({ medium: 'acrylic', palette, valueSteps: 3, difficulty: 'beginner' });
+    const text = planAsText('River valley', plan);
+    expect(text.split('\n')[0]).toBe('River valley');
+    expect(text).toContain('- [ ] Gesso');
+    expect(text).toContain(`1. ${plan.steps[0].title} (`);
+    expect(text).toContain(`Steps (about ${formatMinutes(plan.totalMinutes)})`);
+  });
+});
+

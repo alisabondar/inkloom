@@ -184,6 +184,22 @@ export function nearestDmc(rgb: Rgb): { code: string; name: string } {
   return { code, name };
 }
 
+/** What to copy for one colour: the thread number, or the paint name with its pigment code. */
+export function copyText(c: ShoppingColor): string {
+  if (c.code?.startsWith('DMC ')) return c.name;
+  return c.code ? `${c.name} (${c.code})` : c.name;
+}
+
+/** The palette as a plain-text shopping list, with the fabric (if any) on its own line. */
+export function shoppingListText(title: string, colors: ShoppingColor[], fabric?: ShoppingColor): string {
+  const items = colors.filter((c) => c !== fabric);
+  return [
+    `${title}: shopping list`,
+    ...(fabric ? [`Fabric close to ${fabric.name}`] : []),
+    ...items.map((c) => `- [ ] ${copyText(c)}`),
+  ].join('\n');
+}
+
 const PAINT_WORD: Partial<Record<Medium, string>> = {
   watercolor: 'watercolor paint',
   acrylic: 'acrylic paint',

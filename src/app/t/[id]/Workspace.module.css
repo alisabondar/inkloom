@@ -37,7 +37,7 @@
 .shop { color: inherit; text-decoration: underline dotted; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 .shop:hover { text-decoration-style: solid; }
 .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.25); }
-.fabricTag { font-family: var(--studio-font-hand); font-size: 15px; color: var(--studio-coral); margin-right: 6px; }
+.fabricTag { font-family: var(--studio-font-hand); font-size: 15px; color: var(--studio-coral); margin-left: 6px; }
 
 /* The sheet sits at the top of the desk and stays in view while the side columns scroll,
    instead of centring against them (they grow with the palette and fine-tune). */
@@ -76,6 +76,12 @@
 .owner form { margin: 0; }
 
 .planSheet { position: relative; z-index: 1; width: min(100%, 720px); padding: 32px 36px; }
+.planHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 16px; }
+.planHead .planTitle { margin: 0; }
+.planActions { display: flex; align-items: center; gap: 8px; }
+.planCopy { padding: 8px 12px; font-size: 13px; color: var(--studio-ink); border: 1.5px dashed var(--studio-rule); }
+.copyList { margin: 10px 0 0; padding-left: 0; }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .planTitle { font-family: var(--studio-font-display); margin: 0 0 16px; }
 .guestNote { margin: 0; font-size: 14px; color: var(--studio-ink); }
 .guestLink { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
@@ -104,12 +110,17 @@
   .printPage { break-after: page; page-break-after: always; padding: 0; }
   .printPage:last-child { break-after: auto; page-break-after: auto; }
   .printImage { display: block; width: 100%; max-height: 85vh; object-fit: contain; }
-  .printSwatches { list-style: none; padding: 0; columns: 2; }
-  .printSwatches li { break-inside: avoid; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .printSwatches span, .printScale span {
+  .legend { width: 100%; border-collapse: collapse; font-size: 12px; margin: 0 0 18px; }
+  .legend th { text-align: left; font-weight: 700; border-bottom: 1.5px solid #000; padding: 4px 8px; }
+  .legend td { border-bottom: 1px solid #ccc; padding: 4px 8px; vertical-align: middle; }
+  .legend tr { break-inside: avoid; }
+  .legend .num { text-align: right; font-variant-numeric: tabular-nums; width: 1%; white-space: nowrap; }
+  .legendCode { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; width: 1%; }
+  .legendSwatchCell { width: 1%; }
+  .legendSwatch { display: block; width: 22px; height: 16px; border: 1px solid #999; }
+  .legendSwatch, .printScale span {
     -webkit-print-color-adjust: exact; print-color-adjust: exact; background-clip: padding-box;
   }
-  .printSwatches span { width: 28px; height: 28px; border: 1px solid #999; display: inline-block; }
   .printScale { display: flex; border: 1px solid #999; }
   .printScale span { flex: 1; height: 48px; display: grid; place-items: end center; font-size: 10px; color: #c00; }
 }

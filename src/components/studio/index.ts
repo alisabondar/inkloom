@@ -9,3 +9,4 @@ export { LayerCard, type LayerCardProps } from './LayerCard';
 export { PaintTin, type PaintTinProps } from './PaintTin';
 export { SnapSlider, nearestStop, type SnapSliderProps, type SnapStop } from './SnapSlider';
 export { Stepper, type StepperProps } from './Stepper';
+export { CopyButton, type CopyButtonProps } from './CopyButton';

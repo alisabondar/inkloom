@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { nearestDmc, shoppingPalette } from '@/lib/shopping';
+import { copyText, nearestDmc, shoppingListText, shoppingPalette } from '@/lib/shopping';
 import type { PaletteColor } from '@/lib/processing';
 
 const color = (rgb: [number, number, number], name: string): PaletteColor => ({
@@ -55,3 +55,23 @@ describe('shoppingPalette', () => {
     expect(shoppingPalette('paint-by-number', blues)).toHaveLength(2);
   });
 });
+
+describe('copying', () => {
+  it('copies the thread, or the paint with its pigment code', () => {
+    const [thread] = shoppingPalette('embroidery', [color([199, 43, 59], 'Cadmium red')]);
+    expect(copyText(thread)).toBe('DMC 321 Red');
+    const [ultra, paynes] = shoppingPalette('acrylic', [color([40, 50, 160], 'Ultramarine'), color([60, 66, 78], "Payne's grey")]);
+    expect(copyText(ultra)).toBe('Ultramarine (PB29)');
+    expect(copyText(paynes)).toBe("Payne's grey");
+  });
+
+  it('builds a shopping list with the fabric on its own line', () => {
+    const threads = shoppingPalette('embroidery', [color([240, 240, 236], 'Ivory'), color([199, 43, 59], 'Cadmium red')]);
+    const list = shoppingListText('Wreath', threads, threads[0]).split('\n');
+    expect(list[0]).toBe('Wreath: shopping list');
+    expect(list[1]).toMatch(/^Fabric close to DMC /);
+    expect(list).toContain('- [ ] DMC 321 Red');
+    expect(list.filter((l) => l.startsWith('- [ ]'))).toHaveLength(1);
+  });
+});
+

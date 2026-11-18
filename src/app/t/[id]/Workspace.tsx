@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { useActionState, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, SnapSlider, Stepper, Tape, type SnapStop } from '@/components/studio';
+import { Button, Chip, CopyButton, HandNote, LayerCard, PaintTin, Paper, SnapSlider, Stepper, Tape, type SnapStop } from '@/components/studio';
 import { lineArt, settingsForDifficulty, SKETCH_WEIGHT, type Difficulty, type RasterImage } from '@/lib/processing';
-import { buildProjectPlan, fabricColour, MEDIUMS } from '@/lib/plan';
+import { buildProjectPlan, fabricColour, formatMinutes, MEDIUMS, planAsText } from '@/lib/plan';
 import { formatSize, SIZES } from '@/lib/sizes';
-import { shoppingPalette, type ShoppingColor } from '@/lib/shopping';
+import { copyText, shoppingListText, shoppingPalette, type ShoppingColor } from '@/lib/shopping';
 import type { TemplateCard } from '@/lib/db/queries';
 import type { WorkspaceLayer } from '@/lib/db/types';
 import type { ActionState } from '@/lib/validation';
@@ -361,9 +361,7 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
   const tapeColors = [...(usesPaints ? palette.map((p) => p.hex) : []), '#e7b45c', '#7fb9a8', '#d97b4a', '#9db7c9'].slice(0, 4);
   const aspect = source ? `${source.raster.width} / ${source.raster.height}` : '4 / 3';
   const grid = settings.layers.grid && settings.gridSize > 0 ? settings.gridSize : 0;
-  const hours = Math.floor(plan.totalMinutes / 60);
-  const mins = plan.totalMinutes % 60;
-  const timeLabel = hours ? `${hours} h ${mins ? `${mins} min` : ''}` : `${mins} min`;
+  const timeLabel = formatMinutes(plan.totalMinutes);
 
   return (
     <div className={styles.root}>
@@ -403,7 +401,10 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
                     <span className={styles.dot} style={{ background: c.hex }} aria-hidden="true" />
                     {template.medium === 'embroidery' && c.code ? (
                       <span className={styles.shareName}>
-                        {c === fabric ? <b>{c.code}</b> : <ShopLink url={c.shopUrl} label={`Find ${c.code} at Michaels`}><b>{c.code}</b></ShopLink>}
+                        <span>
+                          {c === fabric ? <b>{c.code}</b> : <ShopLink url={c.shopUrl} label={`Find ${c.code} at Michaels`}><b>{c.code}</b></ShopLink>}
+                          {c === fabric && <span className={styles.fabricTag}>fabric</span>}
+                        </span>
                         <small className={styles.code}>{c.name.slice(c.code.length + 1)}</small>
                       </span>
                     ) : (
@@ -412,10 +413,14 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
                         {c.code && <small className={styles.code} title="Pigment code printed on the tube">{c.code}</small>}
                       </span>
                     )}
-                    <i>{c === fabric ? <span className={styles.fabricTag}>fabric</span> : null}{Math.round(c.share * 100)}%</i>
+                    <i>{Math.round(c.share * 100)}%</i>
+                    <CopyButton text={copyText(c)} label={`Copy ${c.code?.startsWith('DMC ') ? c.code : c.name}`} />
                   </li>
                 ))}
               </ul>
+              <CopyButton className={styles.copyList} text={shoppingListText(template.title, palette, fabric)} label="Copy the shopping list">
+                copy shopping list
+              </CopyButton>
             </>
           ) : (
             <HandNote>{template.medium === 'embroidery' ? 'matching the threads…' : 'mixing the paints…'}</HandNote>
@@ -444,7 +449,7 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
               {busy && <HandNote className={styles.busy}>redrawing…</HandNote>}
             </div>
           ) : (
-            <PlanSheet plan={plan} />
+            <PlanSheet plan={plan} title={template.title} onPrint={() => window.print()} canPrint={Boolean(layerData)} />
           )}
         </main>
 
@@ -538,10 +543,16 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
   );
 }
 
-function PlanSheet({ plan }: { plan: ReturnType<typeof buildProjectPlan> }) {
+function PlanSheet({ plan, title, onPrint, canPrint }: { plan: ReturnType<typeof buildProjectPlan>; title: string; onPrint: () => void; canPrint: boolean }) {
   return (
     <Paper className={styles.planSheet} tape as="section">
-      <h2 className={styles.planTitle}>Project plan</h2>
+      <div className={styles.planHead}>
+        <h2 className={styles.planTitle}>Project plan</h2>
+        <div className={styles.planActions}>
+          <CopyButton className={styles.planCopy} text={planAsText(title, plan)} label="Copy the plan as text">Copy plan</CopyButton>
+          <Button variant="paper" size="sm" onClick={onPrint} disabled={!canPrint}>Print pack</Button>
+        </div>
+      </div>
       <h3 className={styles.lbl}>Materials</h3>
       <ul className={styles.materials}>
         {plan.materials.map((m) => (
@@ -551,7 +562,7 @@ function PlanSheet({ plan }: { plan: ReturnType<typeof buildProjectPlan> }) {
       <h3 className={styles.lbl}>Steps</h3>
       <ol className={styles.steps}>
         {plan.steps.map((s) => (
-          <li key={s.title}><b>{s.title}</b> <i>{s.minutes} min</i><p>{s.detail}</p></li>
+          <li key={s.title}><b>{s.title}</b> <i>{formatMinutes(s.minutes)}</i><p>{s.detail}</p></li>
         ))}
       </ol>
     </Paper>
@@ -575,6 +586,8 @@ function PrintPack(props: {
   plan: ReturnType<typeof buildProjectPlan>;
 }) {
   const { title, mediumLabel, imageUrl, palette, fabric, valueSteps, plan } = props;
+  // Thread palettes print as a floss legend: DMC numbers in their own aligned column.
+  const threads = palette.some((c) => c.code?.startsWith('DMC '));
   return (
     <div className={styles.print} aria-hidden="true">
       <section className={styles.printPage}>
@@ -584,12 +597,29 @@ function PrintPack(props: {
         {imageUrl && <img src={imageUrl} alt={`${title} template`} className={styles.printImage} />}
       </section>
       <section className={styles.printPage}>
-        <h2>Palette</h2>
-        <ul className={styles.printSwatches}>
-          {palette.map((c, i) => (
-            <li key={c.hex + i}><span style={{ background: c.hex }} />{i + 1}. {c.name} <small>{[c === fabric ? 'fabric' : c.code && !c.name.startsWith(c.code) ? c.code : null, c.hex, `${Math.round(c.share * 100)}%`].filter(Boolean).join(' · ')}</small></li>
-          ))}
-        </ul>
+        <h2>{threads ? 'Floss legend' : 'Palette'}</h2>
+        <table className={styles.legend}>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col"><span className={styles.srOnly}>Swatch</span></th>
+              <th scope="col">{threads ? 'DMC' : 'Colour'}</th>
+              <th scope="col">{threads ? 'Name' : 'Pigment'}</th>
+              <th scope="col" className={styles.num}>Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            {palette.map((c, i) => (
+              <tr key={c.hex + i}>
+                <td className={styles.num}>{i + 1}</td>
+                <td className={styles.legendSwatchCell}><span className={styles.legendSwatch} style={{ background: c.hex }} /></td>
+                <td className={styles.legendCode}>{threads ? c.code?.replace(/^DMC /, '') : c.name}</td>
+                <td>{threads ? c.name.slice((c.code?.length ?? -1) + 1) : c.code ?? 'mix'}{c === fabric ? <em> (fabric)</em> : null}</td>
+                <td className={styles.num}>{Math.round(c.share * 100)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         <h2>Value scale</h2>
         <div className={styles.printScale}>
           {valueScale(valueSteps).map((c, i) => <span key={i} style={{ background: c }}>{i + 1}</span>)}
@@ -599,8 +629,8 @@ function PrintPack(props: {
         <h2>Project plan</h2>
         <h3>Materials</h3>
         <ul>{plan.materials.map((m) => <li key={m}>☐ {m}</li>)}</ul>
-        <h3>Steps · about {plan.totalMinutes} min</h3>
-        <ol>{plan.steps.map((s) => <li key={s.title}><b>{s.title}</b> ({s.minutes} min): {s.detail}</li>)}</ol>
+        <h3>Steps · about {formatMinutes(plan.totalMinutes)}</h3>
+        <ol>{plan.steps.map((s) => <li key={s.title}><b>{s.title}</b> ({formatMinutes(s.minutes)}): {s.detail}</li>)}</ol>
       </section>
     </div>
   );

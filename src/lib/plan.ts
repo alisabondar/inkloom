@@ -211,3 +211,24 @@ function valueLayers(valueSteps: number, m: (base: number, scale?: StepScale) =>
   }
   return out;
 }
+
+/** The plan as plain text, for pasting into notes or a message: checkboxes, then numbered steps. */
+export function planAsText(title: string, plan: ProjectPlan): string {
+  return [
+    title,
+    '',
+    'Materials',
+    ...plan.materials.map((m) => `- [ ] ${m}`),
+    '',
+    `Steps (about ${formatMinutes(plan.totalMinutes)})`,
+    ...plan.steps.map((s, i) => `${i + 1}. ${s.title} (${formatMinutes(s.minutes)}): ${s.detail}`),
+  ].join('\n');
+}
+
+/** 45 → "45 min", 135 → "2 h 15 min". */
+export function formatMinutes(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h ? (m ? `${h} h ${m} min` : `${h} h`) : `${m} min`;
+}
+
