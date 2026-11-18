@@ -32,3 +32,20 @@ describe('guest demo account', () => {
     expect(isDemoUser({ email: '' })).toBe(false);
   });
 });
+
+describe('guestLimits', () => {
+  afterEach(() => { vi.unstubAllEnvs(); });
+
+  it('defaults to 8 concepts per visitor and 80 for all guests an hour', async () => {
+    const { guestLimits } = await import('../demo');
+    expect(guestLimits()).toEqual({ perVisitor: 8, allGuests: 80 });
+  });
+
+  it('reads both limits from the environment', async () => {
+    vi.stubEnv('GUEST_RATE_LIMIT_PER_HOUR', '12');
+    vi.stubEnv('GUEST_TOTAL_RATE_LIMIT_PER_HOUR', '200');
+    const { guestLimits } = await import('../demo');
+    expect(guestLimits()).toEqual({ perVisitor: 12, allGuests: 200 });
+  });
+});
+

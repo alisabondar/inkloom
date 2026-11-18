@@ -40,8 +40,9 @@ const COUNTDOWN_S = Number(option("--countdown", 5)) || 0;
 const PHOTO = resolve(option("--photo", "public/landscape-painting.png"));
 const VALUED = ["--countdown", "--photo"];
 const BASE = (args.find((arg, index) => !arg.startsWith("--") && !VALUED.includes(args[index - 1])) ?? "http://localhost:3000").replace(/\/$/, "");
-const IDEA = "A mountain valley with a winding river";
-const MEDIUM = "Acrylic";
+const IDEA = "A wreath of wildflowers and fern leaves";
+const MEDIUM = "Embroidery";
+const TITLE = "Wildflower wreath";
 // Presenter window, in screen points: a 16:10 window that Screen Studio can frame.
 const WINDOW = { x: 60, y: 40, width: 1440, height: 900 };
 const REAL_POINTER = PRESENT && !DRY_RUN;
@@ -88,7 +89,8 @@ if (PRESENT && !DRY_RUN) {
   // Headless screencast ignores deviceScaleFactor, so render at CSS zoom in a 2x-sized window.
   // A dry run uses the presenter window's size so pointer positions match a real take.
   const size = DRY_RUN ? { width: WINDOW.width, height: WINDOW.height } : { width: OUT_W, height: OUT_H };
-  page = await browser.newPage({ viewport: size, colorScheme: "light" });
+  // Clipboard access so the copy buttons show "copied ✓" on camera.
+  page = await browser.newPage({ viewport: size, colorScheme: "light", permissions: ["clipboard-read", "clipboard-write"] });
 }
 await page.context().addInitScript((z) => document.addEventListener("DOMContentLoaded", () => {
   if (z !== 1) document.documentElement.style.zoom = String(z);
@@ -320,9 +322,9 @@ await wait(700);
 await press(page.getByRole("button", { name: "Next: describe it →" }));
 await page.locator("#create-idea").waitFor();
 await wait(900);
-await press(page.getByRole("button", { name: "+ wide landscape" }));
+await press(page.getByRole("button", { name: "+ simple bold shapes" }));
 await wait(700);
-await type(page.locator("#create-title"), "River valley", 90);
+await type(page.locator("#create-title"), TITLE, 90);
 await wait(500);
 if (USE_AI) {
   await press(page.getByRole("button", { name: "Generate 4 concepts" }));
@@ -410,17 +412,36 @@ await settled(1000);
 await press(page.getByRole("button", { name: "Increase shading" }));
 await settled(1000);
 for (let i = 0; i < 2; i += 1) {
-  await press(page.getByRole("button", { name: "Increase paints" }));
+  await press(page.getByRole("button", { name: /^Increase (paints|threads)$/ }));
   await settled(800);
 }
 for (let i = 0; i < 3; i += 1) {
   await press(page.getByRole("button", { name: "Increase grid" }));
   await wait(700);
 }
-await wait(1200);
-// The generated project plan, then back to the finished sheet.
+// A bigger hoop takes longer: the estimate follows the size.
+for (let i = 0; i < 2; i += 1) {
+  await press(page.getByRole("button", { name: "Increase size" }));
+  await wait(900);
+}
+await wait(800);
+// The thread list: DMC numbers that link to the shop, and a one-click copy.
+const threads = page.getByRole("button", { name: /^Copy (DMC|the shopping list)/ });
+if (await threads.count()) {
+  await threads.nth(1).evaluate((el) => el.scrollIntoView({ block: "center", behavior: "smooth" }));
+  await wait(1400);
+  await press(threads.nth(1));
+  await wait(1200);
+  await press(page.getByRole("button", { name: "Copy the shopping list" }));
+  await wait(1400);
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+  await wait(1200);
+}
+// The generated project plan, which copies as text too, then back to the finished sheet.
 await press(page.getByRole("tab", { name: "Plan" }));
-await wait(1800);
+await wait(1500);
+await press(page.getByRole("button", { name: "Copy the plan as text" }));
+await wait(1200);
 const lastStep = page.locator("ol li").last();
 if (await lastStep.count()) {
   await lastStep.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "smooth" }));
@@ -433,7 +454,12 @@ await page.getByRole("status").filter({ hasText: "saved ✓" }).waitFor({ timeou
 // The breadcrumb's link, not the site header's (the breadcrumb comes later on the page).
 await press(page.getByRole("link", { name: "My projects", exact: true }).last());
 await page.waitForURL(/\/projects/);
-await page.getByText("River valley").first().waitFor();
+await page.getByText(TITLE).first().waitFor();
+// Thumbnails load lazily; hold until they're painted so the last shot isn't blank cards.
+await page.locator("main img").evaluateAll((imgs) => Promise.all(imgs.map((img) => {
+  img.loading = "eager";
+  return img.complete && img.naturalWidth ? null : new Promise((ok) => { img.onload = img.onerror = ok; });
+})));
 await page.evaluate(() => document.fonts.ready);
 await wait(2800);
 

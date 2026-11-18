@@ -34,6 +34,8 @@ export interface GenerationOptions {
   medium: Medium;
   title?: string;
   variation?: number;
+  /** Guest demo only: which visitor asked, so each gets their own hourly allowance. */
+  visitor?: string;
 }
 
 // Workspace state saved with a template (see the workspace page).

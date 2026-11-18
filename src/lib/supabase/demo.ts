@@ -41,3 +41,23 @@ export async function getDemoSession(): Promise<Session | null> {
   if (!demo) return null;
   return signInOrCreate(demo.email, demo.password, { first_name: 'Guest', username: 'guest' });
 }
+
+/**
+ * Everyone who tries the guest demo shares one account, so its hourly limit is split per visitor:
+ * each browser gets its own allowance (a random id in a cookie), and all guests together get a
+ * larger cap so a busy day can't spend the whole free AI allowance.
+ */
+export const GUEST_VISITOR_COOKIE = 'inkloom_guest_visitor';
+
+const positive = (value: string | undefined, fallback: number) => {
+  const n = parseInt(value || '', 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+};
+
+export function guestLimits() {
+  return {
+    perVisitor: positive(process.env.GUEST_RATE_LIMIT_PER_HOUR, 8),
+    allGuests: positive(process.env.GUEST_TOTAL_RATE_LIMIT_PER_HOUR, 80),
+  };
+}
+
