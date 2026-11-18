@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/alisabondar/inkloom/actions/workflows/ci.yml/badge.svg)](https://github.com/alisabondar/inkloom/actions/workflows/ci.yml)
 
+**[Live demo → inkloom.vercel.app](https://inkloom.vercel.app)**: choose **Try it as a guest** to make a template without signing up.
+
 ![Inkloom demo: an idea becomes four concepts, then a tunable template with layers, presets and a project plan](docs/demo.gif)
 
 Inkloom is a template studio for artists. Describe an idea (or upload a reference photo), pick one of four AI colour concepts, and Inkloom turns it into a working template: fine line art to draw over, a value study, a grid, a named paint palette, and a step-by-step plan for your medium. Everything after the concept is computed in the browser, so every slider redraws instantly without another AI call.
@@ -18,6 +20,7 @@ Inkloom is a template studio for artists. Describe an idea (or upload a referenc
 - **Export:** download a PNG of the visible layers, or print a pack with the template, palette sheet, value scale and plan.
 - **Gallery and My projects:** browse public templates by medium and difficulty, and keep your own public or private.
 - **Accounts:** Supabase Auth with email confirmation, password reset, profile and avatar, password change, JSON data export, and account deletion.
+- **Guest demo:** visitors can try everything from a shared guest account without signing up. Guests can't change the account or publish to the gallery, and share the hourly concept limit.
 - **Look:** a "Studio Table" design system of paper, washi tape and hand-written notes, in `src/components/studio`.
 
 ## How it works
@@ -49,6 +52,7 @@ flowchart LR
 - **The rate limit lives in the database.** It counts the user's generations from the last hour, so it holds across serverless instances without Redis. Reference photos make no AI call, so they don't count.
 - **Photos are stored once.** An uploaded photo is named by its SHA-256 content hash, so uploading it again reuses the stored file.
 - **Sessions are refreshed before render.** `src/proxy.ts` refreshes an expiring access token before the page renders, so Server Components always see a valid session.
+- **A guest demo that can't be hijacked.** The guest button signs in on the server, so the password is never published. Server Actions refuse email, password, profile and avatar changes, account deletion, and publishing for the guest account.
 - **Local work without email loops.** `DEV_AUTH_BYPASS` signs every request in as a real, confirmed Supabase user, so Row Level Security still applies. It is ignored in production.
 
 ## Quality
@@ -110,6 +114,13 @@ Local testing without signing in (ignored when `NODE_ENV=production`): every req
 DEV_AUTH_BYPASS=true
 DEV_USER_EMAIL=dev@inkloom.test        # optional
 DEV_USER_PASSWORD=choose-a-local-one   # optional
+```
+
+Optional guest demo (shows a **Try it as a guest** button on sign-in and create; the account is created on first use, and the password stays on the server):
+
+```bash
+DEMO_USER_EMAIL=guest@your-domain.example
+DEMO_USER_PASSWORD=a-long-random-password
 ```
 
 Then run `npm run dev` and open [http://localhost:3000](http://localhost:3000).
@@ -177,6 +188,10 @@ scripts/               demo recorder, V2 user migration
 supabase/migrations/   schema and Row Level Security
 docs/history/          design plans and audits from earlier versions
 ```
+
+## License
+
+[MIT](LICENSE)
 
 ## Roadmap
 
