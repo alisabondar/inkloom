@@ -76,6 +76,8 @@ describe('action schemas', () => {
     expect(workspaceSettingsSchema(base).ok).toBe(true);
     expect(workspaceSettingsSchema({ ...base, valueSteps: 12 }).ok).toBe(false);
     expect(workspaceSettingsSchema({ ...base, id: 'not-a-uuid' }).ok).toBe(false);
+    expect(workspaceSettingsSchema({ ...base, size: 8 }).ok).toBe(true);
+    expect(workspaceSettingsSchema({ ...base, size: 200 }).ok).toBe(false);
   });
 });
 

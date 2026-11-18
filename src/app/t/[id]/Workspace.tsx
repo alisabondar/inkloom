@@ -5,6 +5,8 @@ import { useActionState, useCallback, useEffect, useMemo, useRef, useState } fro
 import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, SnapSlider, Stepper, Tape, type SnapStop } from '@/components/studio';
 import { lineArt, settingsForDifficulty, SKETCH_WEIGHT, type Difficulty, type RasterImage } from '@/lib/processing';
 import { buildProjectPlan, MEDIUMS } from '@/lib/plan';
+import { formatSize, SIZES } from '@/lib/sizes';
+import { shoppingPalette } from '@/lib/shopping';
 import type { TemplateCard } from '@/lib/db/queries';
 import type { WorkspaceLayer } from '@/lib/db/types';
 import type { ActionState } from '@/lib/validation';
@@ -57,10 +59,11 @@ const DEFAULT_LAYERS: Record<WorkspaceLayer, boolean> = { lines: true, values: f
 
 export interface Settings extends ProcessParams {
   gridSize: number;
+  size: number;
   layers: Record<WorkspaceLayer, boolean>;
 }
 
-export function initialSettings(template: Pick<TemplateCard, 'settings' | 'difficulty'>): Settings {
+export function initialSettings(template: Pick<TemplateCard, 'settings' | 'difficulty'> & Partial<Pick<TemplateCard, 'medium'>>): Settings {
   const saved = template.settings ?? {};
   const preset = settingsForDifficulty(template.difficulty);
   return {
@@ -70,6 +73,7 @@ export function initialSettings(template: Pick<TemplateCard, 'settings' | 'diffi
     valueSteps: saved.valueSteps ?? preset.valueSteps,
     paletteSize: saved.paletteSize ?? preset.paletteSize,
     gridSize: saved.gridSize ?? 0,
+    size: saved.size ?? SIZES[template.medium ?? 'acrylic'].reference,
     layers: { ...DEFAULT_LAYERS, ...(saved.layers ?? {}) },
   };
 }
@@ -255,6 +259,7 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
         valueSteps: settings.valueSteps,
         paletteSize: settings.paletteSize,
         gridSize: settings.gridSize,
+        size: settings.size,
         layers: JSON.stringify(settings.layers),
       }).catch(() => ({ ok: false, error: 'Could not save' }));
       setSaveNote(res.ok ? 'saved ✓' : res.error ?? 'not saved');
@@ -279,7 +284,8 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
     update(settingsForDifficulty(d));
   };
 
-  const palette = useMemo(() => result?.palette ?? [], [result]);
+  // Thread numbers for embroidery, pigment codes for paints, and a shop link for each colour.
+  const palette = useMemo(() => shoppingPalette(template.medium, result?.palette ?? []), [template.medium, result]);
 
   // Live line-art previews of this template for each preset card.
   const presetThumbs = useMemo(() => {
@@ -297,8 +303,8 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
     || (usesPaints && settings.paletteSize !== activePreset.paletteSize);
   const presetLabel = PRESETS.find((p) => p.id === difficulty)?.label ?? difficulty;
   const plan = useMemo(
-    () => buildProjectPlan({ medium: template.medium, palette, valueSteps: settings.valueSteps, difficulty, regions: result?.regions }),
-    [template.medium, palette, settings.valueSteps, difficulty, result?.regions],
+    () => buildProjectPlan({ medium: template.medium, palette, valueSteps: settings.valueSteps, difficulty, regions: result?.regions, size: settings.size }),
+    [template.medium, palette, settings.valueSteps, difficulty, result?.regions, settings.size],
   );
 
   const layerData: Layers | null = source && result
@@ -380,7 +386,23 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
                 {palette.map((c) => (
                   <li key={c.hex + c.name}>
                     <span className={styles.dot} style={{ background: c.hex }} aria-hidden="true" />
-                    {c.name} <i>{Math.round(c.share * 100)}%</i>
+                    {template.medium === 'embroidery' && c.code ? (
+                      <span className={styles.shareName}>
+                        <b>{c.code}</b>
+                        <small className={styles.code}>{c.name.slice(c.code.length + 1)}</small>
+                      </span>
+                    ) : (
+                      <span className={styles.shareName}>
+                        {c.name}
+                        {c.code && <small className={styles.code} title="Pigment code printed on the tube">{c.code}</small>}
+                      </span>
+                    )}
+                    <i>{Math.round(c.share * 100)}%</i>
+                    {c.shopUrl && (
+                      <a className={styles.shop} href={c.shopUrl} target="_blank" rel="noopener noreferrer" aria-label={`Find ${c.name} at Michaels`}>
+                        shop ↗
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -457,6 +479,7 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
                 <Stepper label="Grid" options={GRID_OPTIONS} value={settings.gridSize} format={(v) => (v ? `${v}×${v}` : 'Off')} onChange={(v) => update({ gridSize: v, layers: { ...settings.layers, grid: v > 0 } })} />
               </div>
             )}
+            <Stepper label="Size" options={SIZES[template.medium].options} value={settings.size} format={(v) => formatSize(template.medium, v)} onChange={(v) => update({ size: v })} />
             <p className={styles.time}>About <b>{timeLabel}</b> of {mediumLabel.toLowerCase()} work</p>
             {saveNote && isOwner && <HandNote className={styles.saved}><span role="status">{saveNote}</span></HandNote>}
             {!isOwner && <HandNote className={styles.saved}>tweak away · changes stay with you</HandNote>}

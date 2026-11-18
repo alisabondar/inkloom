@@ -39,7 +39,7 @@ const PAINT_COLORS: [string, Rgb][] = [
   ['Ivory black', [25, 25, 25]],
 ];
 
-function toLab([r, g, b]: Rgb): Rgb {
+export function toLab([r, g, b]: Rgb): Rgb {
   const lin = (c: number) => {
     const v = c / 255;
     return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);

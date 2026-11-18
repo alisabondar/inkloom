@@ -43,6 +43,8 @@ export interface WorkspaceSettings {
   valueSteps?: number;
   paletteSize?: number;
   gridSize?: number;
+  /** Finished size in inches (longest side, or hoop diameter). */
+  size?: number;
   layers?: Partial<Record<WorkspaceLayer, boolean>>;
 }
 

@@ -1,6 +1,7 @@
 // Small typed validators for Server Action inputs (no external schema library is available).
 import type { Difficulty } from '@/lib/processing';
 import { MEDIUMS, type Medium } from '@/lib/plan';
+import { MAX_SIZE, MIN_SIZE } from '@/lib/sizes';
 
 type FieldResult<T> = { ok: true; value: T } | { ok: false; error: string };
 export type Field<T> = (raw: unknown) => FieldResult<T>;
@@ -172,5 +173,6 @@ export const workspaceSettingsSchema = object({
   valueSteps: number({ min: 2, max: 9, integer: true, label: 'Value steps' }),
   paletteSize: number({ min: 3, max: 16, integer: true, label: 'Palette size' }),
   gridSize: number({ min: 0, max: 12, integer: true, label: 'Grid' }),
+  size: optional(number({ min: MIN_SIZE, max: MAX_SIZE, label: 'Size' })),
   layers: string({ label: 'Layers', max: 500 }),
 });

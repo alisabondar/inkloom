@@ -3,7 +3,7 @@ export { lineArt, type LineArtOptions } from './lineArt';
 export { valueStudy } from './valueStudy';
 export { extractPalette, quantizeToPalette, type PaletteColor } from './palette';
 export { regionOutlines, countRegions } from './regions';
-export { nameColor } from './colorNames';
+export { nameColor, toLab } from './colorNames';
 export {
   DIFFICULTY_PRESETS,
   SKETCH_WEIGHT,

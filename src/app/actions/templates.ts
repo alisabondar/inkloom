@@ -45,7 +45,7 @@ export async function updateWorkspaceSettingsAction(input: Record<string, unknow
   const parsed = workspaceSettingsSchema(input);
   if (!parsed.ok) return { fieldErrors: parsed.fieldErrors };
   const { supabase } = await requireUser();
-  const { id, layers, ...numbers } = parsed.data;
+  const { id, layers, size, ...numbers } = parsed.data;
 
   let layerState: WorkspaceSettings['layers'] = {};
   try {
@@ -55,7 +55,7 @@ export async function updateWorkspaceSettingsAction(input: Record<string, unknow
     return { fieldErrors: { layers: 'Layers are invalid' } };
   }
 
-  const settings: WorkspaceSettings = { ...numbers, layers: layerState };
+  const settings: WorkspaceSettings = { ...numbers, ...(size == null ? {} : { size }), layers: layerState };
   const { error } = await supabase.from('templates').update({ settings }).eq('id', id);
   return error ? { error: 'Could not save settings' } : { ok: true };
 }
