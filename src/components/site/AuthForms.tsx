@@ -33,7 +33,7 @@ export function SignUpForm({ next }: { next: string }) {
       <Field label="First name" name="first_name" autoComplete="given-name" required state={state} />
       <Field label="Email" name="email" type="email" autoComplete="email" required state={state} />
       <Field label="Username (optional)" name="username" autoComplete="username" state={state} />
-      <Field label="Password" name="password" type="password" autoComplete="new-password" minLength={8} required state={state} />
+      <Field label="Password" name="password" type="password" autoComplete="new-password" minLength={8} hint="At least 8 characters" required state={state} />
       <Button type="submit" disabled={pending}>{pending ? 'Creating account…' : 'Create account'}</Button>
     </form>
   );
@@ -55,7 +55,7 @@ export function NewPasswordForm() {
   return (
     <form action={action} className={styles.form}>
       <FormStatus state={state} />
-      <Field label="New password" name="password" type="password" autoComplete="new-password" minLength={8} required state={state} />
+      <Field label="New password" name="password" type="password" autoComplete="new-password" minLength={8} hint="At least 8 characters" required state={state} />
       <Button type="submit" disabled={pending}>{pending ? 'Saving…' : 'Set new password'}</Button>
     </form>
   );

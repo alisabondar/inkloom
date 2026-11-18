@@ -14,9 +14,9 @@ export function ProfileForm({ profile }: { profile: CurrentProfile }) {
   return (
     <form action={action} className={styles.form}>
       <FormStatus state={state} />
-      <Field label="First name" name="first_name" defaultValue={profile.first_name ?? ''} required state={state} />
-      <Field label="Username" name="username" defaultValue={profile.username ?? ''} state={state} />
-      <Field label="Email" name="email" type="email" defaultValue={profile.email ?? ''} required state={state} />
+      <Field label="First name" name="first_name" autoComplete="given-name" defaultValue={profile.first_name ?? ''} required state={state} />
+      <Field label="Username" name="username" autoComplete="username" defaultValue={profile.username ?? ''} state={state} />
+      <Field label="Email" name="email" type="email" autoComplete="email" defaultValue={profile.email ?? ''} required state={state} />
       <div className={styles.field}>
         <label htmlFor="favorite_medium" className={styles.label}>Favourite medium</label>
         <select id="favorite_medium" name="favorite_medium" className={styles.select} defaultValue={state.values?.favorite_medium ?? profile.favorite_medium ?? ''} key={state.values?.favorite_medium}>
@@ -37,7 +37,7 @@ export function AvatarForm({ profile }: { profile: CurrentProfile }) {
       <div className={styles.row}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {profile.avatarUrl ? <img src={profile.avatarUrl} alt="Your avatar" className={styles.avatarPreview} /> : <div className={styles.avatarPreview} aria-hidden="true">{(profile.first_name || profile.username || '?').charAt(0).toUpperCase()}</div>}
-        <Field label="New avatar" name="avatar" type="file" accept="image/*" required state={state} />
+        <Field label="New avatar" name="avatar" type="file" accept="image/*" hint="An image up to 5 MB" required state={state} />
       </div>
       <Button type="submit" variant="paper" disabled={pending}>{pending ? 'Uploading…' : 'Upload avatar'}</Button>
     </form>
@@ -50,7 +50,7 @@ export function PasswordForm() {
     <form action={action} className={styles.form}>
       <FormStatus state={state} />
       <Field label="Current password" name="currentPassword" type="password" autoComplete="current-password" required state={state} />
-      <Field label="New password" name="newPassword" type="password" autoComplete="new-password" minLength={8} required state={state} />
+      <Field label="New password" name="newPassword" type="password" autoComplete="new-password" minLength={8} hint="At least 8 characters" required state={state} />
       <Button type="submit" variant="paper" disabled={pending}>{pending ? 'Changing…' : 'Change password'}</Button>
     </form>
   );
@@ -58,35 +58,49 @@ export function PasswordForm() {
 
 export function DataControls() {
   const [pending, startTransition] = useTransition();
+  // Which action is running, so only its button says so.
+  const [busy, setBusy] = useState<'export' | 'delete' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const download = () =>
+  const download = () => {
+    setError(null);
+    setBusy('export');
     startTransition(async () => {
-      const data = await exportDataAction();
-      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `inkloom-export-${new Date().toISOString().slice(0, 10)}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
+      try {
+        const data = await exportDataAction();
+        const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `inkloom-export-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      } catch {
+        setError('Could not export your data. Try again in a moment.');
+      } finally {
+        setBusy(null);
+      }
     });
+  };
 
   const remove = () => {
     if (!window.confirm('Delete your account, templates, and images for good? This cannot be undone.')) return;
+    setError(null);
+    setBusy('delete');
     startTransition(async () => {
       const result = await deleteAccountAction();
       if (result?.error) setError(result.error);
+      setBusy(null);
     });
   };
 
   return (
     <div className={styles.form}>
       <p className={styles.muted}>Download everything as JSON: your profile, templates (with image links), and generation history.</p>
-      <Button variant="paper" onClick={download} disabled={pending}>Export my data</Button>
+      <Button variant="paper" onClick={download} disabled={pending}>{busy === 'export' ? 'Preparing your file…' : 'Export my data'}</Button>
       <div className={styles.danger}>
         {error && <div role="alert" className={styles.formError}>{error}</div>}
         <p className={styles.muted}>Deleting your account removes your profile, templates, and uploaded images.</p>
-        <button type="button" className={styles.dangerButton} onClick={remove} disabled={pending}>Delete account</button>
+        <button type="button" className={styles.dangerButton} onClick={remove} disabled={pending}>{busy === 'delete' ? 'Deleting…' : 'Delete account'}</button>
       </div>
     </div>
   );

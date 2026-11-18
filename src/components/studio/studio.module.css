@@ -149,7 +149,8 @@
 .stepper output { width: 100px; padding: 0 10px; white-space: nowrap; display: grid; place-items: center; font-weight: 700; font-size: 13.5px; color: var(--studio-ink); font-variant-numeric: tabular-nums; }
 
 /* one-click copy: a quiet text button that confirms in place */
-.copy { flex: none; min-height: 24px; padding: 2px 6px; border: 0; border-radius: 3px; background: none; font: 600 12px var(--studio-font-body); letter-spacing: 0.02em; color: var(--studio-muted); cursor: pointer; }
+.copy { flex: none; min-height: 24px; padding: 2px 6px; border: 0; border-radius: 3px; background: none; font: 600 12px var(--studio-font-body); letter-spacing: 0.02em; color: var(--studio-muted); cursor: pointer; transition: color 0.15s ease, background-color 0.15s ease; }
+@media (prefers-reduced-motion: reduce) { .copy { transition: none; } }
 .copy:hover { color: var(--studio-ink); background: rgb(0 0 0 / 0.05); }
 .copy:focus-visible { outline: 2px solid var(--studio-teal); outline-offset: 1px; }
 .copy[data-state='copied'] { color: var(--studio-teal); }
