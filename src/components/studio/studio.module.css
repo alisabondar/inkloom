@@ -146,7 +146,7 @@
 .stepper button:hover:not(:disabled) { background: #efe5d2; }
 .stepper button:disabled { color: var(--studio-rule); cursor: not-allowed; }
 .stepper button:focus-visible { outline: 2px solid var(--studio-teal); outline-offset: -2px; }
-.stepper output { min-width: 64px; display: grid; place-items: center; font-weight: 700; font-size: 13.5px; color: var(--studio-ink); font-variant-numeric: tabular-nums; }
+.stepper output { width: 100px; padding: 0 10px; white-space: nowrap; display: grid; place-items: center; font-weight: 700; font-size: 13.5px; color: var(--studio-ink); font-variant-numeric: tabular-nums; }
 
 /* one-click copy: a quiet text button that confirms in place */
 .copy { flex: none; padding: 2px 4px; border: 0; border-radius: 3px; background: none; font: 600 11px var(--studio-font-body); letter-spacing: 0.02em; color: var(--studio-muted); cursor: pointer; }

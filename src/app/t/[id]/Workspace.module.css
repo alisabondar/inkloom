@@ -69,9 +69,12 @@
 }
 .clipboard { padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--studio-shadow-card); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; text-transform: capitalize; }
-.time { margin: 4px 0 0; font-size: 0.9rem; color: var(--studio-ink-soft); text-wrap: pretty; }
+.time { margin: 4px 0 14px; font-size: 0.9rem; color: var(--studio-ink-soft); text-wrap: pretty; }
 .saved { align-self: flex-end; font-size: 1.05rem; }
 .exports, .owner { display: flex; flex-wrap: wrap; gap: 8px; }
+/* The two exports stack at full width so neither wraps on its own. */
+.exports { flex-direction: column; }
+.exports > * { width: 100%; justify-content: center; }
 .owner { padding-top: 12px; border-top: 1px dashed var(--studio-rule); }
 .owner form { margin: 0; }
 

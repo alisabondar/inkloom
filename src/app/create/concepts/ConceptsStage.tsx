@@ -98,7 +98,9 @@ export function ConceptsStage({ ids, idea, medium, title, pollMs = POLL_MS }: Co
   return (
     <>
       <HandNote>{allDone ? 'take your pick' : 'working on it…'}</HandNote>
-      <h1 className={styles.title}>{idea || 'Your concepts'}</h1>
+      {/* The title makes a readable heading; the full idea can be a paragraph, so it sits below. */}
+      <h1 className={styles.title}>{title || 'Your concepts'}</h1>
+      {idea && <p className={styles.ideaLine}>“{idea}”</p>}
       <StepIndicator current={3} />
       <div className={styles.stage}>
         <Paper style={{ padding: '22px 20px', position: 'relative' }}>
