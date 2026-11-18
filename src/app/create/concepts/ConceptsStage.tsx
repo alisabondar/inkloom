@@ -128,7 +128,7 @@ export function ConceptsStage({ ids, idea, medium, title, pollMs = POLL_MS }: Co
           )}
           {allDone && !allFailed && (
             <p className={styles.notice}>
-              Not quite right? <a href={retryHref}>Edit the idea</a>
+              Not quite right? <a href={retryHref} className={styles.retryLink}>Edit the idea</a>
             </p>
           )}
         </Paper>
