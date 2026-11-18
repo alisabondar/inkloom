@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Button, Chip, HandNote, LayerCard, PaintTin, Paper, SnapSlider, Stepper, Tape, type SnapStop } from '@/components/studio';
 import { lineArt, settingsForDifficulty, SKETCH_WEIGHT, type Difficulty, type RasterImage } from '@/lib/processing';
 import { buildProjectPlan, MEDIUMS } from '@/lib/plan';
@@ -193,6 +193,16 @@ function useProcessor() {
     }).catch(() => run());
     return { id, latest: () => seq.current, done };
   }, []);
+}
+
+/** A palette colour's name, linked to a shop search when there is one. */
+function ShopLink({ url, label, children }: { url?: string; label: string; children: ReactNode }) {
+  if (!url) return <>{children}</>;
+  return (
+    <a className={styles.shop} href={url} target="_blank" rel="noopener noreferrer" title={label}>
+      {children}
+    </a>
+  );
 }
 
 export interface WorkspaceProps { template: TemplateCard; isOwner: boolean; isGuest?: boolean }
@@ -388,21 +398,16 @@ export function Workspace({ template, isOwner, isGuest = false }: WorkspaceProps
                     <span className={styles.dot} style={{ background: c.hex }} aria-hidden="true" />
                     {template.medium === 'embroidery' && c.code ? (
                       <span className={styles.shareName}>
-                        <b>{c.code}</b>
+                        <ShopLink url={c.shopUrl} label={`Find ${c.code} at Michaels`}><b>{c.code}</b></ShopLink>
                         <small className={styles.code}>{c.name.slice(c.code.length + 1)}</small>
                       </span>
                     ) : (
                       <span className={styles.shareName}>
-                        {c.name}
+                        <ShopLink url={c.shopUrl} label={`Find ${c.name} at Michaels`}>{c.name}</ShopLink>
                         {c.code && <small className={styles.code} title="Pigment code printed on the tube">{c.code}</small>}
                       </span>
                     )}
                     <i>{Math.round(c.share * 100)}%</i>
-                    {c.shopUrl && (
-                      <a className={styles.shop} href={c.shopUrl} target="_blank" rel="noopener noreferrer" aria-label={`Find ${c.name} at Michaels`}>
-                        shop ↗
-                      </a>
-                    )}
                   </li>
                 ))}
               </ul>

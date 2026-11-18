@@ -58,12 +58,17 @@ export interface ProjectPlan {
  */
 export type StepScale = 'fixed' | 'edge' | 'area';
 
+const AREA_EXPONENT = 1.6;
+
 /**
  * Scales a step's base minutes, written for the medium's reference size, to the chosen size.
  * `sizeRatio` is chosen size ÷ reference size along one side, so 2 means twice as wide and tall.
  */
-export function scaleMinutes(base: number, scale: StepScale, sizeRatio: number): number { // eslint-disable-line @typescript-eslint/no-unused-vars
-  // TODO(you): return the scaled minutes for each kind of step.
+export function scaleMinutes(base: number, scale: StepScale, sizeRatio: number): number {
+  if (scale === 'edge') return base * sizeRatio;
+  // Area grows with the square of the size, but bigger pieces use broader brushes and longer
+  // stitches, so the exponent is damped below 2.
+  if (scale === 'area') return base * sizeRatio ** AREA_EXPONENT;
   return base;
 }
 

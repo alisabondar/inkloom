@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { buildProjectPlan, MEDIUMS, type Medium } from '@/lib/plan';
+import { buildProjectPlan, MEDIUMS, scaleMinutes, type Medium } from '@/lib/plan';
+import { SIZES } from '@/lib/sizes';
 import type { PaletteColor } from '@/lib/processing';
 
 const palette: PaletteColor[] = [
@@ -60,5 +61,30 @@ describe('buildProjectPlan', () => {
     const w3 = buildProjectPlan({ medium: 'watercolor', palette, valueSteps: 3, difficulty: 'beginner' }).totalMinutes;
     const w7 = buildProjectPlan({ medium: 'watercolor', palette, valueSteps: 7, difficulty: 'beginner' }).totalMinutes;
     expect(w7).toBeGreaterThan(w3);
+  });
+});
+
+describe('size', () => {
+  it('scales line work with length, surface work faster, and leaves prep alone', () => {
+    expect(scaleMinutes(20, 'fixed', 2)).toBe(20);
+    expect(scaleMinutes(20, 'edge', 2)).toBe(40);
+    const area = scaleMinutes(20, 'area', 2);
+    expect(area).toBeGreaterThan(40);
+    expect(area).toBeLessThan(80);
+    expect(scaleMinutes(20, 'area', 1)).toBe(20);
+  });
+
+  it('a bigger hoop takes longer and the reference size matches having no size', () => {
+    const base = { medium: 'embroidery' as Medium, palette, valueSteps: 3, difficulty: 'beginner' as const, regions: 200 };
+    const plain = buildProjectPlan(base).totalMinutes;
+    expect(buildProjectPlan({ ...base, size: SIZES.embroidery.reference }).totalMinutes).toBe(plain);
+    expect(buildProjectPlan({ ...base, size: 12 }).totalMinutes).toBeGreaterThan(plain);
+    expect(buildProjectPlan({ ...base, size: 4 }).totalMinutes).toBeLessThan(plain);
+  });
+
+  it('keeps fixed steps the same at any size', () => {
+    const finish = (size: number) =>
+      buildProjectPlan({ medium: 'embroidery', palette, valueSteps: 3, difficulty: 'beginner', size }).steps.find((s) => s.title === 'Finish')!.minutes;
+    expect(finish(4)).toBe(finish(12));
   });
 });
