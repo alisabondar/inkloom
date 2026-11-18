@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { getAdminClient } from '@/lib/supabase/admin';
 import { clearSessionCookies, createAuthClient, requireUser, setSessionCookies } from '@/lib/supabase/server';
 import { ACCESS_TOKEN_COOKIE } from '@/lib/supabase/env';
+import { GUEST_LOCKED, getDemoSession, isDemoUser } from '@/lib/supabase/demo';
 import { newPasswordSchema, resetRequestSchema, signInSchema, signUpSchema, type ActionState } from '@/lib/validation';
 import { getOrigin, safeNext } from './request';
 
@@ -59,6 +60,14 @@ export async function signInAction(_prev: ActionState, formData: FormData): Prom
   redirect(safeNext(formData.get('next')));
 }
 
+// "Try it as a guest": signs in to the shared demo account (see src/lib/supabase/demo.ts).
+export async function guestSignInAction(formData: FormData) {
+  const session = await getDemoSession().catch(() => null);
+  if (!session) redirect('/signin?error=guest');
+  await setSessionCookies(session);
+  redirect(safeNext(formData.get('next'), '/create'));
+}
+
 export async function signOutAction() {
   const accessToken = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
   if (accessToken) {
@@ -85,6 +94,7 @@ export async function setNewPasswordAction(_prev: ActionState, formData: FormDat
   if (!parsed.ok) return { fieldErrors: parsed.fieldErrors };
 
   const { user } = await requireUser();
+  if (isDemoUser(user)) return { error: GUEST_LOCKED };
   const { error } = await getAdminClient().auth.admin.updateUserById(user.id, { password: parsed.data.password });
   if (error) return { error: error.message };
 

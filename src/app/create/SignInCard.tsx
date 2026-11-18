@@ -1,4 +1,5 @@
 import { Button, HandNote, Paper } from '@/components/studio';
+import { GuestSignIn } from '@/components/site/GuestSignIn';
 import styles from './create.module.css';
 
 export function SignInCard({ next }: { next: string }) {
@@ -8,6 +9,7 @@ export function SignInCard({ next }: { next: string }) {
       <h1 className={styles.title}>Sign in to start creating</h1>
       <p className={styles.sub}>Your concepts and templates are saved to your projects, so we need to know who you are first.</p>
       <Button href={`/signin?next=${encodeURIComponent(next)}`}>Sign in</Button>
+      <GuestSignIn next={next} />
     </Paper>
   );
 }

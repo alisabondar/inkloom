@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { GUEST_LOCKED, isDemoUser } from '@/lib/supabase/demo';
 import { revalidatePath } from 'next/cache';
 import { requireUser } from '@/lib/supabase/server';
 import { saveTemplateSchema, templateIdSchema, visibilitySchema, workspaceSettingsSchema, type ActionState } from '@/lib/validation';
@@ -62,7 +63,9 @@ export async function updateWorkspaceSettingsAction(input: Record<string, unknow
 export async function setVisibilityAction(input: Record<string, unknown>): Promise<ActionState> {
   const parsed = visibilitySchema(input);
   if (!parsed.ok) return { fieldErrors: parsed.fieldErrors };
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
+  // Guests can't publish to the public gallery; everything they make stays private.
+  if (parsed.data.isPublic && isDemoUser(user)) return { error: GUEST_LOCKED };
 
   const { error } = await supabase.from('templates').update({ is_public: parsed.data.isPublic }).eq('id', parsed.data.id);
   if (error) return { error: 'Could not change visibility' };

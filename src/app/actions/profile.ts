@@ -6,11 +6,13 @@ import { getAdminClient, signStoragePath } from '@/lib/supabase/admin';
 import { clearSessionCookies, createAuthClient, requireUser, setSessionCookies } from '@/lib/supabase/server';
 import { avatarSchema, changePasswordSchema, profileSchema, type ActionState } from '@/lib/validation';
 import type { ProfileRow, TemplateRow } from '@/lib/db/types';
+import { GUEST_LOCKED, isDemoUser } from '@/lib/supabase/demo';
 
 export async function updateProfileAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = profileSchema(formData);
   if (!parsed.ok) return { fieldErrors: parsed.fieldErrors };
   const { supabase, user } = await requireUser();
+  if (isDemoUser(user)) return { error: GUEST_LOCKED };
   const { email, first_name, username, favorite_medium } = parsed.data;
 
   if (username) {
@@ -36,6 +38,7 @@ export async function uploadAvatarAction(_prev: ActionState, formData: FormData)
   const file = parsed.data.avatar;
 
   const { supabase, user } = await requireUser();
+  if (isDemoUser(user)) return { error: GUEST_LOCKED };
   const extension = file.type.split('/')[1]?.replace(/[^a-z0-9]/g, '') || 'png';
   const path = `${user.id}/avatar-${Date.now()}.${extension}`;
 
@@ -54,6 +57,7 @@ export async function changePasswordAction(_prev: ActionState, formData: FormDat
   const parsed = changePasswordSchema(formData);
   if (!parsed.ok) return { fieldErrors: parsed.fieldErrors };
   const { user } = await requireUser();
+  if (isDemoUser(user)) return { error: GUEST_LOCKED };
   if (!user.email) return { error: 'This account has no email' };
 
   const authClient = createAuthClient();
@@ -99,6 +103,7 @@ async function removeFolder(supabase: Awaited<ReturnType<typeof requireUser>>['s
 
 export async function deleteAccountAction() {
   const { supabase, user } = await requireUser();
+  if (isDemoUser(user)) return { error: GUEST_LOCKED };
 
   await removeFolder(supabase, 'avatars', user.id);
   await removeFolder(supabase, 'templates', user.id);

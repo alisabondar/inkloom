@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { HandNote, Paper } from '@/components/studio';
 import { SignInForm } from '@/components/site/AuthForms';
+import { GuestSignIn } from '@/components/site/GuestSignIn';
 import { getServerClient } from '@/lib/supabase/server';
 import { safeNext } from '@/app/actions/request';
 import styles from '../pages.module.css';
@@ -21,10 +22,12 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
         <h1 className={styles.cardTitle}>Welcome back</h1>
         <p className={styles.sub}>Pick up where you left off.</p>
         {params.error === 'link' && <p className={styles.formError}>That link has expired or was already used. Sign in, or request a new one.</p>}
+        {params.error === 'guest' && <p className={styles.formError}>The guest account isn&apos;t available right now. Sign in or create an account instead.</p>}
         <SignInForm next={next} />
         <p className={styles.muted} style={{ marginTop: 18 }}>
           New here? <Link href={`/signup?next=${encodeURIComponent(next)}`} className={styles.link}>Create an account</Link>
         </p>
+        <GuestSignIn next={next === '/' ? '/create' : next} />
       </Paper>
       <HandNote style={{ display: 'block', marginTop: 18, textAlign: 'center' }}>your table is right where you left it</HandNote>
     </div>
